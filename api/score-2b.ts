@@ -33,7 +33,7 @@ export default async function handler(request: Request) {
     });
   }
 
-  const level2Score = scoreTargetDiagnosticQuestions(TARGET_DIAGNOSTIC_DATA.level2.questions, level2Answers);
+  const level2Score = scoreTargetDiagnosticQuestions([...TARGET_DIAGNOSTIC_DATA.level2.questions], level2Answers);
   if (!level2Score.valid) {
     return jsonResponse(400, {
       endpoint: "/api/score-2b",

@@ -106,8 +106,10 @@ function buildTargetDiagnosticRecord(input: {
 }) {
   const level1Answers = typeof input.level1Answers === "object" && input.level1Answers ? input.level1Answers : {};
   const level2Answers = typeof input.level2Answers === "object" && input.level2Answers ? input.level2Answers : {};
+  const level1Questions = [...TARGET_DIAGNOSTIC_DATA.level1.questions];
+  const level2Questions = [...TARGET_DIAGNOSTIC_DATA.level2.questions];
   const level1Score = scoreTargetDiagnosticLevel1(level1Answers);
-  const level1ClassificationValidation = validateEvidenceClassifiedAnswers(TARGET_DIAGNOSTIC_DATA.level1.questions, level1Answers);
+  const level1ClassificationValidation = validateEvidenceClassifiedAnswers(level1Questions, level1Answers);
 
   if (!level1Score.valid) {
     return {
@@ -143,10 +145,10 @@ function buildTargetDiagnosticRecord(input: {
     };
   }
 
-  const level2Score = scoreTargetDiagnosticQuestions(TARGET_DIAGNOSTIC_DATA.level2.questions, level2Answers);
-  const level2ClassificationValidation = validateEvidenceClassifiedAnswers(TARGET_DIAGNOSTIC_DATA.level2.questions, level2Answers);
+  const level2Score = scoreTargetDiagnosticQuestions(level2Questions, level2Answers);
+  const level2ClassificationValidation = validateEvidenceClassifiedAnswers(level2Questions, level2Answers);
   const finalClassificationValidation = validateEvidenceClassifiedAnswers(
-    [...TARGET_DIAGNOSTIC_DATA.level1.questions, ...TARGET_DIAGNOSTIC_DATA.level2.questions],
+    [...level1Questions, ...level2Questions],
     { ...level1Answers, ...level2Answers },
   );
   if (!level2Score.valid) {
