@@ -1,0 +1,3819 @@
+{
+  "sourceWorkbook": "ST_Form_Binding_Prompt.xlsx",
+  "masterPromptRows": [
+    {
+      "sourceRow": 1,
+      "cells": {
+        "1": "FORM BINDING DIRECTIVE \u2014 Diagnostic Wizard \u00b7 Steps 1 / 2A / 2B / 2C / 2-TOD \u00b7 v3.1 (May 2026)"
+      }
+    },
+    {
+      "sourceRow": 2,
+      "cells": {
+        "1": "Source of truth: cell-coordinate tables in sheets STEP-2A \u00b7 STEP-2C \u00b7 STEP-2B-L1 \u00b7 STEP-2B-L2 \u00b7 STEP-TOD \u00b7 Build date: 2026-05-04 \u00b7 Schema: ST_Canonical_Schema.xlsx v1.0"
+      }
+    },
+    {
+      "sourceRow": 4,
+      "cells": {
+        "1": "ABSOLUTE RULE"
+      }
+    },
+    {
+      "sourceRow": 5,
+      "cells": {
+        "1": "You are building forms for Steps 1, 2A, 2B, 2C, and 2-TOD of the Structural Typology diagnostic wizard. Every question text and every answer option text that appears in these forms MUST be read directly from the source XLSX files at the cell coordinates specified in the binding tables. Never paraphrase, shorten, or rewrite question text or answer options. The binding tables are the contract. If a binding table cell coordinate does not match the source file, STOP and report \u2014 do not improvise."
+      }
+    },
+    {
+      "sourceRow": 7,
+      "cells": {
+        "1": "WHAT IS NEW IN v3.1"
+      }
+    },
+    {
+      "sourceRow": 8,
+      "cells": {
+        "1": "v3.1 implements the architectural rebuild of 2026-05-03. ALL prior binding coordinates are obsolete. v3.1 binding tables reflect: (1) New v3.1 sheet names: 3_Screening, 3_Level_1_Screening, 4_Level_2_Deepening; (2) New row positions \u2014 every screening question is followed by a Direct Observation Gate row before options; (3) New options \u2014 Option E (\"cannot answer from direct observation\") on every screening question, plus Option F on Q6/Q8/Q9/Q11 in AEM/TSAM and Q11 in EDv2 L1; (4) New questions \u2014 Q11 in AEM/TSAM, TED Q19 in Target Observed; (5) Schema dependency on ST_Canonical_Schema.xlsx for all enums; (6) Per-answer evidence machinery (EvidenceType, KnowledgeLevel, Confidence, ReliabilityFlags) handled by the application layer, NOT by the coder agent rendering the form options."
+      }
+    },
+    {
+      "sourceRow": 10,
+      "cells": {
+        "1": "SOURCE FILES"
+      }
+    },
+    {
+      "sourceRow": 11,
+      "cells": {
+        "1": "Step 1 \u2014 Deal Context Setup: no questionnaire file. UI-only selectors (track, deal type, P1, P2). See sheet STEP-1.\n\nStep 2A \u2014 Acquirer Environment Module:\n File: ST_Acquirer_Environment_Module.xlsx\n Sheet: 3_Screening (NEW v3.1 name \u2014 was \"Screening\" in v1)\n Questions: Q1\u2013Q11 (11 total \u2014 Q11 is new in v3.1)\n\nStep 2B \u2014 Target Environment Diagnostic (External Observer or Side-Agnostic):\n File: ST_Environment_Diagnostic_v2.xlsx\n Sheet 1: 3_Level_1_Screening (NEW v3.1 name \u2014 was \"Level 1 \u2014 Screening\" in v2)\n Questions: Q1\u2013Q12 (12 total)\n Sheet 2: 4_Level_2_Deepening (NEW v3.1 name \u2014 was \"Level 2 \u2014 Deepening\" in v2)\n Questions: Q13\u2013Q22 (10 total)\n\nStep 2C \u2014 Target Self-Assessment Module:\n File: ST_Target_Self_Assessment_Module.xlsx\n Sheet: 3_Screening (NEW v3.1 name \u2014 was \"Screening\" in v1)\n Questions: Q1\u2013Q11 (11 total \u2014 Q11 is new in v3.1)\n\nStep 2-TOD \u2014 Target Observed Environment Diagnostic (acquirer-side observer instrument):\n File: ST_Target_Observed_Environment_Diagnostic.xlsx\n Sheet: Questionnaire (UNCHANGED \u2014 additive v3.1 rebuild)\n Questions: EVID Q1\u2013Q4 + TED Q1\u2013Q19 (23 total \u2014 TED Q19 is new in v3.1)"
+      }
+    },
+    {
+      "sourceRow": 13,
+      "cells": {
+        "1": "READING PROTOCOL \u2014 SCREENING SHEETS (AEM, TSAM, EDv2 L1, EDv2 L2)"
+      }
+    },
+    {
+      "sourceRow": 14,
+      "cells": {
+        "1": "For every TED-style question rendered in the form:\n\n 1. Open the source file specified in the binding table.\n 2. Navigate to the sheet specified in the binding table.\n 3. Read the QUESTION TEXT from cell at (Question_row, column C). Note: text is in a merged region C:F; use the anchor cell C.\n 4. Read each OPTION TEXT (A, B, C, D, E, optionally F) from cell at (Option_row, column C). Note: option text is in a merged region C:D; use the anchor cell C.\n 5. The option LETTER itself is in column B for visual reference but is hard-coded in your binding \u2014 do not derive it from the file.\n\n 6. v3.1 ADDITION \u2014 Direct Observation Gate:\n Before showing the options to the respondent, render the Direct Observation Gate:\n \"Have you personally observed this in [your firm | your organisation | the target] in the last 24 months?\"\n Three responses: yes / no / document_supported. The exact gate row coordinate is in the binding table (column \"Gate_row\").\n The gate prompt text is at (Gate_row, column 2) \u2014 anchor cell B of merged region B:C.\n\n 7. v3.1 ADDITION \u2014 After option selection, capture per-answer evidence-machinery fields per ST_Canonical_Schema.xlsx Sheet 7_Answer_Record:\n evidenceType (enum)\n knowledgeLevel (enum)\n confidence (enum)\n reliabilityFlags (multi-select)\n observedRoles (free text, optional)\n evidenceItemIds (foreign keys, optional)\n Use the canonical-schema enum values exactly. Do NOT show the field labels visually as \"Input\" rows from the screening sheet \u2014 those rows are scaffolding for the practitioner-facing Excel view, not for the form."
+      }
+    },
+    {
+      "sourceRow": 16,
+      "cells": {
+        "1": "READING PROTOCOL \u2014 STEP-TOD (Target Observed Environment Diagnostic)"
+      }
+    },
+    {
+      "sourceRow": 17,
+      "cells": {
+        "1": "STEP-TOD has a different cell convention from the screening sheets. ALL data for each question lives on ONE row:\n Col C = Question text\n Col D = Option A\n Col E = Option B\n Col F = Option C\n Col G = Option D\n Col Q = Option E (NEW v3.1 \u2014 column 17)\n\nFor every TED-style question in this sheet:\n 1. Read question and 5 options from the row coordinates in STEP-TOD binding table.\n 2. v3.1 \u2014 render Direct Observation Gate before options (use the same gate prompt as above).\n 3. v3.1 \u2014 capture per-answer evidence machinery as above.\n\nFor EVID Q1\u2013Q4 (evidence-calibration block at workbook level):\n Render before TED questions. EVID block does NOT need per-question Direct Observation Gate \u2014 the EVID block IS the evidence calibration. EVID answers feed the Evidence_Confidence sheet computation."
+      }
+    },
+    {
+      "sourceRow": 19,
+      "cells": {
+        "1": "OPTION E SEMANTICS"
+      }
+    },
+    {
+      "sourceRow": 20,
+      "cells": {
+        "1": "Option E (\"I cannot answer from direct observation\") is a LEGITIMATE answer, not a failure mode. Render it normally as the fifth radio button. Selection of E:\n \u2022 Does not produce an environment signal (E_Environment = no_environment_signal in binding tables).\n \u2022 Does not block form progress \u2014 the respondent can submit forms with multiple E answers.\n \u2022 Triggers downstream \"coverage_insufficient\" engine flag if E count exceeds threshold per ST_Canonical_Schema sheet 14_RoleCoverageMatrix.\n \u2022 Per ST_Canonical_Schema sheet 7_Answer_Record validation: when respondent selects E, force evidenceType = unknown, knowledgeLevel = not_known, confidence = cannot_determine. Hide the evidence-machinery fields in this case (engine will set them to the unknown values automatically).\n\nOption F (where present) follows the same semantics as E unless explicitly noted otherwise in the binding table column \"Practitioner Note\"."
+      }
+    },
+    {
+      "sourceRow": 22,
+      "cells": {
+        "1": "FORBIDDEN ACTIONS"
+      }
+    },
+    {
+      "sourceRow": 23,
+      "cells": {
+        "1": "You must NEVER:\n \u2022 Write question or answer text from memory or by paraphrasing.\n \u2022 Shorten, summarise, or improve wording.\n \u2022 Swap answer options between questions (e.g. use Q3-B text as a radio option for Q5).\n \u2022 Display a primary environment label as the form output. The form must not name an environment as the respondent's \"type.\" Per ST_Canonical_Schema sheet 17_AnalystGate: paid outputs require analyst review; free-tier outputs may show a \"directional pattern only\" label and must NOT name a final environment.\n \u2022 Skip the Direct Observation Gate. The gate is a hard precondition for option selection in v3.1.\n \u2022 Persist evidence-machinery values that violate the canonical-schema validation rules in sheet 7_Answer_Record (e.g. evidenceType = direct_observation with confidence = cannot_determine is invalid).\n \u2022 Treat the practitioner-facing \"Input\" rows in the source file as form fields \u2014 those are Excel scaffolding for human reviewers, not API contracts.\n \u2022 Reuse cell coordinates from prior versions of the binding (v1.0, v1.1, v1.2). v3.1 invalidates them."
+      }
+    },
+    {
+      "sourceRow": 25,
+      "cells": {
+        "1": "STRUCTURE OF BINDING TABLES"
+      }
+    },
+    {
+      "sourceRow": 26,
+      "cells": {
+        "1": "Each STEP binding sheet has these columns:\n Col A \u2014 Question number (Q1, Q2, \u2026; or EVID Q1\u2013Q4, TED Q1\u2013Q19 in STEP-TOD)\n Col B \u2014 Option label: Q for question row \u00b7 Gate for direct-observation gate row \u00b7 A, B, C, D, E, F for answer rows\n Col C \u2014 Source file name\n Col D \u2014 Source sheet name\n Col E \u2014 Source row number\n Col F \u2014 Source column letter (C for screening sheets; D/E/F/G/Q for STEP-TOD options)\n Col G \u2014 Cell value snippet (first 80 chars) \u2014 VERIFY ONLY (read live from file at render time)\n Col H \u2014 Practitioner note (v3.1: rewrite flags, F-option presence, etc.)"
+      }
+    },
+    {
+      "sourceRow": 28,
+      "cells": {
+        "1": "STEP 1 \u2014 DEAL CONTEXT SETUP"
+      }
+    },
+    {
+      "sourceRow": 29,
+      "cells": {
+        "1": "Step 1 contains no questionnaire file content. It renders:\n \u2022 Track selector: \"Do you represent the acquirer or the target?\" (two buttons, no file source)\n \u2022 Deal type selector: Platform Acquisition / Operational Roll-Up / MBO / Cross-Border Integration (no file source)\n \u2022 P1 (acquirer track or target track): from Positioning sheet of AEM or TSAM\n \u2022 P2 (acquirer track or target track): from Positioning sheet of AEM or TSAM\n\nSee STEP-1 binding sheet for exact P1/P2 cell coordinates.\n\nCRITICAL v3.1 CHANGE: Positioning sheets renamed from \"Positioning\" to \"2_Positioning\". Coordinates also changed because v3.1 has different layout. The v1.1 patch that fixed C\u2192A for question label is preserved; v3.1 now ALSO fixes the option-text column (was misread as C in v1.1 \u2014 actually B with merged B:C)."
+      }
+    },
+    {
+      "sourceRow": 31,
+      "cells": {
+        "1": "ERROR HANDLING"
+      }
+    },
+    {
+      "sourceRow": 32,
+      "cells": {
+        "1": "If any of the following occur, STOP and report to the developer before rendering:\n \u2022 Source file cannot be opened.\n \u2022 Specified sheet does not exist in the file (especially v3.1 sheet rename: 3_Screening, 3_Level_1_Screening, 4_Level_2_Deepening).\n \u2022 Cell at the specified row/column is empty when content is expected.\n \u2022 Cell content does not start with the snippet in Col G of the binding table (drift detected).\n \u2022 Direct Observation Gate row missing from a screening question \u2014 indicates v3.1 architecture not deployed.\n \u2022 Option E missing from a screening question \u2014 same indication.\n \u2022 ST_Canonical_Schema.xlsx is not present at the expected path \u2014 schema dependency required."
+      }
+    },
+    {
+      "sourceRow": 34,
+      "cells": {
+        "1": "SCHEMA DEPENDENCY (NEW IN v3.1)"
+      }
+    },
+    {
+      "sourceRow": 35,
+      "cells": {
+        "1": "All enum values rendered by the form (Side, EvidenceType, KnowledgeLevel, Confidence, ReliabilityFlag) MUST be sourced from ST_Canonical_Schema.xlsx as the single source of truth. Do not hard-code the enum lists. Do not paraphrase enum labels. Read them at application boot from the canonical schema sheets:\n \u2022 Sheet 1_Sides \u2014 Side enum\n \u2022 Sheet 2_Roles \u2014 Role taxonomy\n \u2022 Sheet 3_EvidenceType \u2014 EvidenceType enum\n \u2022 Sheet 4_KnowledgeLevel \u2014 KnowledgeLevel enum\n \u2022 Sheet 5_Confidence \u2014 Confidence enum\n \u2022 Sheet 6_ReliabilityFlags \u2014 Nine reliability flags\n\nWhen the canonical schema updates, the form picks up the change automatically. Do not embed enum values in the binding tables, the application code, or the form templates."
+      }
+    },
+    {
+      "sourceRow": 37,
+      "cells": {
+        "1": "Academy of Structural Typology \u00b7 structural-typology.com \u00b7 Form Binding Directive \u00b7 v3.1 \u00b7 May 2026"
+      }
+    }
+  ],
+  "step1Rows": [
+    {
+      "sourceRow": 1,
+      "cells": {
+        "1": "STEP 1 \u2014 Deal Context Setup \u00b7 No questionnaire file content for selectors"
+      }
+    },
+    {
+      "sourceRow": 2,
+      "cells": {
+        "1": "Track and Deal Type selectors are UI-only \u2014 text is hard-coded, not sourced from a file. P1 and P2 selectors source from Positioning sheets in AEM (acquirer track) or TSAM (target track). v3.1: Positioning sheet renamed to \"2_Positioning\"; option text in column B (merged B:C anchor), not column C as v1.1 binding said."
+      }
+    },
+    {
+      "sourceRow": 4,
+      "cells": {
+        "1": "TRACK SELECTOR (NO FILE SOURCE)"
+      }
+    },
+    {
+      "sourceRow": 5,
+      "cells": {
+        "1": "Render the prompt: \"Do you represent the acquirer or the target?\"\nButton 1: \"Acquirer\" \u2192 routes to Step 2A (ST_Acquirer_Environment_Module.xlsx)\nButton 2: \"Target\" \u2192 routes to Step 2C (ST_Target_Self_Assessment_Module.xlsx)\nButton 3 (v3.1 NEW): \"Advisor / Analyst\" \u2192 routes to Step 2B (ST_Environment_Diagnostic_v2.xlsx, side-agnostic)\n\nThis text is UI-only. Do NOT source from any file."
+      }
+    },
+    {
+      "sourceRow": 7,
+      "cells": {
+        "1": "DEAL TYPE SELECTOR (NO FILE SOURCE)"
+      }
+    },
+    {
+      "sourceRow": 8,
+      "cells": {
+        "1": "Render: \"Select deal type\"\n Option 1: Platform Acquisition\n Option 2: Operational Roll-Up\n Option 3: MBO\n Option 4: Cross-Border Integration\n\nThis text is UI-only. Do NOT source from any file."
+      }
+    },
+    {
+      "sourceRow": 10,
+      "cells": {
+        "1": "P1 \u2014 ACQUIRER TRACK (from AEM 2_Positioning)"
+      }
+    },
+    {
+      "sourceRow": 11,
+      "cells": {
+        "1": "File: ST_Acquirer_Environment_Module.xlsx \u00b7 Sheet: 2_Positioning (NEW v3.1 name)\nQuestion label cell: row 4, column A (merged A4:C4 \u2014 anchor A4)\nOption A text: row 5, column B (merged B5:C5 \u2014 anchor B5) \u2014 value: \"Partner, Managing Director, or C-suite executive\"\nOption B text: row 6, column B (merged B6:C6 \u2014 anchor B6) \u2014 value: \"Principal, VP, or Senior Director\"\nOption C text: row 7, column B (merged B7:C7 \u2014 anchor B7) \u2014 value: \"Deal team member, analyst, or external adviser\"\nOption D text: row 8, column B (merged B8:C8 \u2014 anchor B8) \u2014 value: \"Other \u2014 specify in adjacent cell\"\nNOT SCORED \u2014 context only.\n\u26a0 v3.1 PATCH: Option text is in column B (anchor of merged B:C), not column C. v1.1 binding incorrectly said C."
+      }
+    },
+    {
+      "sourceRow": 13,
+      "cells": {
+        "1": "P2 \u2014 ACQUIRER TRACK (from AEM 2_Positioning)"
+      }
+    },
+    {
+      "sourceRow": 14,
+      "cells": {
+        "1": "File: ST_Acquirer_Environment_Module.xlsx \u00b7 Sheet: 2_Positioning\nQuestion label cell: row 11, column A (merged A11:C11 \u2014 anchor A11)\nOption A text: row 12, column B (merged B12:C12) \u2014 value: \"Less than 18 months \u26a0 (responses treated as supplementary only)\"\nOption B text: row 13, column B (merged B13:C13) \u2014 value: \"18 months to 3 years\"\nOption C text: row 14, column B (merged B14:C14) \u2014 value: \"More than 3 years\"\nOption D text: row 15, column B (merged B15:C15) \u2014 value: \"Founder or pre-institutional \u2014 observed from inception\"\nNOT SCORED \u2014 context only."
+      }
+    },
+    {
+      "sourceRow": 16,
+      "cells": {
+        "1": "P1 \u2014 TARGET TRACK (from TSAM 2_Positioning)"
+      }
+    },
+    {
+      "sourceRow": 17,
+      "cells": {
+        "1": "File: ST_Target_Self_Assessment_Module.xlsx \u00b7 Sheet: 2_Positioning\nQuestion label cell: row 4, column A (merged A4:C4)\nOption A text: row 5, column B \u2014 value: \"CEO, Founder, President, or C-suite executive\"\nOption B text: row 6, column B \u2014 value: \"VP, Senior Director, or Managing Director\"\nOption C text: row 7, column B \u2014 value: \"Director, Department Head, or Manager\"\nOption D text: row 8, column B \u2014 value: \"Other \u2014 specify in adjacent cell\"\nNOT SCORED \u2014 context only.\n\u26a0 v3.1 NOTE: Target Positioning row spacing is now PARALLEL to Acquirer Positioning. The v1.1 patch noted a non-parallel structure (P2 at row 10 due to a blank at row 9) \u2014 that has been corrected in v3.1. Both AEM and TSAM Positioning sheets now have P2 at row 11, options at rows 12\u201315."
+      }
+    },
+    {
+      "sourceRow": 19,
+      "cells": {
+        "1": "P2 \u2014 TARGET TRACK (from TSAM 2_Positioning)"
+      }
+    },
+    {
+      "sourceRow": 20,
+      "cells": {
+        "1": "File: ST_Target_Self_Assessment_Module.xlsx \u00b7 Sheet: 2_Positioning\nQuestion label cell: row 11, column A (merged A11:C11)\nOption A text: row 12, column B \u2014 value: \"Less than 18 months \u26a0 (responses treated as supplementary only)\"\nOption B text: row 13, column B \u2014 value: \"18 months to 3 years\"\nOption C text: row 14, column B \u2014 value: \"More than 3 years\"\nOption D text: row 15, column B \u2014 value: \"Founder or pre-institutional \u2014 observed from inception\"\nNOT SCORED \u2014 context only."
+      }
+    },
+    {
+      "sourceRow": 22,
+      "cells": {
+        "1": "P3 \u2014 ADVISOR/ANALYST TRACK (from EDv2 2_Block_0_Positioning) \u2014 v3.1 NEW"
+      }
+    },
+    {
+      "sourceRow": 23,
+      "cells": {
+        "1": "File: ST_Environment_Diagnostic_v2.xlsx \u00b7 Sheet: 2_Block_0_Positioning\nP1 (role positioning): row 4 question, options rows 5\u20138, column B for option text (merged B:C anchor)\nP2 (observation tenure): row 11 question, options rows 12\u201314, column B for option text\nNOT SCORED \u2014 context only.\nv3.1 NEW: this track was not in the source v1.1/v1.2 binding. Used when respondent is an external advisor or analyst (side-agnostic instrument)."
+      }
+    }
+  ],
+  "bindings": {
+    "step2A": [
+      {
+        "sourceRow": 4,
+        "q": "Q1",
+        "opt": "Q",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "5",
+        "col": "C",
+        "cellValue": "Think of the last significant strategic decision in your firm that was challenge",
+        "practitionerNote": "v3.1 broadened: \"less formal authority, lower status, or weaker political position\" (was \"below in seniority\")."
+      },
+      {
+        "sourceRow": 5,
+        "q": "Q1",
+        "opt": "Gate",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "6",
+        "col": "B",
+        "cellValue": "Direct Observation Gate \u2014 have you personally observed this in your firm in the",
+        "practitionerNote": "v3.1 Direct Observation Gate. Render: yes / no / document_supported BEFORE options."
+      },
+      {
+        "sourceRow": 6,
+        "q": "Q1",
+        "opt": "A",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "7",
+        "col": "C",
+        "cellValue": "The quality of the argument. If the challenger's case was analytically stronger,",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 7,
+        "q": "Q1",
+        "opt": "B",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "8",
+        "col": "C",
+        "cellValue": "The seniority or status of the decision-maker. The challenge was heard, consider",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 8,
+        "q": "Q1",
+        "opt": "C",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "9",
+        "col": "C",
+        "cellValue": "Who had more leverage or visibility at that moment \u2014 not status, not argument qu",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 9,
+        "q": "Q1",
+        "opt": "D",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "10",
+        "col": "C",
+        "cellValue": "Whether the challenge aligned with the firm's established direction or investmen",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 10,
+        "q": "Q1",
+        "opt": "E",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "11",
+        "col": "C",
+        "cellValue": "I cannot answer from direct observation.",
+        "practitionerNote": "v3.1 Option E: legitimate \"cannot answer from direct observation\". Excluded from primary scoring."
+      },
+      {
+        "sourceRow": 11,
+        "q": "Q2",
+        "opt": "Q",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "24",
+        "col": "C",
+        "cellValue": "When a senior person at or near your own level failed to deliver an important co",
+        "practitionerNote": "v3.1 substantively rewritten \u2014 asks how responsibility was handled, not whether formal review occurred. Per Panin/agent critique."
+      },
+      {
+        "sourceRow": 12,
+        "q": "Q2",
+        "opt": "Gate",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "25",
+        "col": "B",
+        "cellValue": "Direct Observation Gate \u2014 have you personally observed this in your firm in the",
+        "practitionerNote": "v3.1 Direct Observation Gate. Render: yes / no / document_supported BEFORE options."
+      },
+      {
+        "sourceRow": 13,
+        "q": "Q2",
+        "opt": "A",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "26",
+        "col": "C",
+        "cellValue": "The same formal process applied. Review, documented consequences, or exit \u2014 appl",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 14,
+        "q": "Q2",
+        "opt": "B",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "27",
+        "col": "C",
+        "cellValue": "The miss was openly acknowledged but handled informally through relationships an",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 15,
+        "q": "Q2",
+        "opt": "C",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "28",
+        "col": "C",
+        "cellValue": "Responsibility was redistributed downward or sideways to people with less power.",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 16,
+        "q": "Q2",
+        "opt": "D",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "29",
+        "col": "C",
+        "cellValue": "The performance framework does not apply at senior level in the same way. Senior",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 17,
+        "q": "Q2",
+        "opt": "E",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "30",
+        "col": "C",
+        "cellValue": "I cannot answer from direct observation.",
+        "practitionerNote": "v3.1 Option E: legitimate \"cannot answer from direct observation\". Excluded from primary scoring."
+      },
+      {
+        "sourceRow": 18,
+        "q": "Q3",
+        "opt": "Q",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "43",
+        "col": "C",
+        "cellValue": "A member of your deal team or investment committee raises a substantive analytic",
+        "practitionerNote": "Stem preserved from v3."
+      },
+      {
+        "sourceRow": 19,
+        "q": "Q3",
+        "opt": "Gate",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "44",
+        "col": "B",
+        "cellValue": "Direct Observation Gate \u2014 have you personally observed this in your firm in the",
+        "practitionerNote": "v3.1 Direct Observation Gate. Render: yes / no / document_supported BEFORE options."
+      },
+      {
+        "sourceRow": 20,
+        "q": "Q3",
+        "opt": "A",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "45",
+        "col": "C",
+        "cellValue": "The objection is taken seriously on its merits. If it holds up under scrutiny, i",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 21,
+        "q": "Q3",
+        "opt": "B",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "46",
+        "col": "C",
+        "cellValue": "The objection is heard. But the process has its own momentum. The transaction pr",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 22,
+        "q": "Q3",
+        "opt": "C",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "47",
+        "col": "C",
+        "cellValue": "The person who raises it is noted as someone who does not understand how decisio",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 23,
+        "q": "Q3",
+        "opt": "D",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "48",
+        "col": "C",
+        "cellValue": "The objection is absorbed and reframed by leadership as a risk flag to manage, n",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 24,
+        "q": "Q3",
+        "opt": "E",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "49",
+        "col": "C",
+        "cellValue": "I cannot answer from direct observation.",
+        "practitionerNote": "v3.1 Option E: legitimate \"cannot answer from direct observation\". Excluded from primary scoring."
+      },
+      {
+        "sourceRow": 25,
+        "q": "Q4",
+        "opt": "Q",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "62",
+        "col": "C",
+        "cellValue": "Your firm has an established way of operating \u2014 a process, governance mechanism,",
+        "practitionerNote": "Stem preserved from v3."
+      },
+      {
+        "sourceRow": 26,
+        "q": "Q4",
+        "opt": "Gate",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "63",
+        "col": "B",
+        "cellValue": "Direct Observation Gate \u2014 have you personally observed this in your firm in the",
+        "practitionerNote": "v3.1 Direct Observation Gate. Render: yes / no / document_supported BEFORE options."
+      },
+      {
+        "sourceRow": 27,
+        "q": "Q4",
+        "opt": "A",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "64",
+        "col": "C",
+        "cellValue": "It is piloted in a structured way. If the pilot produces measurable evidence tha",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 28,
+        "q": "Q4",
+        "opt": "B",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "65",
+        "col": "C",
+        "cellValue": "It is tested immediately in a live context. If it works faster or better in prac",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 29,
+        "q": "Q4",
+        "opt": "C",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "66",
+        "col": "C",
+        "cellValue": "It depends on who proposes it and their standing in the organisation. A trusted",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 30,
+        "q": "Q4",
+        "opt": "D",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "67",
+        "col": "C",
+        "cellValue": "It is unlikely to be adopted unless it solves an immediate operational problem.",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 31,
+        "q": "Q4",
+        "opt": "E",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "68",
+        "col": "C",
+        "cellValue": "I cannot answer from direct observation.",
+        "practitionerNote": "v3.1 Option E: legitimate \"cannot answer from direct observation\". Excluded from primary scoring."
+      },
+      {
+        "sourceRow": 32,
+        "q": "Q5",
+        "opt": "Q",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "81",
+        "col": "C",
+        "cellValue": "Your firm has discretionary capacity this year \u2014 time, budget, and senior attent",
+        "practitionerNote": "Stem preserved from v3."
+      },
+      {
+        "sourceRow": 33,
+        "q": "Q5",
+        "opt": "Gate",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "82",
+        "col": "B",
+        "cellValue": "Direct Observation Gate \u2014 have you personally observed this in your firm in the",
+        "practitionerNote": "v3.1 Direct Observation Gate. Render: yes / no / document_supported BEFORE options."
+      },
+      {
+        "sourceRow": 34,
+        "q": "Q5",
+        "opt": "A",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "83",
+        "col": "C",
+        "cellValue": "To the people and teams with the strongest track record of measurable results in",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 35,
+        "q": "Q5",
+        "opt": "B",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "84",
+        "col": "C",
+        "cellValue": "To whoever is generating the most visible activity and momentum at this moment.",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 36,
+        "q": "Q5",
+        "opt": "C",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "85",
+        "col": "C",
+        "cellValue": "To the most senior and longest-established people and relationships first. The i",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 37,
+        "q": "Q5",
+        "opt": "D",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "86",
+        "col": "C",
+        "cellValue": "According to the agreed strategic priorities and direction of the organisation.",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 38,
+        "q": "Q5",
+        "opt": "E",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "87",
+        "col": "C",
+        "cellValue": "I cannot answer from direct observation.",
+        "practitionerNote": "v3.1 Option E: legitimate \"cannot answer from direct observation\". Excluded from primary scoring."
+      },
+      {
+        "sourceRow": 39,
+        "q": "Q6",
+        "opt": "Q",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "100",
+        "col": "C",
+        "cellValue": "A high-performing senior person seriously considered leaving or actually left in",
+        "practitionerNote": "v3.1 expanded: option E captures external/personal/risk-management factors. Option F now serves \"cannot answer\"."
+      },
+      {
+        "sourceRow": 40,
+        "q": "Q6",
+        "opt": "Gate",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "101",
+        "col": "B",
+        "cellValue": "Direct Observation Gate \u2014 have you personally observed this in your firm in the",
+        "practitionerNote": "v3.1 Direct Observation Gate. Render: yes / no / document_supported BEFORE options."
+      },
+      {
+        "sourceRow": 41,
+        "q": "Q6",
+        "opt": "A",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "102",
+        "col": "C",
+        "cellValue": "The quality of the work, intellectual environment, and people they worked with.",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 42,
+        "q": "Q6",
+        "opt": "B",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "103",
+        "col": "C",
+        "cellValue": "Financial structure, carry, vesting, guarantees, or other economic lock-ins that",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 43,
+        "q": "Q6",
+        "opt": "C",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "104",
+        "col": "C",
+        "cellValue": "Personal loyalty, relationships, obligations, or informal commitments inside the",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 44,
+        "q": "Q6",
+        "opt": "D",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "105",
+        "col": "C",
+        "cellValue": "Power, title, autonomy, political protection, or access to decision-makers \u2014 the",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 45,
+        "q": "Q6",
+        "opt": "E",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "106",
+        "col": "C",
+        "cellValue": "External factors outside the firm: relocation, family pressure, health, immigrat",
+        "practitionerNote": "v3.1 Option E: legitimate \"cannot answer from direct observation\". Excluded from primary scoring."
+      },
+      {
+        "sourceRow": 46,
+        "q": "Q6",
+        "opt": "F",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "107",
+        "col": "C",
+        "cellValue": "I cannot answer from direct observation.",
+        "practitionerNote": "v3.1 Option F: \"cannot answer\" position when E is used for external factors. \u00b7 v3.1 Option F: see binding-specific note for semantics."
+      },
+      {
+        "sourceRow": 47,
+        "q": "Q7",
+        "opt": "Q",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "120",
+        "col": "C",
+        "cellValue": "When your firm faces a significant strategic disagreement internally \u2014 two credi",
+        "practitionerNote": "Stem preserved from v3."
+      },
+      {
+        "sourceRow": 48,
+        "q": "Q7",
+        "opt": "Gate",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "121",
+        "col": "B",
+        "cellValue": "Direct Observation Gate \u2014 have you personally observed this in your firm in the",
+        "practitionerNote": "v3.1 Direct Observation Gate. Render: yes / no / document_supported BEFORE options."
+      },
+      {
+        "sourceRow": 49,
+        "q": "Q7",
+        "opt": "A",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "122",
+        "col": "C",
+        "cellValue": "Structured analytical process: both positions are modelled, relevant experts are",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 50,
+        "q": "Q7",
+        "opt": "B",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "123",
+        "col": "C",
+        "cellValue": "A fast empirical test. Both positions are run in real conditions over a defined",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 51,
+        "q": "Q7",
+        "opt": "C",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "124",
+        "col": "C",
+        "cellValue": "Extended debate until one position is clearly more correct. Speed is explicitly",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 52,
+        "q": "Q7",
+        "opt": "D",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "125",
+        "col": "C",
+        "cellValue": "The most senior or most trusted voice resolves it. Analysis informs but does not",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 53,
+        "q": "Q7",
+        "opt": "E",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "126",
+        "col": "C",
+        "cellValue": "I cannot answer from direct observation.",
+        "practitionerNote": "v3.1 Option E: legitimate \"cannot answer from direct observation\". Excluded from primary scoring."
+      },
+      {
+        "sourceRow": 54,
+        "q": "Q8",
+        "opt": "Q",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "139",
+        "col": "C",
+        "cellValue": "During the most recent period of significant commercial pressure on your firm \u2014",
+        "practitionerNote": "v3.1 substantively rewritten + option F added. Option E is observation gap; F is structural absence (\"no such period\")."
+      },
+      {
+        "sourceRow": 55,
+        "q": "Q8",
+        "opt": "Gate",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "140",
+        "col": "B",
+        "cellValue": "Direct Observation Gate \u2014 have you personally observed this in your firm in the",
+        "practitionerNote": "v3.1 Direct Observation Gate. Render: yes / no / document_supported BEFORE options."
+      },
+      {
+        "sourceRow": 56,
+        "q": "Q8",
+        "opt": "A",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "141",
+        "col": "C",
+        "cellValue": "People investments \u2014 development, wellbeing, relationships \u2014 were protected even",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 57,
+        "q": "Q8",
+        "opt": "B",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "142",
+        "col": "C",
+        "cellValue": "People investments were maintained where they had clear ROI or were operationall",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 58,
+        "q": "Q8",
+        "opt": "C",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "143",
+        "col": "C",
+        "cellValue": "Cost reduction dominated: headcount, bonuses, development budgets, or support fu",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 59,
+        "q": "Q8",
+        "opt": "D",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "144",
+        "col": "C",
+        "cellValue": "The period became an alignment test. People aligned with leadership direction we",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 60,
+        "q": "Q8",
+        "opt": "E",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "145",
+        "col": "C",
+        "cellValue": "I observed the period but cannot determine what actions were taken from direct o",
+        "practitionerNote": "v3.1: \"I observed the period but cannot determine what actions were taken.\" \u00b7 v3.1 Option E: legitimate \"cannot answer from direct observation\". Excluded from primary scoring."
+      },
+      {
+        "sourceRow": 61,
+        "q": "Q8",
+        "opt": "F",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "146",
+        "col": "C",
+        "cellValue": "My firm has not experienced a significant commercial-pressure period in the last",
+        "practitionerNote": "v3.1 Option F: \"no such commercial-pressure period in the last 24 months\". Excluded; flagged no_such_period_observed. \u00b7 v3.1 Option F: see binding-specific note for semantics."
+      },
+      {
+        "sourceRow": 62,
+        "q": "Q9",
+        "opt": "Q",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "159",
+        "col": "C",
+        "cellValue": "Think of the last person who left your firm who was widely regarded as high-perf",
+        "practitionerNote": "v3.1 substantively rewritten. Observable proxies replace \"genuinely talented\" subjective judgement."
+      },
+      {
+        "sourceRow": 63,
+        "q": "Q9",
+        "opt": "Gate",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "160",
+        "col": "B",
+        "cellValue": "Direct Observation Gate \u2014 have you personally observed this in your firm in the",
+        "practitionerNote": "v3.1 Direct Observation Gate. Render: yes / no / document_supported BEFORE options."
+      },
+      {
+        "sourceRow": 64,
+        "q": "Q9",
+        "opt": "A",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "161",
+        "col": "C",
+        "cellValue": "They left for a clearly better opportunity and the firm accepted it without majo",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 65,
+        "q": "Q9",
+        "opt": "B",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "162",
+        "col": "C",
+        "cellValue": "They left because their growth, autonomy, or influence was blocked internally.",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 66,
+        "q": "Q9",
+        "opt": "C",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "163",
+        "col": "C",
+        "cellValue": "They were informally pushed out, politically isolated, or denied support before",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 67,
+        "q": "Q9",
+        "opt": "D",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "164",
+        "col": "C",
+        "cellValue": "They left after a conflict over values, leadership style, decision rights, or st",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 68,
+        "q": "Q9",
+        "opt": "E",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "165",
+        "col": "C",
+        "cellValue": "No such departure has occurred in my observation in the recent past.",
+        "practitionerNote": "v3.1: \"no such departure has occurred in my observation\". Flagged no_such_event_observed. \u00b7 v3.1 Option E: legitimate \"cannot answer from direct observation\". Excluded from primary scoring."
+      },
+      {
+        "sourceRow": 69,
+        "q": "Q9",
+        "opt": "F",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "166",
+        "col": "C",
+        "cellValue": "Such a departure occurred, but I do not know the actual mechanism from direct ob",
+        "practitionerNote": "v3.1 Option F: \"departure occurred but mechanism unknown\". Flagged mechanism_unknown. \u00b7 v3.1 Option F: see binding-specific note for semantics."
+      },
+      {
+        "sourceRow": 70,
+        "q": "Q10",
+        "opt": "Q",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "179",
+        "col": "C",
+        "cellValue": "Has there been a recent case (last 24 months) where rigorous internal analysis c",
+        "practitionerNote": "v3.1 sub-instruction added. Each substantive option (A\u2013D) begins with \"YES\" to make gate-then-outcome logic visible."
+      },
+      {
+        "sourceRow": 71,
+        "q": "Q10",
+        "opt": "Gate",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "180",
+        "col": "B",
+        "cellValue": "Direct Observation Gate \u2014 have you personally observed this in your firm in the",
+        "practitionerNote": "v3.1 Direct Observation Gate. Render: yes / no / document_supported BEFORE options."
+      },
+      {
+        "sourceRow": 72,
+        "q": "Q10",
+        "opt": "A",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "181",
+        "col": "C",
+        "cellValue": "YES, and the analysis prompted a genuine revision of the assumption. Belief move",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 73,
+        "q": "Q10",
+        "opt": "B",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "182",
+        "col": "C",
+        "cellValue": "YES, but the analysis was acknowledged and absorbed into a refined version of th",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 74,
+        "q": "Q10",
+        "opt": "C",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "183",
+        "col": "C",
+        "cellValue": "YES, but the analysis was dismissed, deprioritised, or the analyst's standing wa",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 75,
+        "q": "Q10",
+        "opt": "D",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "184",
+        "col": "C",
+        "cellValue": "YES, but the analysis was used selectively \u2014 parts taken up, parts that conflict",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 76,
+        "q": "Q10",
+        "opt": "E",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "185",
+        "col": "C",
+        "cellValue": "NO such recent case has occurred in my observation, OR I cannot determine whethe",
+        "practitionerNote": "v3.1 Option E: legitimate \"cannot answer from direct observation\". Excluded from primary scoring."
+      },
+      {
+        "sourceRow": 77,
+        "q": "Q11",
+        "opt": "Q",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "198",
+        "col": "C",
+        "cellValue": "When a highly creative, identity-driven, or emotionally resonant initiative insi",
+        "practitionerNote": "NEW in v3.1. Sole NF/SFP discriminator (The Creative Commons). Closes signal-coverage gap."
+      },
+      {
+        "sourceRow": 78,
+        "q": "Q11",
+        "opt": "Gate",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "199",
+        "col": "B",
+        "cellValue": "Direct Observation Gate \u2014 have you personally observed this in your firm in the",
+        "practitionerNote": "v3.1 Direct Observation Gate. Render: yes / no / document_supported BEFORE options."
+      },
+      {
+        "sourceRow": 79,
+        "q": "Q11",
+        "opt": "A",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "200",
+        "col": "C",
+        "cellValue": "The initiative is evaluated through structured criteria and either integrated or",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 80,
+        "q": "Q11",
+        "opt": "B",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "201",
+        "col": "C",
+        "cellValue": "The initiative is tested quickly in the market or in practice; if it gains tract",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 81,
+        "q": "Q11",
+        "opt": "C",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "202",
+        "col": "C",
+        "cellValue": "The initiative is protected because it expresses the authentic voice, identity,",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 82,
+        "q": "Q11",
+        "opt": "D",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "203",
+        "col": "C",
+        "cellValue": "The initiative is accepted only if it supports the existing mission, doctrine, o",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 83,
+        "q": "Q11",
+        "opt": "E",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "204",
+        "col": "C",
+        "cellValue": "The initiative is shut down because it does not meet operational discipline or f",
+        "practitionerNote": "v3.1 Option E: legitimate \"cannot answer from direct observation\". Excluded from primary scoring."
+      },
+      {
+        "sourceRow": 84,
+        "q": "Q11",
+        "opt": "F",
+        "sourceFile": "ST_Acquirer_Environment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "205",
+        "col": "C",
+        "cellValue": "I cannot answer from direct observation.",
+        "practitionerNote": "v3.1 Option F: \"cannot answer from direct observation\". \u00b7 v3.1 Option F: see binding-specific note for semantics."
+      }
+    ],
+    "step2C": [
+      {
+        "sourceRow": 4,
+        "q": "Q1",
+        "opt": "Q",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "5",
+        "col": "C",
+        "cellValue": "Think of the last significant decision in your organisation that was challenged",
+        "practitionerNote": "v3.1 broadened phrasing \u2014 works for founder-led/flat target organisations."
+      },
+      {
+        "sourceRow": 5,
+        "q": "Q1",
+        "opt": "Gate",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "6",
+        "col": "B",
+        "cellValue": "Direct Observation Gate \u2014 have you personally observed this in your organisation",
+        "practitionerNote": "v3.1 Direct Observation Gate. Render: yes / no / document_supported BEFORE options."
+      },
+      {
+        "sourceRow": 6,
+        "q": "Q1",
+        "opt": "A",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "7",
+        "col": "C",
+        "cellValue": "The quality of the argument. If the challenger's case was analytically stronger,",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 7,
+        "q": "Q1",
+        "opt": "B",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "8",
+        "col": "C",
+        "cellValue": "The seniority or status of the decision-maker. The challenge was heard, consider",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 8,
+        "q": "Q1",
+        "opt": "C",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "9",
+        "col": "C",
+        "cellValue": "Who had more leverage or visibility at that moment \u2014 not status, not argument qu",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 9,
+        "q": "Q1",
+        "opt": "D",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "10",
+        "col": "C",
+        "cellValue": "Whether the challenge aligned with how things have historically been done here.",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 10,
+        "q": "Q1",
+        "opt": "E",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "11",
+        "col": "C",
+        "cellValue": "I cannot answer from direct observation.",
+        "practitionerNote": "v3.1 Option E: legitimate \"cannot answer from direct observation\". Excluded from primary scoring."
+      },
+      {
+        "sourceRow": 11,
+        "q": "Q2",
+        "opt": "Q",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "24",
+        "col": "C",
+        "cellValue": "When a senior person in your organisation \u2014 at director level or above, at or ne",
+        "practitionerNote": "v3 rewrite preserved. Asks how responsibility was handled, not whether formal review occurred."
+      },
+      {
+        "sourceRow": 12,
+        "q": "Q2",
+        "opt": "Gate",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "25",
+        "col": "B",
+        "cellValue": "Direct Observation Gate \u2014 have you personally observed this in your organisation",
+        "practitionerNote": "v3.1 Direct Observation Gate. Render: yes / no / document_supported BEFORE options."
+      },
+      {
+        "sourceRow": 13,
+        "q": "Q2",
+        "opt": "A",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "26",
+        "col": "C",
+        "cellValue": "The same formal process applied. Review, documented consequences, or exit \u2014 appl",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 14,
+        "q": "Q2",
+        "opt": "B",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "27",
+        "col": "C",
+        "cellValue": "The miss was openly acknowledged but handled informally through relationships an",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 15,
+        "q": "Q2",
+        "opt": "C",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "28",
+        "col": "C",
+        "cellValue": "Responsibility was redistributed downward or sideways to people with less power.",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 16,
+        "q": "Q2",
+        "opt": "D",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "29",
+        "col": "C",
+        "cellValue": "The performance framework does not apply at senior level in the same way. Senior",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 17,
+        "q": "Q2",
+        "opt": "E",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "30",
+        "col": "C",
+        "cellValue": "I cannot answer from direct observation.",
+        "practitionerNote": "v3.1 Option E: legitimate \"cannot answer from direct observation\". Excluded from primary scoring."
+      },
+      {
+        "sourceRow": 18,
+        "q": "Q3",
+        "opt": "Q",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "43",
+        "col": "C",
+        "cellValue": "A member of your team or a peer raises a substantive analytical objection to an",
+        "practitionerNote": "Adapted from AEM Q3: \"deal team / IC\" \u2192 \"team or peer\", \"transaction\" \u2192 \"initiative\"."
+      },
+      {
+        "sourceRow": 19,
+        "q": "Q3",
+        "opt": "Gate",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "44",
+        "col": "B",
+        "cellValue": "Direct Observation Gate \u2014 have you personally observed this in your organisation",
+        "practitionerNote": "v3.1 Direct Observation Gate. Render: yes / no / document_supported BEFORE options."
+      },
+      {
+        "sourceRow": 20,
+        "q": "Q3",
+        "opt": "A",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "45",
+        "col": "C",
+        "cellValue": "The objection is taken seriously on its merits. If it holds up under scrutiny, i",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 21,
+        "q": "Q3",
+        "opt": "B",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "46",
+        "col": "C",
+        "cellValue": "The objection is heard. But the process has its own momentum. The initiative pro",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 22,
+        "q": "Q3",
+        "opt": "C",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "47",
+        "col": "C",
+        "cellValue": "The person who raises it is noted as someone who does not understand how decisio",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 23,
+        "q": "Q3",
+        "opt": "D",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "48",
+        "col": "C",
+        "cellValue": "The objection is absorbed and reframed by leadership as a risk flag to manage, n",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 24,
+        "q": "Q3",
+        "opt": "E",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "49",
+        "col": "C",
+        "cellValue": "I cannot answer from direct observation.",
+        "practitionerNote": "v3.1 Option E: legitimate \"cannot answer from direct observation\". Excluded from primary scoring."
+      },
+      {
+        "sourceRow": 25,
+        "q": "Q4",
+        "opt": "Q",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "62",
+        "col": "C",
+        "cellValue": "Your organisation has an established way of operating \u2014 a process, a governance",
+        "practitionerNote": "CROSS-INSTRUMENT \u2014 identical to AEM Q4. Cross-instrument design is deliberate."
+      },
+      {
+        "sourceRow": 26,
+        "q": "Q4",
+        "opt": "Gate",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "63",
+        "col": "B",
+        "cellValue": "Direct Observation Gate \u2014 have you personally observed this in your organisation",
+        "practitionerNote": "v3.1 Direct Observation Gate. Render: yes / no / document_supported BEFORE options."
+      },
+      {
+        "sourceRow": 27,
+        "q": "Q4",
+        "opt": "A",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "64",
+        "col": "C",
+        "cellValue": "It is piloted in a structured way. If the pilot produces measurable evidence tha",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 28,
+        "q": "Q4",
+        "opt": "B",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "65",
+        "col": "C",
+        "cellValue": "It is tested immediately in a live context. If it works faster or better in prac",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 29,
+        "q": "Q4",
+        "opt": "C",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "66",
+        "col": "C",
+        "cellValue": "It depends on who proposes it and their standing in the organisation. A trusted",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 30,
+        "q": "Q4",
+        "opt": "D",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "67",
+        "col": "C",
+        "cellValue": "It is unlikely to be adopted unless it solves an immediate operational problem.",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 31,
+        "q": "Q4",
+        "opt": "E",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "68",
+        "col": "C",
+        "cellValue": "I cannot answer from direct observation.",
+        "practitionerNote": "v3.1 Option E: legitimate \"cannot answer from direct observation\". Excluded from primary scoring."
+      },
+      {
+        "sourceRow": 32,
+        "q": "Q5",
+        "opt": "Q",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "81",
+        "col": "C",
+        "cellValue": "Your organisation has discretionary capacity this year \u2014 time, budget, and senio",
+        "practitionerNote": "Adapted from AEM: \"deal flow\" \u2192 \"visible activity and momentum\"; \"investment thesis\" \u2192 \"agreed strategic priorities\"."
+      },
+      {
+        "sourceRow": 33,
+        "q": "Q5",
+        "opt": "Gate",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "82",
+        "col": "B",
+        "cellValue": "Direct Observation Gate \u2014 have you personally observed this in your organisation",
+        "practitionerNote": "v3.1 Direct Observation Gate. Render: yes / no / document_supported BEFORE options."
+      },
+      {
+        "sourceRow": 34,
+        "q": "Q5",
+        "opt": "A",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "83",
+        "col": "C",
+        "cellValue": "To the people and teams with the strongest track record of measurable results in",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 35,
+        "q": "Q5",
+        "opt": "B",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "84",
+        "col": "C",
+        "cellValue": "To whoever is generating the most visible activity and momentum at this moment.",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 36,
+        "q": "Q5",
+        "opt": "C",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "85",
+        "col": "C",
+        "cellValue": "To the most senior and longest-established people and relationships first. The i",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 37,
+        "q": "Q5",
+        "opt": "D",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "86",
+        "col": "C",
+        "cellValue": "According to the agreed strategic priorities and direction of the organisation.",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 38,
+        "q": "Q5",
+        "opt": "E",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "87",
+        "col": "C",
+        "cellValue": "I cannot answer from direct observation.",
+        "practitionerNote": "v3.1 Option E: legitimate \"cannot answer from direct observation\". Excluded from primary scoring."
+      },
+      {
+        "sourceRow": 39,
+        "q": "Q6",
+        "opt": "Q",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "100",
+        "col": "C",
+        "cellValue": "A high-performing senior person in your organisation seriously considered leavin",
+        "practitionerNote": "v3.1 expanded with option E for external personal factors. Adapted from AEM: \"carry\" \u2192 \"vesting/equity stake/retention\"."
+      },
+      {
+        "sourceRow": 40,
+        "q": "Q6",
+        "opt": "Gate",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "101",
+        "col": "B",
+        "cellValue": "Direct Observation Gate \u2014 have you personally observed this in your organisation",
+        "practitionerNote": "v3.1 Direct Observation Gate. Render: yes / no / document_supported BEFORE options."
+      },
+      {
+        "sourceRow": 41,
+        "q": "Q6",
+        "opt": "A",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "102",
+        "col": "C",
+        "cellValue": "The quality of the work, intellectual environment, and people they worked with.",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 42,
+        "q": "Q6",
+        "opt": "B",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "103",
+        "col": "C",
+        "cellValue": "Vesting schedule, equity stake, retention package, or other financial mechanisms",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 43,
+        "q": "Q6",
+        "opt": "C",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "104",
+        "col": "C",
+        "cellValue": "Personal loyalty, relationships, obligations, or informal commitments inside the",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 44,
+        "q": "Q6",
+        "opt": "D",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "105",
+        "col": "C",
+        "cellValue": "Power, title, autonomy, political protection, or access to decision-makers \u2014 the",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 45,
+        "q": "Q6",
+        "opt": "E",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "106",
+        "col": "C",
+        "cellValue": "External factors outside the organisation: relocation, family pressure, health,",
+        "practitionerNote": "v3.1 Option E: legitimate \"cannot answer from direct observation\". Excluded from primary scoring."
+      },
+      {
+        "sourceRow": 46,
+        "q": "Q6",
+        "opt": "F",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "107",
+        "col": "C",
+        "cellValue": "I cannot answer from direct observation.",
+        "practitionerNote": "v3.1 Option F: \"cannot answer\". \u00b7 v3.1 Option F: see binding-specific note for semantics."
+      },
+      {
+        "sourceRow": 47,
+        "q": "Q7",
+        "opt": "Q",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "120",
+        "col": "C",
+        "cellValue": "When your organisation faces a significant strategic disagreement internally \u2014 t",
+        "practitionerNote": "CROSS-INSTRUMENT \u2014 identical to AEM Q7."
+      },
+      {
+        "sourceRow": 48,
+        "q": "Q7",
+        "opt": "Gate",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "121",
+        "col": "B",
+        "cellValue": "Direct Observation Gate \u2014 have you personally observed this in your organisation",
+        "practitionerNote": "v3.1 Direct Observation Gate. Render: yes / no / document_supported BEFORE options."
+      },
+      {
+        "sourceRow": 49,
+        "q": "Q7",
+        "opt": "A",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "122",
+        "col": "C",
+        "cellValue": "Structured analytical process: both positions are modelled, relevant experts are",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 50,
+        "q": "Q7",
+        "opt": "B",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "123",
+        "col": "C",
+        "cellValue": "A fast empirical test. Both positions are run in real conditions over a defined",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 51,
+        "q": "Q7",
+        "opt": "C",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "124",
+        "col": "C",
+        "cellValue": "Extended debate until one position is clearly more correct. Speed is explicitly",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 52,
+        "q": "Q7",
+        "opt": "D",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "125",
+        "col": "C",
+        "cellValue": "The most senior or most trusted voice resolves it. Analysis informs but does not",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 53,
+        "q": "Q7",
+        "opt": "E",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "126",
+        "col": "C",
+        "cellValue": "I cannot answer from direct observation.",
+        "practitionerNote": "v3.1 Option E: legitimate \"cannot answer from direct observation\". Excluded from primary scoring."
+      },
+      {
+        "sourceRow": 54,
+        "q": "Q8",
+        "opt": "Q",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "139",
+        "col": "C",
+        "cellValue": "During the most recent period of significant commercial pressure on your organis",
+        "practitionerNote": "CROSS-INSTRUMENT \u2014 identical to AEM Q8. Option F = no-such-period."
+      },
+      {
+        "sourceRow": 55,
+        "q": "Q8",
+        "opt": "Gate",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "140",
+        "col": "B",
+        "cellValue": "Direct Observation Gate \u2014 have you personally observed this in your organisation",
+        "practitionerNote": "v3.1 Direct Observation Gate. Render: yes / no / document_supported BEFORE options."
+      },
+      {
+        "sourceRow": 56,
+        "q": "Q8",
+        "opt": "A",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "141",
+        "col": "C",
+        "cellValue": "People investments \u2014 development, wellbeing, relationships \u2014 were protected even",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 57,
+        "q": "Q8",
+        "opt": "B",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "142",
+        "col": "C",
+        "cellValue": "People investments were maintained where they had clear ROI or were operationall",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 58,
+        "q": "Q8",
+        "opt": "C",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "143",
+        "col": "C",
+        "cellValue": "Cost reduction dominated: headcount, bonuses, development budgets, or support fu",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 59,
+        "q": "Q8",
+        "opt": "D",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "144",
+        "col": "C",
+        "cellValue": "The period became an alignment test. People aligned with leadership direction we",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 60,
+        "q": "Q8",
+        "opt": "E",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "145",
+        "col": "C",
+        "cellValue": "I observed the period but cannot determine what actions were taken from direct o",
+        "practitionerNote": "v3.1: observed-period observation gap. \u00b7 v3.1 Option E: legitimate \"cannot answer from direct observation\". Excluded from primary scoring."
+      },
+      {
+        "sourceRow": 61,
+        "q": "Q8",
+        "opt": "F",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "146",
+        "col": "C",
+        "cellValue": "My organisation has not experienced a significant commercial-pressure period in",
+        "practitionerNote": "v3.1 Option F: no such commercial-pressure period. \u00b7 v3.1 Option F: see binding-specific note for semantics."
+      },
+      {
+        "sourceRow": 62,
+        "q": "Q9",
+        "opt": "Q",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "159",
+        "col": "C",
+        "cellValue": "Think of the last person who left your organisation who was widely regarded as h",
+        "practitionerNote": "v3.1 split E into separate \"no such departure\" / \"mechanism unknown\" states."
+      },
+      {
+        "sourceRow": 63,
+        "q": "Q9",
+        "opt": "Gate",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "160",
+        "col": "B",
+        "cellValue": "Direct Observation Gate \u2014 have you personally observed this in your organisation",
+        "practitionerNote": "v3.1 Direct Observation Gate. Render: yes / no / document_supported BEFORE options."
+      },
+      {
+        "sourceRow": 64,
+        "q": "Q9",
+        "opt": "A",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "161",
+        "col": "C",
+        "cellValue": "They found a better environment for their capability. We could not match what th",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 65,
+        "q": "Q9",
+        "opt": "B",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "162",
+        "col": "C",
+        "cellValue": "They became visible as someone who was not going to rise here. Once that was cle",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 66,
+        "q": "Q9",
+        "opt": "C",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "163",
+        "col": "C",
+        "cellValue": "They left because the pace of decision-making and the approval requirements were",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 67,
+        "q": "Q9",
+        "opt": "D",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "164",
+        "col": "C",
+        "cellValue": "They departed after a relationship rupture \u2014 with a manager, with the culture, o",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 68,
+        "q": "Q9",
+        "opt": "E",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "165",
+        "col": "C",
+        "cellValue": "No such departure has occurred in my observation in the recent past.",
+        "practitionerNote": "v3.1: \"no such departure has occurred in my observation\". \u00b7 v3.1 Option E: legitimate \"cannot answer from direct observation\". Excluded from primary scoring."
+      },
+      {
+        "sourceRow": 69,
+        "q": "Q9",
+        "opt": "F",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "166",
+        "col": "C",
+        "cellValue": "Such a departure occurred, but I do not know the actual mechanism from direct ob",
+        "practitionerNote": "v3.1 Option F: \"departure occurred but mechanism unknown\". \u00b7 v3.1 Option F: see binding-specific note for semantics."
+      },
+      {
+        "sourceRow": 70,
+        "q": "Q10",
+        "opt": "Q",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "179",
+        "col": "C",
+        "cellValue": "Has there been a recent case (last 24 months) where rigorous internal analysis c",
+        "practitionerNote": "v3.1 sub-instruction. Adapted from AEM: \"investment thesis\" \u2192 \"organisational philosophy, strategy, or set of values\"."
+      },
+      {
+        "sourceRow": 71,
+        "q": "Q10",
+        "opt": "Gate",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "180",
+        "col": "B",
+        "cellValue": "Direct Observation Gate \u2014 have you personally observed this in your organisation",
+        "practitionerNote": "v3.1 Direct Observation Gate. Render: yes / no / document_supported BEFORE options."
+      },
+      {
+        "sourceRow": 72,
+        "q": "Q10",
+        "opt": "A",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "181",
+        "col": "C",
+        "cellValue": "YES, and the work was evaluated on its analytical merits. If it held up, the ass",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 73,
+        "q": "Q10",
+        "opt": "B",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "182",
+        "col": "C",
+        "cellValue": "YES, but the work was taken seriously and absorbed as a refinement or risk flag",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 74,
+        "q": "Q10",
+        "opt": "C",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "183",
+        "col": "C",
+        "cellValue": "YES, but the work was noted; the person was quietly repositioned as someone who",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 75,
+        "q": "Q10",
+        "opt": "D",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "184",
+        "col": "C",
+        "cellValue": "YES, but the philosophy is not something that gets revised by analytical work. I",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 76,
+        "q": "Q10",
+        "opt": "E",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "185",
+        "col": "C",
+        "cellValue": "NO such recent case has occurred in my observation, OR I cannot determine whethe",
+        "practitionerNote": "v3.1 Option E: legitimate \"cannot answer from direct observation\". Excluded from primary scoring."
+      },
+      {
+        "sourceRow": 77,
+        "q": "Q11",
+        "opt": "Q",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "198",
+        "col": "C",
+        "cellValue": "When a highly creative, identity-driven, or emotionally resonant initiative insi",
+        "practitionerNote": "NEW in v3.1. Sole NF/SFP discriminator."
+      },
+      {
+        "sourceRow": 78,
+        "q": "Q11",
+        "opt": "Gate",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "199",
+        "col": "B",
+        "cellValue": "Direct Observation Gate \u2014 have you personally observed this in your organisation",
+        "practitionerNote": "v3.1 Direct Observation Gate. Render: yes / no / document_supported BEFORE options."
+      },
+      {
+        "sourceRow": 79,
+        "q": "Q11",
+        "opt": "A",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "200",
+        "col": "C",
+        "cellValue": "The initiative is evaluated through structured criteria and either integrated or",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 80,
+        "q": "Q11",
+        "opt": "B",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "201",
+        "col": "C",
+        "cellValue": "The initiative is tested quickly in the market or in practice; if it gains tract",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 81,
+        "q": "Q11",
+        "opt": "C",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "202",
+        "col": "C",
+        "cellValue": "The initiative is protected because it expresses the authentic voice, identity,",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 82,
+        "q": "Q11",
+        "opt": "D",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "203",
+        "col": "C",
+        "cellValue": "The initiative is accepted only if it supports the existing mission, doctrine, o",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 83,
+        "q": "Q11",
+        "opt": "E",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "204",
+        "col": "C",
+        "cellValue": "The initiative is shut down because it does not meet operational discipline or f",
+        "practitionerNote": "v3.1 Option E: legitimate \"cannot answer from direct observation\". Excluded from primary scoring."
+      },
+      {
+        "sourceRow": 84,
+        "q": "Q11",
+        "opt": "F",
+        "sourceFile": "ST_Target_Self_Assessment_Module.xlsx",
+        "sourceSheet": "3_Screening",
+        "row": "205",
+        "col": "C",
+        "cellValue": "I cannot answer from direct observation.",
+        "practitionerNote": "v3.1 Option F: \"cannot answer\". \u00b7 v3.1 Option F: see binding-specific note for semantics."
+      }
+    ],
+    "step2BLevel1": [
+      {
+        "sourceRow": 4,
+        "q": "Q1",
+        "opt": "Q",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "5",
+        "col": "C",
+        "cellValue": "A senior leader is challenged by a junior employee who presents strong evidence",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 5,
+        "q": "Q1",
+        "opt": "Gate",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "6",
+        "col": "B",
+        "cellValue": "Direct Observation Gate \u2014 have you personally observed this in the organisation",
+        "practitionerNote": "v3.1 Direct Observation Gate. Render: yes / no / document_supported BEFORE options."
+      },
+      {
+        "sourceRow": 6,
+        "q": "Q1",
+        "opt": "A",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "7",
+        "col": "C",
+        "cellValue": "The evidence is evaluated on its merits. If the argument is sound, the decision",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 7,
+        "q": "Q1",
+        "opt": "B",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "8",
+        "col": "C",
+        "cellValue": "The challenge is read as insubordination. The junior employee faces a visible co",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 8,
+        "q": "Q1",
+        "opt": "C",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "9",
+        "col": "C",
+        "cellValue": "The challenge is absorbed and deflected. Decisions follow long-standing relation",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 9,
+        "q": "Q1",
+        "opt": "D",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "10",
+        "col": "C",
+        "cellValue": "The challenge is reframed as a lack of commitment to the mission. The employee i",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 10,
+        "q": "Q1",
+        "opt": "E",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "11",
+        "col": "C",
+        "cellValue": "I cannot answer from direct observation.",
+        "practitionerNote": "v3.1 Option E: legitimate \"cannot answer from direct observation\". Excluded from primary scoring."
+      },
+      {
+        "sourceRow": 11,
+        "q": "Q2",
+        "opt": "Q",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "24",
+        "col": "C",
+        "cellValue": "Think of the last significant decision that was initially contested but eventual",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 12,
+        "q": "Q2",
+        "opt": "Gate",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "25",
+        "col": "B",
+        "cellValue": "Direct Observation Gate \u2014 have you personally observed this in the organisation",
+        "practitionerNote": "v3.1 Direct Observation Gate. Render: yes / no / document_supported BEFORE options."
+      },
+      {
+        "sourceRow": 13,
+        "q": "Q2",
+        "opt": "A",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "26",
+        "col": "C",
+        "cellValue": "The person with the longest tenure and deepest relational trust among the group.",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 14,
+        "q": "Q2",
+        "opt": "B",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "27",
+        "col": "C",
+        "cellValue": "The person who demonstrated the most control over relevant resources, informatio",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 15,
+        "q": "Q2",
+        "opt": "C",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "28",
+        "col": "C",
+        "cellValue": "The person with the strongest track record of measurable results in the relevant",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 16,
+        "q": "Q2",
+        "opt": "D",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "29",
+        "col": "C",
+        "cellValue": "The person most closely associated with the organisation's founding narrative, v",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 17,
+        "q": "Q2",
+        "opt": "E",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "30",
+        "col": "C",
+        "cellValue": "I cannot answer from direct observation.",
+        "practitionerNote": "v3.1 Option E: legitimate \"cannot answer from direct observation\". Excluded from primary scoring."
+      },
+      {
+        "sourceRow": 18,
+        "q": "Q3",
+        "opt": "Q",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "43",
+        "col": "C",
+        "cellValue": "In the last instance you observed where a senior executive missed their primary",
+        "practitionerNote": "v3.1 substantively rewritten. Source v2 asked \"what happens?\" presupposing event occurs. v3.1 anchors to \"last instance you observed\" with no-such-event path."
+      },
+      {
+        "sourceRow": 19,
+        "q": "Q3",
+        "opt": "Gate",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "44",
+        "col": "B",
+        "cellValue": "Direct Observation Gate \u2014 have you personally observed this in the organisation",
+        "practitionerNote": "v3.1 Direct Observation Gate. Render: yes / no / document_supported BEFORE options."
+      },
+      {
+        "sourceRow": 20,
+        "q": "Q3",
+        "opt": "A",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "45",
+        "col": "C",
+        "cellValue": "Performance metrics are enforced downward but rarely upward. Leadership is prote",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 21,
+        "q": "Q3",
+        "opt": "B",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "46",
+        "col": "C",
+        "cellValue": "It depended on whether they still projected strength. If failure signalled weakn",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 22,
+        "q": "Q3",
+        "opt": "C",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "47",
+        "col": "C",
+        "cellValue": "Very little formal action. Seniority and loyalty protected the established figur",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 23,
+        "q": "Q3",
+        "opt": "D",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "48",
+        "col": "C",
+        "cellValue": "The same formal process applied as for any employee: review, consequences, or ex",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 24,
+        "q": "Q3",
+        "opt": "E",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "49",
+        "col": "C",
+        "cellValue": "I cannot answer from direct observation \u2014 no such event has occurred or I do not",
+        "practitionerNote": "v3.1 Option E: legitimate \"cannot answer from direct observation\". Excluded from primary scoring."
+      },
+      {
+        "sourceRow": 25,
+        "q": "Q4",
+        "opt": "Q",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "62",
+        "col": "C",
+        "cellValue": "An employee at any level repeatedly underperforms against their role requirement",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 26,
+        "q": "Q4",
+        "opt": "Gate",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "63",
+        "col": "B",
+        "cellValue": "Direct Observation Gate \u2014 have you personally observed this in the organisation",
+        "practitionerNote": "v3.1 Direct Observation Gate. Render: yes / no / document_supported BEFORE options."
+      },
+      {
+        "sourceRow": 27,
+        "q": "Q4",
+        "opt": "A",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "64",
+        "col": "C",
+        "cellValue": "A structured, data-driven process leads to a clear decision: improvement plan wi",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 28,
+        "q": "Q4",
+        "opt": "B",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "65",
+        "col": "C",
+        "cellValue": "They are publicly penalised or humiliated as weakness becomes visible, then eith",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 29,
+        "q": "Q4",
+        "opt": "C",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "66",
+        "col": "C",
+        "cellValue": "They are managed around \u2014 given roles where they cause least harm \u2014 but rarely r",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 30,
+        "q": "Q4",
+        "opt": "D",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "67",
+        "col": "C",
+        "cellValue": "High turnover at lower levels is treated as normal and acceptable. The system is",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 31,
+        "q": "Q4",
+        "opt": "E",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "68",
+        "col": "C",
+        "cellValue": "I cannot answer from direct observation.",
+        "practitionerNote": "v3.1 Option E: legitimate \"cannot answer from direct observation\". Excluded from primary scoring."
+      },
+      {
+        "sourceRow": 32,
+        "q": "Q5",
+        "opt": "Q",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "81",
+        "col": "C",
+        "cellValue": "An employee publicly questions not the method but the purpose of a core organisa",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 33,
+        "q": "Q5",
+        "opt": "Gate",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "82",
+        "col": "B",
+        "cellValue": "Direct Observation Gate \u2014 have you personally observed this in the organisation",
+        "practitionerNote": "v3.1 Direct Observation Gate. Render: yes / no / document_supported BEFORE options."
+      },
+      {
+        "sourceRow": 34,
+        "q": "Q5",
+        "opt": "A",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "83",
+        "col": "C",
+        "cellValue": "A real debate opens. If the argument is substantive, the process may genuinely c",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 35,
+        "q": "Q5",
+        "opt": "B",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "84",
+        "col": "C",
+        "cellValue": "A formal warning or performance note is issued. The substance of the question is",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 36,
+        "q": "Q5",
+        "opt": "C",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "85",
+        "col": "C",
+        "cellValue": "No formal punishment. But the employee is subtly repositioned as someone who \"do",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 37,
+        "q": "Q5",
+        "opt": "D",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "86",
+        "col": "C",
+        "cellValue": "Nothing is said directly. But the person is gradually excluded from the informal",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 38,
+        "q": "Q5",
+        "opt": "E",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "87",
+        "col": "C",
+        "cellValue": "I cannot answer from direct observation.",
+        "practitionerNote": "v3.1 Option E: legitimate \"cannot answer from direct observation\". Excluded from primary scoring."
+      },
+      {
+        "sourceRow": 39,
+        "q": "Q6",
+        "opt": "Q",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "100",
+        "col": "C",
+        "cellValue": "New external evidence (e.g. research, market data, or a documented failure patte",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 40,
+        "q": "Q6",
+        "opt": "Gate",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "101",
+        "col": "B",
+        "cellValue": "Direct Observation Gate \u2014 have you personally observed this in the organisation",
+        "practitionerNote": "v3.1 Direct Observation Gate. Render: yes / no / document_supported BEFORE options."
+      },
+      {
+        "sourceRow": 41,
+        "q": "Q6",
+        "opt": "A",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "102",
+        "col": "C",
+        "cellValue": "The evidence is taken seriously. If it holds up, the founding assumption is revi",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 42,
+        "q": "Q6",
+        "opt": "B",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "103",
+        "col": "C",
+        "cellValue": "The evidence is evaluated for competitive relevance. If it changes the landscape",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 43,
+        "q": "Q6",
+        "opt": "C",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "104",
+        "col": "C",
+        "cellValue": "The evidence is acknowledged at surface level but its implications are systemati",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 44,
+        "q": "Q6",
+        "opt": "D",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "105",
+        "col": "C",
+        "cellValue": "The question of revising strategic assumptions does not arise. The system proces",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 45,
+        "q": "Q6",
+        "opt": "E",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "106",
+        "col": "C",
+        "cellValue": "I cannot answer from direct observation \u2014 no such evidence-vs-assumption event h",
+        "practitionerNote": "v3.1 Option E: legitimate \"cannot answer from direct observation\". Excluded from primary scoring."
+      },
+      {
+        "sourceRow": 46,
+        "q": "Q7",
+        "opt": "Q",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "119",
+        "col": "C",
+        "cellValue": "A new idea is proposed that would significantly change an existing process. What",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 47,
+        "q": "Q7",
+        "opt": "Gate",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "120",
+        "col": "B",
+        "cellValue": "Direct Observation Gate \u2014 have you personally observed this in the organisation",
+        "practitionerNote": "v3.1 Direct Observation Gate. Render: yes / no / document_supported BEFORE options."
+      },
+      {
+        "sourceRow": 48,
+        "q": "Q7",
+        "opt": "A",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "121",
+        "col": "C",
+        "cellValue": "It gets tested immediately in real conditions. If it works, it replaces the old",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 49,
+        "q": "Q7",
+        "opt": "B",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "122",
+        "col": "C",
+        "cellValue": "It is evaluated against strategic objectives, modelled for long-term impact, and",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 50,
+        "q": "Q7",
+        "opt": "C",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "123",
+        "col": "C",
+        "cellValue": "It depends on who proposes it. A trusted insider framing change as \"improving wh",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 51,
+        "q": "Q7",
+        "opt": "D",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "124",
+        "col": "C",
+        "cellValue": "Change is welcome only if it provides an immediate tactical advantage. Structura",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 52,
+        "q": "Q7",
+        "opt": "E",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "125",
+        "col": "C",
+        "cellValue": "I cannot answer from direct observation.",
+        "practitionerNote": "v3.1 Option E: legitimate \"cannot answer from direct observation\". Excluded from primary scoring."
+      },
+      {
+        "sourceRow": 53,
+        "q": "Q8",
+        "opt": "Q",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "138",
+        "col": "C",
+        "cellValue": "How does the organisation treat failed attempts to try something new?",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 54,
+        "q": "Q8",
+        "opt": "Gate",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "139",
+        "col": "B",
+        "cellValue": "Direct Observation Gate \u2014 have you personally observed this in the organisation",
+        "practitionerNote": "v3.1 Direct Observation Gate. Render: yes / no / document_supported BEFORE options."
+      },
+      {
+        "sourceRow": 55,
+        "q": "Q8",
+        "opt": "A",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "140",
+        "col": "C",
+        "cellValue": "Failure is treated as data. An intelligent failure \u2014 where the right question wa",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 56,
+        "q": "Q8",
+        "opt": "B",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "141",
+        "col": "C",
+        "cellValue": "Failure is reviewed formally. Sound process with calculated risk: person is not",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 57,
+        "q": "Q8",
+        "opt": "C",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "142",
+        "col": "C",
+        "cellValue": "Failure is penalised visibly. The environment makes no distinction between intel",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 58,
+        "q": "Q8",
+        "opt": "D",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "143",
+        "col": "C",
+        "cellValue": "The person carries social stigma \u2014 not formal punishment, but a quiet loss of re",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 59,
+        "q": "Q8",
+        "opt": "E",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "144",
+        "col": "C",
+        "cellValue": "I cannot answer from direct observation.",
+        "practitionerNote": "v3.1 Option E: legitimate \"cannot answer from direct observation\". Excluded from primary scoring."
+      },
+      {
+        "sourceRow": 60,
+        "q": "Q9",
+        "opt": "Q",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "157",
+        "col": "C",
+        "cellValue": "The organisation generates a financial surplus this year. What typically happens",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 61,
+        "q": "Q9",
+        "opt": "Gate",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "158",
+        "col": "B",
+        "cellValue": "Direct Observation Gate \u2014 have you personally observed this in the organisation",
+        "practitionerNote": "v3.1 Direct Observation Gate. Render: yes / no / document_supported BEFORE options."
+      },
+      {
+        "sourceRow": 62,
+        "q": "Q9",
+        "opt": "A",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "159",
+        "col": "C",
+        "cellValue": "Deployed as competitive investment: talent acquisition, R&D, market positioning,",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 63,
+        "q": "Q9",
+        "opt": "B",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "160",
+        "col": "C",
+        "cellValue": "Flows upward through the hierarchy. Lower levels do not see a proportionate shar",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 64,
+        "q": "Q9",
+        "opt": "C",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "161",
+        "col": "C",
+        "cellValue": "Distributed to preserve stability and the wellbeing of long-standing members. In",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 65,
+        "q": "Q9",
+        "opt": "D",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "162",
+        "col": "C",
+        "cellValue": "Directed toward mission expression or creative output \u2014 with limited reinvestmen",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 66,
+        "q": "Q9",
+        "opt": "E",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "163",
+        "col": "C",
+        "cellValue": "I cannot answer from direct observation \u2014 surplus allocation is not visible to m",
+        "practitionerNote": "v3.1 Option E: legitimate \"cannot answer from direct observation\". Excluded from primary scoring."
+      },
+      {
+        "sourceRow": 67,
+        "q": "Q10",
+        "opt": "Q",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "176",
+        "col": "C",
+        "cellValue": "A high-performing employee (2 years tenure) and a lower-performing employee (15",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 68,
+        "q": "Q10",
+        "opt": "Gate",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "177",
+        "col": "B",
+        "cellValue": "Direct Observation Gate \u2014 have you personally observed this in the organisation",
+        "practitionerNote": "v3.1 Direct Observation Gate. Render: yes / no / document_supported BEFORE options."
+      },
+      {
+        "sourceRow": 69,
+        "q": "Q10",
+        "opt": "A",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "178",
+        "col": "C",
+        "cellValue": "The high performer receives the raise based on documented contribution. Tenure i",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 70,
+        "q": "Q10",
+        "opt": "B",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "179",
+        "col": "C",
+        "cellValue": "The long-tenure employee has a strong structural advantage. Seniority and loyalt",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 71,
+        "q": "Q10",
+        "opt": "C",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "180",
+        "col": "C",
+        "cellValue": "The decision depends on who has more leverage and visibility at the moment. Neit",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 72,
+        "q": "Q10",
+        "opt": "D",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "181",
+        "col": "C",
+        "cellValue": "Neither negotiation produces a meaningful outcome. Compensation is set by the sy",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 73,
+        "q": "Q10",
+        "opt": "E",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "182",
+        "col": "C",
+        "cellValue": "I cannot answer from direct observation \u2014 compensation decisions are not visible",
+        "practitionerNote": "v3.1 Option E: legitimate \"cannot answer from direct observation\". Excluded from primary scoring."
+      },
+      {
+        "sourceRow": 74,
+        "q": "Q11",
+        "opt": "Q",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "195",
+        "col": "C",
+        "cellValue": "An experienced employee is considering leaving. They have a comparable offer els",
+        "practitionerNote": "v3.1 expanded: option E for external/personal/risk-management factors. Adapted from source v2 \"comparable offer\" framing."
+      },
+      {
+        "sourceRow": 75,
+        "q": "Q11",
+        "opt": "Gate",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "196",
+        "col": "B",
+        "cellValue": "Direct Observation Gate \u2014 have you personally observed this in the organisation",
+        "practitionerNote": "v3.1 Direct Observation Gate. Render: yes / no / document_supported BEFORE options."
+      },
+      {
+        "sourceRow": 76,
+        "q": "Q11",
+        "opt": "A",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "197",
+        "col": "C",
+        "cellValue": "The sense that this place is their community \u2014 not just their employer. Acceptin",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 77,
+        "q": "Q11",
+        "opt": "B",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "198",
+        "col": "C",
+        "cellValue": "The calculation that accepting this offer specifically \u2014 from this competitor \u2014",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 78,
+        "q": "Q11",
+        "opt": "C",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "199",
+        "col": "C",
+        "cellValue": "The calculation that leaving now costs more than staying. They have participated",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 79,
+        "q": "Q11",
+        "opt": "D",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "200",
+        "col": "C",
+        "cellValue": "The work itself. Problems are genuinely interesting, the environment develops th",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 80,
+        "q": "Q11",
+        "opt": "E",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "201",
+        "col": "C",
+        "cellValue": "External factors outside the organisation determined the outcome (relocation, fa",
+        "practitionerNote": "v3.1 Option E: legitimate \"cannot answer from direct observation\". Excluded from primary scoring."
+      },
+      {
+        "sourceRow": 81,
+        "q": "Q11",
+        "opt": "F",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "202",
+        "col": "C",
+        "cellValue": "I cannot answer from direct observation.",
+        "practitionerNote": "v3.1 Option F: \"cannot answer\". \u00b7 v3.1 Option F: see binding-specific note for semantics."
+      },
+      {
+        "sourceRow": 82,
+        "q": "Q12",
+        "opt": "Q",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "215",
+        "col": "C",
+        "cellValue": "The organisation has had consistently high staff turnover at lower levels for se",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 83,
+        "q": "Q12",
+        "opt": "Gate",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "216",
+        "col": "B",
+        "cellValue": "Direct Observation Gate \u2014 have you personally observed this in the organisation",
+        "practitionerNote": "v3.1 Direct Observation Gate. Render: yes / no / document_supported BEFORE options."
+      },
+      {
+        "sourceRow": 84,
+        "q": "Q12",
+        "opt": "A",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "217",
+        "col": "C",
+        "cellValue": "As normal, or even efficient. New people work harder, cost less, and fit the sys",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 85,
+        "q": "Q12",
+        "opt": "B",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "218",
+        "col": "C",
+        "cellValue": "As a serious problem. Loss of people is experienced as a loss of community and p",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 86,
+        "q": "Q12",
+        "opt": "C",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "219",
+        "col": "C",
+        "cellValue": "As a data point requiring diagnosis. High turnover is a systemic signal \u2014 either",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 87,
+        "q": "Q12",
+        "opt": "D",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "220",
+        "col": "C",
+        "cellValue": "As a sign that the wrong people are joining \u2014 those who lack commitment to the v",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 88,
+        "q": "Q12",
+        "opt": "E",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "3_Level_1_Screening",
+        "row": "221",
+        "col": "C",
+        "cellValue": "I cannot answer from direct observation \u2014 turnover narrative is not visible to m",
+        "practitionerNote": "v3.1 Option E: legitimate \"cannot answer from direct observation\". Excluded from primary scoring."
+      }
+    ],
+    "step2BLevel2": [
+      {
+        "sourceRow": 4,
+        "q": "Q13",
+        "opt": "Q",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "5",
+        "col": "C",
+        "cellValue": "Managers at the middle level are promoted primarily because:",
+        "practitionerNote": "Stem preserved from source v2 post-rewrite."
+      },
+      {
+        "sourceRow": 5,
+        "q": "Q13",
+        "opt": "Gate",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "6",
+        "col": "B",
+        "cellValue": "Direct Observation Gate \u2014 have you personally observed this in the organisation",
+        "practitionerNote": "v3.1 Direct Observation Gate. Render: yes / no / document_supported BEFORE options."
+      },
+      {
+        "sourceRow": 6,
+        "q": "Q13",
+        "opt": "A",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "7",
+        "col": "C",
+        "cellValue": "They delivered the strongest personal results under pressure and demonstrated th",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 7,
+        "q": "Q13",
+        "opt": "B",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "8",
+        "col": "C",
+        "cellValue": "They brought the most new people into the organisation and kept them long enough",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 8,
+        "q": "Q13",
+        "opt": "C",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "9",
+        "col": "C",
+        "cellValue": "They built the most effective teams \u2014 their direct reports improved measurably u",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 9,
+        "q": "Q13",
+        "opt": "D",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "10",
+        "col": "C",
+        "cellValue": "They have been here long enough to be trusted by both their team and senior lead",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 10,
+        "q": "Q13",
+        "opt": "E",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "11",
+        "col": "C",
+        "cellValue": "I cannot answer from direct observation \u2014 promotion criteria are not visible to",
+        "practitionerNote": "v3.1 Option E: legitimate \"cannot answer from direct observation\". Excluded from primary scoring."
+      },
+      {
+        "sourceRow": 11,
+        "q": "Q14",
+        "opt": "Q",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "24",
+        "col": "C",
+        "cellValue": "An employee wants to leave the organisation. What actually holds them back?",
+        "practitionerNote": "Stem preserved from source v2 post-rewrite."
+      },
+      {
+        "sourceRow": 12,
+        "q": "Q14",
+        "opt": "Gate",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "25",
+        "col": "B",
+        "cellValue": "Direct Observation Gate \u2014 have you personally observed this in the organisation",
+        "practitionerNote": "v3.1 Direct Observation Gate. Render: yes / no / document_supported BEFORE options."
+      },
+      {
+        "sourceRow": 13,
+        "q": "Q14",
+        "opt": "A",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "26",
+        "col": "C",
+        "cellValue": "The organisation has made examples visible. There are known cases of people who",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 14,
+        "q": "Q14",
+        "opt": "B",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "27",
+        "col": "C",
+        "cellValue": "The recognition that they have been part of the system long enough that leaving",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 15,
+        "q": "Q14",
+        "opt": "C",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "28",
+        "col": "C",
+        "cellValue": "They are mid-stream in commitments that matter to them personally \u2014 a team they",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 16,
+        "q": "Q14",
+        "opt": "D",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "29",
+        "col": "C",
+        "cellValue": "Nothing structural. People leave when they find a better environment. Retention",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 17,
+        "q": "Q14",
+        "opt": "E",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "30",
+        "col": "C",
+        "cellValue": "I cannot answer from direct observation \u2014 departure mechanisms are not visible t",
+        "practitionerNote": "v3.1 Option E: legitimate \"cannot answer from direct observation\". Excluded from primary scoring."
+      },
+      {
+        "sourceRow": 18,
+        "q": "Q15",
+        "opt": "Q",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "43",
+        "col": "C",
+        "cellValue": "A manager publicly asks: \"Should we be doing this at all?\" about a core ongoing",
+        "practitionerNote": "Stem preserved from source v2 post-rewrite."
+      },
+      {
+        "sourceRow": 19,
+        "q": "Q15",
+        "opt": "Gate",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "44",
+        "col": "B",
+        "cellValue": "Direct Observation Gate \u2014 have you personally observed this in the organisation",
+        "practitionerNote": "v3.1 Direct Observation Gate. Render: yes / no / document_supported BEFORE options."
+      },
+      {
+        "sourceRow": 20,
+        "q": "Q15",
+        "opt": "A",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "45",
+        "col": "C",
+        "cellValue": "A formal review of the manager's performance is initiated in the period followin",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 21,
+        "q": "Q15",
+        "opt": "B",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "46",
+        "col": "C",
+        "cellValue": "No consequence lands directly. But within weeks, the manager is no longer includ",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 22,
+        "q": "Q15",
+        "opt": "C",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "47",
+        "col": "C",
+        "cellValue": "The manager is repositioned as someone who \"lacks faith in the mission.\" The que",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 23,
+        "q": "Q15",
+        "opt": "D",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "48",
+        "col": "C",
+        "cellValue": "The question is welcomed. If it is substantive, it opens a real discussion. Lead",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 24,
+        "q": "Q15",
+        "opt": "E",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "49",
+        "col": "C",
+        "cellValue": "I cannot answer from direct observation.",
+        "practitionerNote": "v3.1 Option E: legitimate \"cannot answer from direct observation\". Excluded from primary scoring."
+      },
+      {
+        "sourceRow": 25,
+        "q": "Q16",
+        "opt": "Q",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "62",
+        "col": "C",
+        "cellValue": "The organisation invests in employee wellbeing programmes (mental health support",
+        "practitionerNote": "Stem preserved from source v2 post-rewrite."
+      },
+      {
+        "sourceRow": 26,
+        "q": "Q16",
+        "opt": "Gate",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "63",
+        "col": "B",
+        "cellValue": "Direct Observation Gate \u2014 have you personally observed this in the organisation",
+        "practitionerNote": "v3.1 Direct Observation Gate. Render: yes / no / document_supported BEFORE options."
+      },
+      {
+        "sourceRow": 27,
+        "q": "Q16",
+        "opt": "A",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "64",
+        "col": "C",
+        "cellValue": "When it demonstrably improves performance metrics. The investment is evaluated a",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 28,
+        "q": "Q16",
+        "opt": "B",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "65",
+        "col": "C",
+        "cellValue": "When it is commercially advantageous \u2014 as a branding or retention investment. Th",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 29,
+        "q": "Q16",
+        "opt": "C",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "66",
+        "col": "C",
+        "cellValue": "When it aligns with the mission narrative. Wellbeing is positioned as an express",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 30,
+        "q": "Q16",
+        "opt": "D",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "67",
+        "col": "C",
+        "cellValue": "Continuously and unconditionally \u2014 because people matter here, and care is expre",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 31,
+        "q": "Q16",
+        "opt": "E",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "68",
+        "col": "C",
+        "cellValue": "I cannot answer from direct observation.",
+        "practitionerNote": "v3.1 Option E: legitimate \"cannot answer from direct observation\". Excluded from primary scoring."
+      },
+      {
+        "sourceRow": 32,
+        "q": "Q17",
+        "opt": "Q",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "81",
+        "col": "C",
+        "cellValue": "A long-standing employee who is no longer performing well. The organisation's re",
+        "practitionerNote": "Stem preserved from source v2 post-rewrite."
+      },
+      {
+        "sourceRow": 33,
+        "q": "Q17",
+        "opt": "Gate",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "82",
+        "col": "B",
+        "cellValue": "Direct Observation Gate \u2014 have you personally observed this in the organisation",
+        "practitionerNote": "v3.1 Direct Observation Gate. Render: yes / no / document_supported BEFORE options."
+      },
+      {
+        "sourceRow": 34,
+        "q": "Q17",
+        "opt": "A",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "83",
+        "col": "C",
+        "cellValue": "They are protected, reassigned, or managed around. Loyalty and tenure provide re",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 35,
+        "q": "Q17",
+        "opt": "B",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "84",
+        "col": "C",
+        "cellValue": "They are replaced \u2014 quickly and without ceremony. High turnover at lower levels",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 36,
+        "q": "Q17",
+        "opt": "C",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "85",
+        "col": "C",
+        "cellValue": "A formal performance improvement process is initiated with clear metrics and a d",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 37,
+        "q": "Q17",
+        "opt": "D",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "86",
+        "col": "C",
+        "cellValue": "They are publicly diminished or displaced as their weakness becomes visible. Str",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 38,
+        "q": "Q17",
+        "opt": "E",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "87",
+        "col": "C",
+        "cellValue": "I cannot answer from direct observation.",
+        "practitionerNote": "v3.1 Option E: legitimate \"cannot answer from direct observation\". Excluded from primary scoring."
+      },
+      {
+        "sourceRow": 39,
+        "q": "Q18",
+        "opt": "Q",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "100",
+        "col": "C",
+        "cellValue": "New employees are recruited primarily through:",
+        "practitionerNote": "Stem preserved from source v2 post-rewrite."
+      },
+      {
+        "sourceRow": 40,
+        "q": "Q18",
+        "opt": "Gate",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "101",
+        "col": "B",
+        "cellValue": "Direct Observation Gate \u2014 have you personally observed this in the organisation",
+        "practitionerNote": "v3.1 Direct Observation Gate. Render: yes / no / document_supported BEFORE options."
+      },
+      {
+        "sourceRow": 41,
+        "q": "Q18",
+        "opt": "A",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "102",
+        "col": "C",
+        "cellValue": "Referrals from existing employees. The key implicit criterion is \"will this pers",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 42,
+        "q": "Q18",
+        "opt": "B",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "103",
+        "col": "C",
+        "cellValue": "Formal channels optimised for throughput. Volume matters more than fit. The syst",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 43,
+        "q": "Q18",
+        "opt": "C",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "104",
+        "col": "C",
+        "cellValue": "Competitive selection based on demonstrable skills, track record, and capacity t",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 44,
+        "q": "Q18",
+        "opt": "D",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "105",
+        "col": "C",
+        "cellValue": "Targeting of specific profiles: flexible, adaptive individuals who can operate i",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 45,
+        "q": "Q18",
+        "opt": "E",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "106",
+        "col": "C",
+        "cellValue": "I cannot answer from direct observation \u2014 recruitment criteria are not visible t",
+        "practitionerNote": "v3.1 Option E: legitimate \"cannot answer from direct observation\". Excluded from primary scoring."
+      },
+      {
+        "sourceRow": 46,
+        "q": "Q19",
+        "opt": "Q",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "119",
+        "col": "C",
+        "cellValue": "A disagreement between two departments about the best approach to a significant",
+        "practitionerNote": "Stem preserved from source v2 post-rewrite."
+      },
+      {
+        "sourceRow": 47,
+        "q": "Q19",
+        "opt": "Gate",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "120",
+        "col": "B",
+        "cellValue": "Direct Observation Gate \u2014 have you personally observed this in the organisation",
+        "practitionerNote": "v3.1 Direct Observation Gate. Render: yes / no / document_supported BEFORE options."
+      },
+      {
+        "sourceRow": 48,
+        "q": "Q19",
+        "opt": "A",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "121",
+        "col": "C",
+        "cellValue": "Each side is asked to run a quick test in real conditions. The one that produces",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 49,
+        "q": "Q19",
+        "opt": "B",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "122",
+        "col": "C",
+        "cellValue": "Structured analytical process: data review, modelling, stakeholder input, and a",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 50,
+        "q": "Q19",
+        "opt": "C",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "123",
+        "col": "C",
+        "cellValue": "Extended rigorous debate continues until one position is shown to be more episte",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 51,
+        "q": "Q19",
+        "opt": "D",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "124",
+        "col": "C",
+        "cellValue": "Escalated to the most senior or most trusted person, whose preference resolves t",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 52,
+        "q": "Q19",
+        "opt": "E",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "125",
+        "col": "C",
+        "cellValue": "I cannot answer from direct observation.",
+        "practitionerNote": "v3.1 Option E: legitimate \"cannot answer from direct observation\". Excluded from primary scoring."
+      },
+      {
+        "sourceRow": 53,
+        "q": "Q20",
+        "opt": "Q",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "138",
+        "col": "C",
+        "cellValue": "The organisation is building a new capability it does not currently possess. Wha",
+        "practitionerNote": "Stem preserved from source v2 post-rewrite."
+      },
+      {
+        "sourceRow": 54,
+        "q": "Q20",
+        "opt": "Gate",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "139",
+        "col": "B",
+        "cellValue": "Direct Observation Gate \u2014 have you personally observed this in the organisation",
+        "practitionerNote": "v3.1 Direct Observation Gate. Render: yes / no / document_supported BEFORE options."
+      },
+      {
+        "sourceRow": 55,
+        "q": "Q20",
+        "opt": "A",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "140",
+        "col": "C",
+        "cellValue": "Small team, rapid prototypes, learn-by-doing in real conditions. Documentation f",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 56,
+        "q": "Q20",
+        "opt": "B",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "141",
+        "col": "C",
+        "cellValue": "Structured programme: capability mapping, targeted hire or development, staged b",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 57,
+        "q": "Q20",
+        "opt": "C",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "142",
+        "col": "C",
+        "cellValue": "The capability is acquired through control \u2014 buying, pressuring, or absorbing th",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 58,
+        "q": "Q20",
+        "opt": "D",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "143",
+        "col": "C",
+        "cellValue": "Capability development is not a strategic priority. The organisation runs on exi",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 59,
+        "q": "Q20",
+        "opt": "E",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "144",
+        "col": "C",
+        "cellValue": "I cannot answer from direct observation \u2014 no recent capability-build or it is no",
+        "practitionerNote": "v3.1 Option E: legitimate \"cannot answer from direct observation\". Excluded from primary scoring."
+      },
+      {
+        "sourceRow": 60,
+        "q": "Q21",
+        "opt": "Q",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "157",
+        "col": "C",
+        "cellValue": "A core belief that has guided the organisation for years is challenged with new",
+        "practitionerNote": "Stem preserved from source v2 post-rewrite."
+      },
+      {
+        "sourceRow": 61,
+        "q": "Q21",
+        "opt": "Gate",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "158",
+        "col": "B",
+        "cellValue": "Direct Observation Gate \u2014 have you personally observed this in the organisation",
+        "practitionerNote": "v3.1 Direct Observation Gate. Render: yes / no / document_supported BEFORE options."
+      },
+      {
+        "sourceRow": 62,
+        "q": "Q21",
+        "opt": "A",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "159",
+        "col": "C",
+        "cellValue": "The evidence is evaluated seriously. If it is sound, the belief is revised \u2014 eve",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 63,
+        "q": "Q21",
+        "opt": "B",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "160",
+        "col": "C",
+        "cellValue": "The challenge triggers a reaffirmation rather than a review. Leadership uses the",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 64,
+        "q": "Q21",
+        "opt": "C",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "161",
+        "col": "C",
+        "cellValue": "The belief is re-examined only if the challenge has competitive or commercial re",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 65,
+        "q": "Q21",
+        "opt": "D",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "162",
+        "col": "C",
+        "cellValue": "The belief is not revisable \u2014 not because of dogma, but because tradition is the",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 66,
+        "q": "Q21",
+        "opt": "E",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "163",
+        "col": "C",
+        "cellValue": "I cannot answer from direct observation \u2014 no such belief-vs-evidence event has o",
+        "practitionerNote": "v3.1 Option E: legitimate \"cannot answer from direct observation\". Excluded from primary scoring."
+      },
+      {
+        "sourceRow": 67,
+        "q": "Q22",
+        "opt": "Q",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "176",
+        "col": "C",
+        "cellValue": "Who has the most real authority in a strategic discussion \u2014 regardless of formal",
+        "practitionerNote": "Stem preserved from source v2 post-rewrite."
+      },
+      {
+        "sourceRow": 68,
+        "q": "Q22",
+        "opt": "Gate",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "177",
+        "col": "B",
+        "cellValue": "Direct Observation Gate \u2014 have you personally observed this in the organisation",
+        "practitionerNote": "v3.1 Direct Observation Gate. Render: yes / no / document_supported BEFORE options."
+      },
+      {
+        "sourceRow": 69,
+        "q": "Q22",
+        "opt": "A",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "178",
+        "col": "C",
+        "cellValue": "The person with the most precise, best-supported, most coherent argument \u2014 regar",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 70,
+        "q": "Q22",
+        "opt": "B",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "179",
+        "col": "C",
+        "cellValue": "The person most closely associated with the organisation's founding vision or wh",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 71,
+        "q": "Q22",
+        "opt": "C",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "180",
+        "col": "C",
+        "cellValue": "The person with the strongest relevant track record and the most credible domain",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 72,
+        "q": "Q22",
+        "opt": "D",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "181",
+        "col": "C",
+        "cellValue": "The person with the longest relationship history and the most relational trust a",
+        "practitionerNote": ""
+      },
+      {
+        "sourceRow": 73,
+        "q": "Q22",
+        "opt": "E",
+        "sourceFile": "ST_Environment_Diagnostic_v2.xlsx",
+        "sourceSheet": "4_Level_2_Deepening",
+        "row": "182",
+        "col": "C",
+        "cellValue": "I cannot answer from direct observation \u2014 strategic discussions are not visible",
+        "practitionerNote": "v3.1 Option E: legitimate \"cannot answer from direct observation\". Excluded from primary scoring."
+      }
+    ],
+    "stepTargetObserved": []
+  },
+  "routingRows": [
+    {
+      "sourceRow": 1,
+      "cells": {
+        "1": "STEP-2B \u2014 Environment Diagnostic \u00b7 Two-level routing \u00b7 v3.1"
+      }
+    },
+    {
+      "sourceRow": 3,
+      "cells": {
+        "1": "FILE"
+      }
+    },
+    {
+      "sourceRow": 4,
+      "cells": {
+        "1": "ST_Environment_Diagnostic_v2.xlsx \u2014 single file, two screening sheets.\n Sheet 1: 3_Level_1_Screening (NEW v3.1 name \u2014 was \"Level 1 \u2014 Screening\" in v2) \u2192 Q1\u2013Q12 (12 questions, 6 axes)\n Sheet 2: 4_Level_2_Deepening (NEW v3.1 name \u2014 was \"Level 2 \u2014 Deepening\" in v2) \u2192 Q13\u2013Q22 (10 questions, 4 critical pairs)"
+      }
+    },
+    {
+      "sourceRow": 6,
+      "cells": {
+        "1": "LEVEL 1 \u2014 Q1 to Q12"
+      }
+    },
+    {
+      "sourceRow": 7,
+      "cells": {
+        "1": "Read from sheet: 3_Level_1_Screening (exact name \u2014 note underscore-separated v3.1 naming).\nBinding table: sheet STEP-2B-L1 in this file.\nRender all 12 questions in order Q1 \u2192 Q12. Each has 5 options (A\u2013E) \u2014 Q11 has 6 (A\u2013F).\nRender Direct Observation Gate before each question's options."
+      }
+    },
+    {
+      "sourceRow": 9,
+      "cells": {
+        "1": "LEVEL 2 \u2014 Q13 to Q22"
+      }
+    },
+    {
+      "sourceRow": 10,
+      "cells": {
+        "1": "Read from sheet: 4_Level_2_Deepening (exact name).\nBinding table: sheet STEP-2B-L2 in this file.\nQ13 starts at row 5 in this v3.1 layout (was row 6 in v2 source). Q numbering continues from Level 1 (Q13 not Q1).\nRender all 10 questions in order Q13 \u2192 Q22. Each has 5 options (A\u2013E).\nRender Direct Observation Gate before each question's options."
+      }
+    },
+    {
+      "sourceRow": 12,
+      "cells": {
+        "1": "CRITICAL \u2014 ROW NUMBERS ARE NOT SEQUENTIAL"
+      }
+    },
+    {
+      "sourceRow": 13,
+      "cells": {
+        "1": "The source files contain header rows, axis-label rows, gate rows, input-field rows, methodology-note rows, and spacer rows between questions. Row numbers are NOT sequential with question numbers. v3.1 layout has approximately 19 rows between consecutive questions (was 5\u20137 rows in v2). Use the binding tables for exact coordinates \u2014 never guess.\n\nExample v3.1 layout pattern per question:\n Row N: Axis bar\n Row N+1: Question stem (anchor cell column C of merged C:F)\n Row N+2: Direct Observation Gate row\n Rows N+3 to N+7: Options A\u2013E (anchor cells column C of merged C:D)\n Rows N+8 to N+15: Practitioner Input fields (NOT to be rendered as form fields)\n Rows N+16, N+17: Methodology notes\n Row N+18: Spacer"
+      }
+    },
+    {
+      "sourceRow": 15,
+      "cells": {
+        "1": "COVERAGE WARNING (v3.1 ESCALATION)"
+      }
+    },
+    {
+      "sourceRow": 16,
+      "cells": {
+        "1": "When the engine produces a primary or secondary signal for one of the THIN-COVERAGE environments, route the form output through dedicated environment questionnaires for confirmation:\n\n NT/STP (8/22 signals) \u2192 NT_STP_Diagnostic_Questionnaire.xlsx\n NF/NT (8/22 signals) \u2192 NF_NT_Diagnostic_Questionnaire.xlsx\n NF/SFP (3/22 signals) \u2192 NF_SFP_Diagnostic_Questionnaire.xlsx\n\nPer ST_Environment_Diagnostic_v2.xlsx sheet 5_Reliability_Audit and sheet 6_Layered_Scoring: the instrument flags these environments as instrument artifacts when they emerge from this 22-question screen. Do NOT issue a primary-environment output for thin-coverage environments without dedicated-questionnaire confirmation."
+      }
+    }
+  ]
+}

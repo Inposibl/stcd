@@ -1,0 +1,5 @@
+# Netlify SPA fallback for React Router-style deep links.
+# Keeps temporary invite URLs such as /screen-9a-target-code-gate?... active.
+/api/seal-prediction /.netlify/functions/seal-prediction 200
+/api/export-prediction-ledger /.netlify/functions/export-prediction-ledger 200
+/* /index.html 200

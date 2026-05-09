@@ -1,0 +1,38 @@
+{
+  "name": "st-framer-vercel-public",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "validate:g2": "node scripts/validate-g2.mjs",
+    "validate:g2b": "node scripts/validate-g2b.mjs",
+    "validate:track1": "node scripts/validate-track1.mjs",
+    "validate:step2b": "node scripts/validate-step2b.mjs",
+    "validate:g4b": "node scripts/validate-g4b.mjs",
+    "validate:g4c": "node scripts/validate-g4c.mjs",
+    "validate:g3": "node scripts/validate-g3.mjs",
+    "validate:evidence-capture": "node scripts/validate-evidence-capture.mjs",
+    "validate:risk-output": "node scripts/validate-risk-output.mjs",
+    "validate:final-report": "node scripts/validate-final-report-structure.mjs",
+    "validate:contradictions": "node scripts/validate-contradictions.mjs",
+    "validate:triage": "node scripts/validate-triage.mjs",
+    "validate:analyst-workflow": "node scripts/validate-analyst-workflow.mjs",
+    "validate:screen12": "node scripts/validate-screen12.mjs",
+    "validate:consultation": "node scripts/validate-consultation.mjs",
+    "validate:g5": "node scripts/validate-g5.mjs",
+    "export:newlogic": "python scripts/export_newlogic_json.py"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "^5.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "typescript": "^5.7.0",
+    "vite": "^6.0.0"
+  },
+  "devDependencies": {
+    "lighthouse": "^13.2.0"
+  }
+}

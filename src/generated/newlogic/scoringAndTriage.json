@@ -1,0 +1,1122 @@
+{
+  "dualRespondentComparison": {
+    "sourceWorkbook": "ST_Dual_Respondent_Axis_Comparison_v1.xlsx",
+    "answerEnvironmentMap": [],
+    "pairSpecificWeights": [],
+    "comparisonEngine": [],
+    "evidenceQualityLayer": [],
+    "divergenceClassification": [
+      {
+        "sourceRow": 6,
+        "state": "\u2460 CONVERGENT",
+        "triggerCondition": "Effective AGREE on \u22657 of 11 questions (was 7 of 10 in source v1.0; v3.1 adjusts for Q11)",
+        "highWeightCondition": "BOTH HIGH-weight pair-resolvers AGREE",
+        "qualityThreshold": "Combined quality multiplier \u2265 0.7 on agreement-contributing questions",
+        "resolutionPath": "No analyst intervention required for this state alone; standard methodology proceeds",
+        "output": "\u2605\u2605\u2605 STRONG signal pattern + 0 contradiction records (per schema sheet 11)"
+      },
+      {
+        "sourceRow": 7,
+        "state": "\u2461 PARTIAL CONVERGENCE",
+        "triggerCondition": "Effective AGREE on 5\u20136 of 11 questions",
+        "highWeightCondition": "AT LEAST ONE HIGH-weight pair-resolver AGREES",
+        "qualityThreshold": "Combined quality multiplier \u2265 0.5 on agreement-contributing questions",
+        "resolutionPath": "Co-presence note appended for diverging axes; one or more low-severity Contradiction records may issue",
+        "output": "\u2605\u2605 CONFIRMED signal pattern + 0\u20133 contradiction records"
+      },
+      {
+        "sourceRow": 8,
+        "state": "\u2462 ROLE-LEVEL SPLIT",
+        "triggerCondition": "AGREE on \u22655 non-governance axes AND DIVERGE on Axis 1 (Q1) and/or Axis 5 (Q5) AND R1 senior, R2 line-level",
+        "highWeightCondition": "HIGH-weight pair-resolvers may agree or diverge \u2014 not determinative for this state",
+        "qualityThreshold": "Quality multiplier \u2265 0.5 (role mismatch reduces it but does not invalidate)",
+        "resolutionPath": "Senior respondent (R1) signal pattern is primary; junior respondent observation noted as operational layer",
+        "output": "\u2605 WEAK signal pattern + SPLIT annotation + 1 medium-severity Contradiction record (cross_respondent_same_side)"
+      },
+      {
+        "sourceRow": 9,
+        "state": "\u2463-A IRRESOLVABLE \u2014 within-pair divergence",
+        "triggerCondition": "BOTH HIGH-weight pair-resolvers DIVERGE (e.g. R1=Q4-A R2=Q4-B AND R1=Q7-A R2=Q7-B for NT/STJ vs NT/STP pair)",
+        "highWeightCondition": "Both pair-resolvers fail",
+        "qualityThreshold": "Quality multiplier \u2265 0.5 on the failing questions (genuine divergence, not low-quality artifact)",
+        "resolutionPath": "PRACTITIONER ESCALATION REQUIRED \u2014 within-pair distinction compromised",
+        "output": "BLOCKED \u2014 no signal pattern issued + 1 high-severity Contradiction record (cross_respondent_same_side)"
+      },
+      {
+        "sourceRow": 10,
+        "state": "\u2463-B IRRESOLVABLE \u2014 pair-identification failure",
+        "triggerCondition": "R2 produces a third environment OUTSIDE the candidate pair (e.g. R1 \u2192 NT/STJ pair indicators; R2 \u2192 SFJ/SFP indicators)",
+        "highWeightCondition": "Pair identification itself fails \u2014 pair-resolver weights inapplicable",
+        "qualityThreshold": "Quality multiplier \u2265 0.5 (genuine divergence)",
+        "resolutionPath": "PRACTITIONER ESCALATION ONLY \u2014 adding R3 does NOT resolve. Per project rule: \u2463-B is irresolvable by additional respondents.",
+        "output": "BLOCKED \u2014 no signal pattern issued + 1 critical-severity Contradiction record (cross_respondent_same_side, escalated_to_finding)"
+      },
+      {
+        "sourceRow": 12,
+        "state": "\u2463-A vs \u2463-B DISAMBIGUATION (CRITICAL)",
+        "triggerCondition": "",
+        "highWeightCondition": "",
+        "qualityThreshold": "",
+        "resolutionPath": "",
+        "output": ""
+      },
+      {
+        "sourceRow": 13,
+        "state": "PROJECT RULE (per user memory): \"\u2463-B (pair-identification failure) is governed by State \u2463-B logic. Adding a third respondent does not resolve \u2463-B; only practitioner escalation does. R3 option is valid only for \u2463-A (within-pair divergence).\"\n\nHow to distinguish: examine R2's answer pattern. If R2's signals are scattered across the candidate pair (e.g. some NT/STJ, some NT/STP) \u2192 \u2463-A. If R2's signals concentrate on a DIFFERENT pair entirely (e.g. NT/STJ pair was hypothesised but R2 reads as SFJ/SFP) \u2192 \u2463-B.\n\nPractitioner action: \u2463-A may be resolved by adding a third respondent who breaks the tie. \u2463-B requires practitioner re-diagnosis of the candidate pair itself \u2014 the original pair hypothesis was wrong.",
+        "triggerCondition": "",
+        "highWeightCondition": "",
+        "qualityThreshold": "",
+        "resolutionPath": "",
+        "output": ""
+      }
+    ],
+    "contradictionOutput": [
+      {
+        "sourceRow": 6,
+        "divergenceState": "\u2460 CONVERGENT",
+        "contradictiontype": "No contradiction (default)",
+        "defaultSeverity": "N/A",
+        "recordsIssued": "0 records",
+        "routing": "No analyst routing required from this comparator"
+      },
+      {
+        "sourceRow": 7,
+        "divergenceState": "\u2461 PARTIAL CONVERGENCE",
+        "contradictiontype": "cross_respondent_same_side",
+        "defaultSeverity": "low to medium (per question)",
+        "recordsIssued": "0 to 3 records \u2014 one per materially-divergent question with quality multiplier \u2265 0.5",
+        "routing": "Standard analyst review queue"
+      },
+      {
+        "sourceRow": 8,
+        "divergenceState": "\u2462 ROLE-LEVEL SPLIT",
+        "contradictiontype": "cross_respondent_same_side",
+        "defaultSeverity": "medium",
+        "recordsIssued": "1 record covering Axis 1 / Axis 5 split, observedRoles populated with both R1 and R2 roles",
+        "routing": "Standard analyst review queue; analyst applies methodology \u00a73 Gate 4 override-permitted analysis"
+      },
+      {
+        "sourceRow": 9,
+        "divergenceState": "\u2463-A IRRESOLVABLE \u2014 within-pair divergence",
+        "contradictiontype": "cross_respondent_same_side",
+        "defaultSeverity": "high",
+        "recordsIssued": "1 record covering pair-resolver questions; analystResolution = \"practitioner_escalation_required\"",
+        "routing": "PRACTITIONER ESCALATION queue. Optionally: third respondent may be requested via methodology \u00a75 escalation flow."
+      },
+      {
+        "sourceRow": 10,
+        "divergenceState": "\u2463-B IRRESOLVABLE \u2014 pair-identification failure",
+        "contradictiontype": "cross_respondent_same_side, escalated_to_finding",
+        "defaultSeverity": "critical",
+        "recordsIssued": "1 record with escalatedToAssessmentId pre-populated; analystResolution = \"practitioner_redo_pair_hypothesis\"",
+        "routing": "PRACTITIONER ESCALATION queue. Adding a third respondent does NOT resolve. Per project rule: only practitioner can resolve."
+      },
+      {
+        "sourceRow": 12,
+        "divergenceState": "CONTRADICTION RECORD FIELD POPULATION",
+        "contradictiontype": "",
+        "defaultSeverity": "",
+        "recordsIssued": "",
+        "routing": ""
+      },
+      {
+        "sourceRow": 13,
+        "divergenceState": "Schema Field (sheet 11)",
+        "contradictiontype": "Source",
+        "defaultSeverity": "Default Value",
+        "recordsIssued": "Notes",
+        "routing": "Required?"
+      },
+      {
+        "sourceRow": 14,
+        "divergenceState": "id",
+        "contradictiontype": "Engine-generated UUID",
+        "defaultSeverity": "Auto",
+        "recordsIssued": "\u2014",
+        "routing": "Required"
+      },
+      {
+        "sourceRow": 15,
+        "divergenceState": "dealId",
+        "contradictiontype": "Engagement record",
+        "defaultSeverity": "Auto",
+        "recordsIssued": "\u2014",
+        "routing": "Required"
+      },
+      {
+        "sourceRow": 16,
+        "divergenceState": "contradictionType",
+        "contradictiontype": "Sheet 6 mapping above",
+        "defaultSeverity": "cross_respondent_same_side",
+        "recordsIssued": "May escalate to escalated_to_finding for \u2463-B",
+        "routing": "Required"
+      },
+      {
+        "sourceRow": 17,
+        "divergenceState": "detectionSource",
+        "contradictiontype": "Constant",
+        "defaultSeverity": "engine_dual_respondent_comparison",
+        "recordsIssued": "Identifies this comparator as the source",
+        "routing": "Required"
+      },
+      {
+        "sourceRow": 18,
+        "divergenceState": "detectedAt",
+        "contradictiontype": "Engine timestamp",
+        "defaultSeverity": "Auto",
+        "recordsIssued": "ISO 8601",
+        "routing": "Required"
+      },
+      {
+        "sourceRow": 19,
+        "divergenceState": "involvedAnswerIds",
+        "contradictiontype": "Sheet 3 output",
+        "defaultSeverity": "Both R1 and R2 answer IDs for the divergent question(s)",
+        "recordsIssued": "\u2014",
+        "routing": "Required"
+      },
+      {
+        "sourceRow": 20,
+        "divergenceState": "involvedRespondentIds",
+        "contradictiontype": "Sheet 3 output",
+        "defaultSeverity": "R1 and R2 IDs",
+        "recordsIssued": "\u2014",
+        "routing": "Required"
+      },
+      {
+        "sourceRow": 21,
+        "divergenceState": "severity",
+        "contradictiontype": "Sheet 6 mapping above",
+        "defaultSeverity": "low / medium / high / critical",
+        "recordsIssued": "Per state",
+        "routing": "Required"
+      },
+      {
+        "sourceRow": 22,
+        "divergenceState": "reviewStatus",
+        "contradictiontype": "Constant",
+        "defaultSeverity": "open",
+        "recordsIssued": "Analyst transitions to under_review per methodology \u00a75 state machine",
+        "routing": "Required"
+      },
+      {
+        "sourceRow": 23,
+        "divergenceState": "analystResolution",
+        "contradictiontype": "Empty initially",
+        "defaultSeverity": "\u2014",
+        "recordsIssued": "Populated by analyst per methodology \u00a75",
+        "routing": "Conditional"
+      },
+      {
+        "sourceRow": 24,
+        "divergenceState": "escalatedToAssessmentId",
+        "contradictiontype": "Empty (\u2463-A) / placeholder (\u2463-B)",
+        "defaultSeverity": "\u2014",
+        "recordsIssued": "For \u2463-B: pre-populated to indicate finding-grade escalation",
+        "routing": "Conditional"
+      },
+      {
+        "sourceRow": 25,
+        "divergenceState": "createdAt",
+        "contradictiontype": "Engine timestamp",
+        "defaultSeverity": "Auto",
+        "recordsIssued": "\u2014",
+        "routing": "Required"
+      }
+    ],
+    "edgeCases": []
+  },
+  "triage": {
+    "sourceWorkbook": "ST_Triage_Framework.xlsx",
+    "triggerConditions": [
+      {
+        "sourceRow": 5,
+        "trigger": "TRIGGER 1\nWEAK SIGNAL",
+        "activationCondition": "Highest weighted signal direction is identified but on a single-axis or single-question signal only. Combined evidence-quality multiplier (per Dual Respondent sheet 4 / per schema sheet 15) below the high-confidence gate threshold.",
+        "meaning": "A candidate signal pattern exists but evidence is too thin for analyst confirmation without verification. Per ST_Analyst_Methodology.xlsx \u00a73 Gate 3: confidence is capped at low until additional evidence is gathered.",
+        "severity": "medium",
+        "action": "\u2192 Run accuracy check (sheet 2)\n\u2192 Select 35-Q instrument for the candidate (sheet 5)\n\u2192 Proceed to verification output (sheet 6)"
+      },
+      {
+        "sourceRow": 6,
+        "trigger": "TRIGGER 2\nCO-PRESENCE",
+        "activationCondition": "Two signal directions within 2 points (per EDv2 sheet 6_Layered_Scoring co-presence rule). Neither emerges as clearly dominant.",
+        "meaning": "Two environments co-present in the signal pattern. Per ST_Analyst_Methodology.xlsx \u00a71: this is NOT a \"split type\" finding \u2014 it is a signal pattern requiring analyst-mediated disambiguation.",
+        "severity": "medium to high (depending on which two)",
+        "action": "\u2192 Run accuracy check (sheet 2)\n\u2192 Select 35-Q instruments for BOTH candidates (sheet 5)\n\u2192 Run verification on both; signal pattern feeds analyst workspace"
+      },
+      {
+        "sourceRow": 7,
+        "trigger": "TRIGGER 3\nPARTIAL",
+        "activationCondition": "Layer 1 instrument returned a partial differentiation \u2014 a signal direction emerged but coverage warning is active OR the signal is concentrated in only some questions of the relevant axis.",
+        "meaning": "Partial signal \u2014 instrument cannot fully discriminate without additional evidence.",
+        "severity": "medium",
+        "action": "\u2192 Run accuracy check (sheet 2)\n\u2192 Select 35-Q instrument for the partial candidate (sheet 5)\n\u2192 Proceed to verification output (sheet 6)"
+      },
+      {
+        "sourceRow": 8,
+        "trigger": "TRIGGER 4\nNEGATIVE-ONLY (v3.1 RESTATED)",
+        "activationCondition": "No positive signal direction emerged. Layer 1 questionnaire produced only \"this is NOT environment X\" eliminations without identifying a positive candidate.",
+        "meaning": "No candidate signal pattern. Engine cannot proceed to verification because there is nothing to verify.",
+        "severity": "high",
+        "action": "\u2192 Run accuracy check (sheet 2)\n\u2192 Do NOT serve a 35-Q instrument\n\u2192 Escalate to practitioner (sheet 7)"
+      },
+      {
+        "sourceRow": 9,
+        "trigger": "TRIGGER 5\nRELIABILITY-FLAG SATURATION (v3.1 NEW)",
+        "activationCondition": "Reliability-flag count from Answer records (schema sheet 7) exceeds the threshold per schema sheet 15_ConfidenceGate. Specifically: \u226540% of answers carry any reliability flag, OR any answer carries acquisition_framing_contamination, OR \u22653 answers carry status_protection / narrative_interest.",
+        "meaning": "Evidence reliability is too compromised for instrument-level verification to add value. Adding more questionnaire data will not improve confidence \u2014 the underlying respondent reliability is the limiting factor.",
+        "severity": "high",
+        "action": "\u2192 Run accuracy check (sheet 2)\n\u2192 DO NOT serve a 35-Q instrument (low ROI)\n\u2192 Route to analyst workspace via Contradiction record (sheet 4)\n\u2192 Practitioner consultation if no resolution path"
+      },
+      {
+        "sourceRow": 10,
+        "trigger": "TRIGGER 6\nCONTRADICTION-COUNT BLOCKING (v3.1 NEW)",
+        "activationCondition": "Contradiction count from cross-respondent comparator (Dual Respondent file) \u2265 5, OR \u2265 1 critical-severity Contradiction record, OR \u2463-B (pair-identification failure) state from Dual Respondent. Per methodology \u00a75, \u2463-B is irresolvable by additional respondents.",
+        "meaning": "Cross-respondent or document evidence is structurally contradictory. Verification questionnaire will not resolve this \u2014 the disagreement is at the diagnostic level, not the instrument level.",
+        "severity": "critical",
+        "action": "\u2192 Skip accuracy check (already failed implicitly)\n\u2192 DO NOT serve a 35-Q instrument\n\u2192 Route to analyst workspace via Contradiction Triage (methodology \u00a75)\n\u2192 Practitioner escalation for \u2463-B cases"
+      },
+      {
+        "sourceRow": 11,
+        "trigger": "NOT-TRIGGERED CONDITIONS",
+        "activationCondition": "",
+        "meaning": "",
+        "severity": "",
+        "action": ""
+      },
+      {
+        "sourceRow": 12,
+        "trigger": "Triage does NOT activate when ALL of the following hold: (a) Layer 1 produced a clear weighted signal pattern with combined evidence-quality multiplier \u2265 0.7 (per schema sheet 15 high-confidence gate); (b) reliability-flag count below threshold; (c) zero open Contradiction records; (d) no thin-coverage environment in primary or secondary signal. In this state: route directly to analyst workspace for standard review (no triage required).",
+        "activationCondition": "",
+        "meaning": "",
+        "severity": "",
+        "action": ""
+      },
+      {
+        "sourceRow": 14,
+        "trigger": "THIN-COVERAGE ENVIRONMENT ROUTING (v3.1)",
+        "activationCondition": "",
+        "meaning": "",
+        "severity": "",
+        "action": ""
+      },
+      {
+        "sourceRow": 15,
+        "trigger": "Even when no other trigger fires, signals concentrated on thin-coverage environments require routing to dedicated 35-Q questionnaires per ST_Environment_Diagnostic_v2.xlsx sheet 5_Reliability_Audit:\n\n NT/STP (8/22 signals in EDv2) \u2192 NT_STP_Diagnostic_Questionnaire.xlsx\n NF/NT (8/22 signals in EDv2) \u2192 NF_NT_Diagnostic_Questionnaire.xlsx\n NF/SFP (3/22 signals in EDv2; relies on Q11 in AEM/TSAM) \u2192 NF_SFP_Diagnostic_Questionnaire.xlsx\n\nFor NF/SFP specifically: if Q11 returned both-F (cannot answer) from both respondents in dual-respondent comparison, NF/SFP cannot be ruled in or out by AEM/TSAM. Mandatory routing to NF_SFP questionnaire OR practitioner escalation.",
+        "activationCondition": "",
+        "meaning": "",
+        "severity": "",
+        "action": ""
+      }
+    ],
+    "accuracyChecks": [
+      {
+        "sourceRow": 5,
+        "check": "CHECK 1\nRespondent tenure",
+        "source": "Block 0 \u00b7 P2",
+        "questionToClient": "Does the respondent who completed the diagnostic have at least 12 months of continuous observation of this organisation from their stated vantage point?",
+        "failureAction": "If P2 = A (less than 12 months): respondent answers should be re-run with a respondent who has \u2265 12 months tenure. Send \"tenure < 12 months\" message template.",
+        "v31Update": "Threshold unchanged from source v1.0. Note: AEM/TSAM v3.1 require 18 months for primary self-description, EDv2 v3.1 requires 12 months for external observation."
+      },
+      {
+        "sourceRow": 6,
+        "check": "CHECK 2\nRespondent role",
+        "source": "Block 0 \u00b7 P1",
+        "questionToClient": "Did the respondent complete the diagnostic from a position that allows observation of authority mechanisms (Axis 1) and resource flows (Axis 5)?",
+        "failureAction": "If P1 = C (external consultant) or P1 = B (mid-level manager) AND ambiguity is on Axis 1 or Axis 5: request a P1 = A senior internal respondent. Send \"role = external or mid-level\" message template.",
+        "v31Update": "Preserved from source v1.0. Per ST_Analyst_Methodology.xlsx \u00a73 Gate 2 (Role Coverage): Tier-mandatory respondent gaps cap confidence at medium."
+      },
+      {
+        "sourceRow": 7,
+        "check": "CHECK 3\nEvent-anchored answers",
+        "source": "Level 1 \u00b7 Q1\u2013Q12 (EDv2)",
+        "questionToClient": "Each question in Level 1 is anchored to a specific recent observable event \u2014 not a description of general values or policy. Did the respondent answer based on what actually happened, or what they believe should happen?",
+        "failureAction": "If client confirms answers were based on values/policy: re-administer Step 2-B with corrected instructions. Send \"values-based answers\" message template.",
+        "v31Update": "Preserved from source v1.0. Per v3.1 architecture: this check overlaps with the Direct Observation Gate (added v3.1) \u2014 gate row should already filter values-based answers, but a respondent may bypass the gate."
+      },
+      {
+        "sourceRow": 8,
+        "check": "CHECK 4\nMultiple-respondent gap",
+        "source": "Scoring sheet \u00b7 combined + ST_Dual_Respondent_Axis_Comparison_v1.xlsx + ST_B_Single_Output_Template_v1.xlsx",
+        "questionToClient": "Was the diagnostic completed by a single respondent or by 8\u201315 respondents per organisation as designed?",
+        "failureAction": "ACQUIRER SIDE: route to dual-respondent comparator (single-respondent + recruit second respondent). TARGET SIDE: n=1 handling unchanged \u2014 single-respondent target self-assessment is acceptable but contamination flag mandatory.",
+        "v31Update": "Preserved from April 2026 amendment. v3.1 update: target-side single-respondent now includes acquisition-framing contamination check by design (per Target Self-Assessment Module v3.1)."
+      },
+      {
+        "sourceRow": 9,
+        "check": "CHECK 5\nDIRECT-OBSERVATION GATE PATTERN (v3.1 NEW)",
+        "source": "Per-question Direct Observation Gate (added v3.1) on AEM/TSAM/EDv2 questionnaires",
+        "questionToClient": "Did the respondent answer YES to the Direct Observation Gate on the questions that drive the ambiguity? Or did they answer NO / document_supported?",
+        "failureAction": "If gate is consistently NO across the ambiguity-driving questions: respondent does not have direct observation; route to alternative respondent OR document-based evidence. Confidence cap applies.",
+        "v31Update": "NEW v3.1. Gate failure on the ambiguity-driving questions means instrument-level verification (35-Q) will not help \u2014 the same observation gap will recur."
+      },
+      {
+        "sourceRow": 10,
+        "check": "CHECK 6\nEVIDENCE-MACHINERY QUALITY (v3.1 NEW)",
+        "source": "Per-answer evidence-machinery: evidenceType, knowledgeLevel, confidence, reliabilityFlags",
+        "questionToClient": "For the ambiguity-driving questions, what evidence type and knowledge level did the respondent declare? Were any reliability flags raised?",
+        "failureAction": "If evidenceType = inference / hypothetical / unknown OR knowledgeLevel = speculative / not_known on > 50% of ambiguity-driving questions: instrument verification will not improve quality. Route to analyst workspace OR practitioner escalation.",
+        "v31Update": "NEW v3.1. Required per ST_Canonical_Schema.xlsx sheet 7_Answer_Record evidence-machinery fields."
+      },
+      {
+        "sourceRow": 11,
+        "check": "ACCURACY CHECK FLOW",
+        "source": "",
+        "questionToClient": "",
+        "failureAction": "",
+        "v31Update": ""
+      },
+      {
+        "sourceRow": 12,
+        "check": "Run all six checks in sequence. Multiple failures may compound. Decision rules:\n\n \u2022 All 6 PASS \u2192 proceed to instrument selection (sheet 5)\n \u2022 Any 1-2 FAIL with corrective action available \u2192 send corrective message; re-run Layer 1; return to triage\n \u2022 Check 5 FAIL OR Check 6 FAIL \u2192 DO NOT serve 35-Q (instrument cannot fix the underlying problem); route to analyst workspace via Contradiction record (sheet 4) OR practitioner escalation\n \u2022 Any 3+ checks FAIL \u2192 practitioner escalation (sheet 7)\n \u2022 Client cannot provide corrective respondent \u2192 practitioner escalation (sheet 7)",
+        "source": "",
+        "questionToClient": "",
+        "failureAction": "",
+        "v31Update": ""
+      }
+    ],
+    "reliabilityFlagTiers": [
+      {
+        "sourceRow": 18,
+        "tier": "LOW",
+        "trigger": "Total flag rate < 10% of answers AND no critical flag",
+        "confidenceGateImpact": "No impact \u2014 confidence may reach high if other gates pass",
+        "triageRouting": "Standard analyst review",
+        "overridePermission": "No analyst override needed"
+      },
+      {
+        "sourceRow": 19,
+        "tier": "MODERATE",
+        "trigger": "Total flag rate 10-40% OR moderate-tier triggers met",
+        "confidenceGateImpact": "Confidence capped at medium (per schema sheet 15)",
+        "triageRouting": "Analyst review with explicit reliability note in coverageNote",
+        "overridePermission": "Analyst may override to flag specific findings as low confidence"
+      },
+      {
+        "sourceRow": 20,
+        "tier": "HIGH",
+        "trigger": "Total flag rate > 40% OR high-tier triggers met OR single critical-tier instance",
+        "confidenceGateImpact": "Confidence capped at low (per schema sheet 15)",
+        "triageRouting": "Analyst review with mandatory contradicted_by_pattern flag on affected findings",
+        "overridePermission": "Analyst SHOULD downgrade severity ratings on affected findings; analyst CAN issue follow_up_required label"
+      },
+      {
+        "sourceRow": 21,
+        "tier": "CRITICAL",
+        "trigger": "\u2265 2 critical-tier instances OR pattern across multiple respondents",
+        "confidenceGateImpact": "Confidence cannot exceed cannot_determine on RiskOutput aggregate",
+        "triageRouting": "DO NOT issue paid output. Route to practitioner escalation. Findings may be issued as informational only with explicit reliability disclaimer.",
+        "overridePermission": "Senior analyst sign-off required to issue any paid finding from this engagement"
+      }
+    ],
+    "reliabilityFlagRules": [
+      {
+        "sourceRow": 6,
+        "flag": "acquisition_framing_contamination",
+        "description": "Target-side respondent is aware of pending acquisition; answers may be distorted toward acceptability or self-protection.",
+        "diagnosticWeight": "CRITICAL \u2014 single instance forces high triage tier",
+        "triggers": "Auto-set when target-side respondent declares deal awareness in metadata",
+        "routingImpact": "Single instance \u2192 reliability tier HIGH; route to analyst workspace; document in coverageNote"
+      },
+      {
+        "sourceRow": 7,
+        "flag": "status_protection",
+        "description": "Respondent answer protects role status, seniority, or organisational position.",
+        "diagnosticWeight": "High",
+        "triggers": "Detected when respondent answer is structurally implausible for their role (e.g. line-level claims of executive observation)",
+        "routingImpact": "\u2265 3 instances \u2192 reliability tier HIGH"
+      },
+      {
+        "sourceRow": 8,
+        "flag": "narrative_interest",
+        "description": "Respondent has personal narrative interest in the answer (founder describing own founding myth, etc.).",
+        "diagnosticWeight": "High",
+        "triggers": "Detected via cross-respondent triangulation: same-side respondents agree but differ from cross-side observers",
+        "routingImpact": "\u2265 2 instances \u2192 reliability tier MODERATE; \u2265 4 \u2192 HIGH"
+      },
+      {
+        "sourceRow": 9,
+        "flag": "compensation_exposure",
+        "description": "Respondent has financial exposure to deal outcome (earn-out, retention, carry).",
+        "diagnosticWeight": "Moderate to high (depending on amount)",
+        "triggers": "Auto-set when respondent declares personal_economic_exposure = high in metadata",
+        "routingImpact": "Combined with acquisition_framing_contamination \u2192 CRITICAL tier"
+      },
+      {
+        "sourceRow": 10,
+        "flag": "observation_gap",
+        "description": "Respondent answered substantively but Direct Observation Gate was NO.",
+        "diagnosticWeight": "Moderate",
+        "triggers": "Auto-set when gate row = no AND substantive option selected (not E)",
+        "routingImpact": "\u2265 4 instances \u2192 reliability tier MODERATE"
+      },
+      {
+        "sourceRow": 11,
+        "flag": "memory_distance",
+        "description": "Respondent answered based on observation > 24 months old.",
+        "diagnosticWeight": "Low to moderate",
+        "triggers": "Detected when knowledgeLevel = pattern_based AND observation tenure marker indicates older memory",
+        "routingImpact": "\u2265 5 instances \u2192 reliability tier MODERATE"
+      },
+      {
+        "sourceRow": 12,
+        "flag": "peer_consistency_bias",
+        "description": "Respondent answer aligns with same-side peer answers but contradicts documentary evidence.",
+        "diagnosticWeight": "Moderate",
+        "triggers": "Detected via document divergence: peer-aligned answer differs from verified EvidenceItem",
+        "routingImpact": "\u2265 2 instances \u2192 reliability tier MODERATE"
+      },
+      {
+        "sourceRow": 13,
+        "flag": "role_inappropriateness",
+        "description": "Respondent answered questions outside their legitimate access scope (per schema sheet 14_RoleCoverageMatrix).",
+        "diagnosticWeight": "Moderate",
+        "triggers": "Auto-set when respondent role is below-tier for the question scope (e.g. line-level on Axis 1)",
+        "routingImpact": "\u2265 3 instances \u2192 reliability tier MODERATE"
+      },
+      {
+        "sourceRow": 14,
+        "flag": "contradiction_with_self",
+        "description": "Respondent gave self-contradictory answers within their own questionnaire.",
+        "diagnosticWeight": "High",
+        "triggers": "Detected by internal consistency check (e.g. gate=no but substantive option selected on same question)",
+        "routingImpact": "\u2265 1 instance \u2192 reliability tier MODERATE; \u2265 2 \u2192 HIGH; pattern across answers may invalidate the entire respondent set per methodology \u00a75"
+      },
+      {
+        "sourceRow": 16,
+        "flag": "RELIABILITY TIER \u2192 TRIAGE ACTION",
+        "description": "",
+        "diagnosticWeight": "",
+        "triggers": "",
+        "routingImpact": ""
+      },
+      {
+        "sourceRow": 17,
+        "flag": "Tier",
+        "description": "Trigger",
+        "diagnosticWeight": "Confidence Gate impact",
+        "triggers": "Triage routing",
+        "routingImpact": "Override permission"
+      },
+      {
+        "sourceRow": 18,
+        "flag": "LOW",
+        "description": "Total flag rate < 10% of answers AND no critical flag",
+        "diagnosticWeight": "No impact \u2014 confidence may reach high if other gates pass",
+        "triggers": "Standard analyst review",
+        "routingImpact": "No analyst override needed"
+      },
+      {
+        "sourceRow": 19,
+        "flag": "MODERATE",
+        "description": "Total flag rate 10-40% OR moderate-tier triggers met",
+        "diagnosticWeight": "Confidence capped at medium (per schema sheet 15)",
+        "triggers": "Analyst review with explicit reliability note in coverageNote",
+        "routingImpact": "Analyst may override to flag specific findings as low confidence"
+      },
+      {
+        "sourceRow": 20,
+        "flag": "HIGH",
+        "description": "Total flag rate > 40% OR high-tier triggers met OR single critical-tier instance",
+        "diagnosticWeight": "Confidence capped at low (per schema sheet 15)",
+        "triggers": "Analyst review with mandatory contradicted_by_pattern flag on affected findings",
+        "routingImpact": "Analyst SHOULD downgrade severity ratings on affected findings; analyst CAN issue follow_up_required label"
+      },
+      {
+        "sourceRow": 21,
+        "flag": "CRITICAL",
+        "description": "\u2265 2 critical-tier instances OR pattern across multiple respondents",
+        "diagnosticWeight": "Confidence cannot exceed cannot_determine on RiskOutput aggregate",
+        "triggers": "DO NOT issue paid output. Route to practitioner escalation. Findings may be issued as informational only with explicit reliability disclaimer.",
+        "routingImpact": "Senior analyst sign-off required to issue any paid finding from this engagement"
+      }
+    ],
+    "contradictionTiers": [
+      {
+        "sourceRow": 6,
+        "tier": "NONE",
+        "trigger": "0 open Contradiction records",
+        "severityComposition": "\u2014",
+        "triageRouting": "Standard analyst review path; no triage routing required from this dimension",
+        "perStAnalystMethodologyXlsx": "\u00a75 Contradiction Triage not invoked"
+      },
+      {
+        "sourceRow": 7,
+        "tier": "FEW",
+        "trigger": "1-2 open Contradiction records, all severity \u2264 medium",
+        "severityComposition": "medium or low",
+        "triageRouting": "Standard analyst review queue; analyst applies \u00a75 triage matrix per record",
+        "perStAnalystMethodologyXlsx": "\u00a75 standard procedure: open \u2192 under_review \u2192 resolved or escalated_to_finding"
+      },
+      {
+        "sourceRow": 8,
+        "tier": "MANY",
+        "trigger": "3-4 open Contradiction records OR \u2265 1 high-severity record",
+        "severityComposition": "mixed; at least one high",
+        "triageRouting": "Priority analyst review queue; senior analyst review preferred. Confidence Gate (\u00a73 Gate 3) impact applied.",
+        "perStAnalystMethodologyXlsx": "\u00a75 with senior analyst preference. Confidence capped at medium until contradictions resolved."
+      },
+      {
+        "sourceRow": 9,
+        "tier": "BLOCKING",
+        "trigger": "\u2265 5 open records OR \u2265 1 critical-severity record OR \u2463-B (pair-identification failure) state from Dual Respondent comparator",
+        "severityComposition": "critical present",
+        "triageRouting": "PRACTITIONER ESCALATION REQUIRED. Do not issue paid output until contradictions resolved.",
+        "perStAnalystMethodologyXlsx": "\u00a75 with mandatory practitioner consultation. \u2463-B: per documented project rule, additional respondents do NOT resolve \u2014 only practitioner can re-diagnose pair hypothesis."
+      },
+      {
+        "sourceRow": 11,
+        "tier": "COMBINED RELIABILITY + CONTRADICTION TIER MATRIX",
+        "trigger": "",
+        "severityComposition": "",
+        "triageRouting": "",
+        "perStAnalystMethodologyXlsx": ""
+      },
+      {
+        "sourceRow": 12,
+        "tier": "When BOTH dimensions activate, the combined tier is the more severe of the two \u2014 not an average. Examples:\n\n \u2022 Reliability tier MODERATE + Contradiction tier FEW \u2192 effective tier MODERATE\n \u2022 Reliability tier MODERATE + Contradiction tier MANY \u2192 effective tier MANY (higher of the two)\n \u2022 Reliability tier HIGH + Contradiction tier NONE \u2192 effective tier HIGH\n \u2022 Reliability tier CRITICAL + Contradiction tier ANY \u2192 effective tier CRITICAL/BLOCKING\n \u2022 Reliability tier ANY + Contradiction tier BLOCKING \u2192 effective tier BLOCKING\n\nRationale: a chain is as reliable as its weakest link. Per ST_Analyst_Methodology.xlsx \u00a76 Risk Output Composition Procedure: confidence is the MINIMUM across constituent assessments, not the average.",
+        "trigger": "",
+        "severityComposition": "",
+        "triageRouting": "",
+        "perStAnalystMethodologyXlsx": ""
+      }
+    ],
+    "instrumentSelection": [
+      {
+        "sourceRow": 5,
+        "trigger": "TRIGGER 1 (weak signal)",
+        "candidateSignalDirection": "Single signal direction (the candidate)",
+        "instrumentFileToServe": "[ENV]_Diagnostic_Questionnaire.xlsx for the single candidate",
+        "administeredTo": "8-15 mid-level managers + long-tenure employees",
+        "v31Note": "Single instrument"
+      },
+      {
+        "sourceRow": 6,
+        "trigger": "TRIGGER 2 (co-presence)",
+        "candidateSignalDirection": "Both candidate signal directions (ENV_1 and ENV_2)",
+        "instrumentFileToServe": "[ENV_1]_Diagnostic_Questionnaire.xlsx AND [ENV_2]_Diagnostic_Questionnaire.xlsx",
+        "administeredTo": "Same respondent group completes both (different sessions preferred)",
+        "v31Note": "Two instruments"
+      },
+      {
+        "sourceRow": 7,
+        "trigger": "TRIGGER 3 (partial)",
+        "candidateSignalDirection": "The partial candidate",
+        "instrumentFileToServe": "[ENV]_Diagnostic_Questionnaire.xlsx for the partial candidate",
+        "administeredTo": "8-15 respondents preferring P1=A/B P2=B/C",
+        "v31Note": "Single instrument"
+      },
+      {
+        "sourceRow": 8,
+        "trigger": "TRIGGER 4 (negative-only)",
+        "candidateSignalDirection": "UNKNOWN \u2014 no positive candidate",
+        "instrumentFileToServe": "DO NOT SERVE a 35-Q instrument",
+        "administeredTo": "\u2014",
+        "v31Note": "Route to practitioner escalation (sheet 7)"
+      },
+      {
+        "sourceRow": 9,
+        "trigger": "TRIGGER 5 (reliability saturation, v3.1 NEW)",
+        "candidateSignalDirection": "Any candidate",
+        "instrumentFileToServe": "DO NOT SERVE a 35-Q instrument \u2014 reliability is the limiting factor, not coverage",
+        "administeredTo": "\u2014",
+        "v31Note": "Route to analyst workspace (sheet 4 routing) OR practitioner"
+      },
+      {
+        "sourceRow": 10,
+        "trigger": "TRIGGER 6 (contradiction blocking, v3.1 NEW)",
+        "candidateSignalDirection": "Any candidate",
+        "instrumentFileToServe": "DO NOT SERVE a 35-Q instrument \u2014 contradictions are at diagnostic level, not instrument level",
+        "administeredTo": "\u2014",
+        "v31Note": "Route to analyst workspace via methodology \u00a75 OR practitioner for \u2463-B"
+      },
+      {
+        "sourceRow": 12,
+        "trigger": "LEVEL 2 DEEPENING PAIR MAP",
+        "candidateSignalDirection": "",
+        "instrumentFileToServe": "",
+        "administeredTo": "",
+        "v31Note": ""
+      },
+      {
+        "sourceRow": 13,
+        "trigger": "When the co-presence signal involves one of the four critical pairs from EDv2 Level 2 Deepening, the 35-Q instruments below are the targeted resolution. Use this table to confirm the right instrument(s).",
+        "candidateSignalDirection": "",
+        "instrumentFileToServe": "",
+        "administeredTo": "",
+        "v31Note": ""
+      },
+      {
+        "sourceRow": 15,
+        "trigger": "Pair",
+        "candidateSignalDirection": "Env A",
+        "instrumentFileToServe": "Env B",
+        "administeredTo": "Env A Instrument",
+        "v31Note": "Env B Instrument"
+      },
+      {
+        "sourceRow": 16,
+        "trigger": "Pair A (Power Racket vs Enforcer Network)",
+        "candidateSignalDirection": "STJ/STP",
+        "instrumentFileToServe": "STP/STJ",
+        "administeredTo": "STJ_STP_Diagnostic_Questionnaire.xlsx",
+        "v31Note": "STP_STJ_Diagnostic_Questionnaire.xlsx"
+      },
+      {
+        "sourceRow": 17,
+        "trigger": "Pair B (Hometown Network vs Franchise Machine)",
+        "candidateSignalDirection": "SFJ/SFP",
+        "instrumentFileToServe": "SFP/SFJ",
+        "administeredTo": "SFJ_SFP_Diagnostic_Questionnaire.xlsx",
+        "v31Note": "SFP_SFJ_Diagnostic_Questionnaire.xlsx"
+      },
+      {
+        "sourceRow": 18,
+        "trigger": "Pair C (Performance Arena vs Disruption Lab)",
+        "candidateSignalDirection": "NT/STJ",
+        "instrumentFileToServe": "NT/STP",
+        "administeredTo": "NT_STJ_Diagnostic_Questionnaire.xlsx",
+        "v31Note": "NT_STP_Diagnostic_Questionnaire.xlsx"
+      },
+      {
+        "sourceRow": 19,
+        "trigger": "Pair D (Mission Field vs Idea Lab)",
+        "candidateSignalDirection": "NF/SFJ",
+        "instrumentFileToServe": "NF/NT",
+        "administeredTo": "NF_SFJ_Diagnostic_Questionnaire.xlsx",
+        "v31Note": "NF_NT_Diagnostic_Questionnaire.xlsx"
+      },
+      {
+        "sourceRow": 20,
+        "trigger": "Pair E (Creative Commons standalone \u2014 v3.1 NEW)",
+        "candidateSignalDirection": "NF/SFP",
+        "instrumentFileToServe": "\u2014 (single env)",
+        "administeredTo": "NF_SFP_Diagnostic_Questionnaire.xlsx",
+        "v31Note": "No paired counterpart; serve solo when Q11-C signals NF/SFP and confirmation needed"
+      },
+      {
+        "sourceRow": 22,
+        "trigger": "NOTE ON INSTRUMENT FILENAMES",
+        "candidateSignalDirection": "",
+        "instrumentFileToServe": "",
+        "administeredTo": "",
+        "v31Note": ""
+      },
+      {
+        "sourceRow": 23,
+        "trigger": "The 35-Q instrument filenames use underscore form (e.g. SFP_SFJ_Diagnostic_Questionnaire.xlsx) because they were saved as filenames in pre-v3.1 work and the strict file-renaming rule prevents renaming. The environment code itself is canonical SFP/SFJ (slash form). Filenames with underscores reference instruments; environment codes in content always use slash form.",
+        "candidateSignalDirection": "",
+        "instrumentFileToServe": "",
+        "administeredTo": "",
+        "v31Note": ""
+      }
+    ],
+    "verificationOutput": [
+      {
+        "sourceRow": 1,
+        "cells": {
+          "1": "VERIFICATION OUTPUT \u00b7 How to read 35-Q instrument results \u00b7 v3.1"
+        }
+      },
+      {
+        "sourceRow": 2,
+        "cells": {
+          "1": "The 35-Q instruments produce signal patterns. v3.1 architectural change: the output is NOT a final environment label. It is a signal pattern that feeds analyst review. Per ST_Analyst_Methodology.xlsx \u00a71, no Layer 1 instrument (including 35-Q verification) names a final environment in a paid output."
+        }
+      },
+      {
+        "sourceRow": 4,
+        "cells": {
+          "1": "35-Q INSTRUMENT STRUCTURE (REFERENCE)"
+        }
+      },
+      {
+        "sourceRow": 5,
+        "cells": {
+          "1": "Field",
+          "2": "Value",
+          "3": "Notes",
+          "4": "\u2014"
+        }
+      },
+      {
+        "sourceRow": 6,
+        "cells": {
+          "1": "Question count",
+          "2": "35 questions \u00b7 7 thematic sections \u00b7 5 questions per section",
+          "3": "\u2014"
+        }
+      },
+      {
+        "sourceRow": 7,
+        "cells": {
+          "1": "Scoring",
+          "2": "25 points per section \u00b7 175 maximum per respondent",
+          "3": "Section-level granularity"
+        }
+      },
+      {
+        "sourceRow": 8,
+        "cells": {
+          "1": "Output (current pre-v3.1 form)",
+          "2": "EnvironmentFlag: CONFIRMED / PARTIAL / MIXED / NOT_[type]",
+          "3": "These instruments have not been v3.1-rebuilt. Their output is treated as a signal pattern in v3.1, not as a final environment lock."
+        }
+      },
+      {
+        "sourceRow": 9,
+        "cells": {
+          "1": "Respondent target",
+          "2": "8-15 mid-level managers + long-tenure employees",
+          "3": "Standard administration parameters"
+        }
+      },
+      {
+        "sourceRow": 10,
+        "cells": {
+          "1": "Administration time",
+          "2": "~35 minutes per respondent",
+          "3": "\u2014"
+        }
+      },
+      {
+        "sourceRow": 11,
+        "cells": {
+          "1": "Aggregation rule",
+          "2": "Score all respondents on same instrument. Composite signal = majority pattern across respondents. If split 4/4: request 2 additional respondents before classifying.",
+          "3": "\u2014"
+        }
+      },
+      {
+        "sourceRow": 12,
+        "cells": {
+          "1": "Source files (9 instruments)",
+          "2": "NF_NT, NF_SFJ, NF_SFP, NT_STJ, NT_STP, SFJ_SFP, SFP_SFJ, STJ_STP, STP_STJ",
+          "3": "Each as Diagnostic_Questionnaire (practitioner) and Branded_Questionnaire (client-facing)"
+        }
+      },
+      {
+        "sourceRow": 14,
+        "cells": {
+          "1": "RESULT INTERPRETATION (v3.1 ARCHITECTURE)"
+        }
+      },
+      {
+        "sourceRow": 15,
+        "cells": {
+          "1": "35-Q EnvironmentFlag",
+          "2": "v3.1 interpretation",
+          "3": "Triage action",
+          "4": "Methodology reference"
+        }
+      },
+      {
+        "sourceRow": 16,
+        "cells": {
+          "1": "CONFIRMED",
+          "2": "Verification candidate signal pattern is consistent with the [ENV] hypothesis. Not a final environment label.",
+          "3": "EXIT triage. Route to analyst workspace with confirmed candidate signal pattern. Analyst applies \u00a74 procedure to author findings.",
+          "4": "ST_Analyst_Methodology.xlsx \u00a74 (Analyst Assessment authoring) \u2014 analyst issues findings citing this signal pattern as supporting evidence."
+        }
+      },
+      {
+        "sourceRow": 17,
+        "cells": {
+          "1": "PARTIAL (after 35-Q)",
+          "2": "Verification did NOT fully confirm the candidate. Signal direction remains ambiguous.",
+          "3": "Check whether co-presence pair returned CONFIRMED on the OTHER candidate. If yes: that direction is the elimination outcome. If no: route to practitioner.",
+          "4": "\u00a74 evidenceLabel = follow_up_required permitted with explicit gap description."
+        }
+      },
+      {
+        "sourceRow": 18,
+        "cells": {
+          "1": "MIXED (after 35-Q)",
+          "2": "Two signal directions remain co-present after targeted verification. NOT a single primary.",
+          "3": "Do NOT attempt algorithmic resolution. Route to analyst workspace with both signal directions. Co-presence is itself diagnostic information.",
+          "4": "\u00a75 contradictionType = answer_vs_pattern. Co-presence is a Contradiction record candidate."
+        }
+      },
+      {
+        "sourceRow": 19,
+        "cells": {
+          "1": "NOT_[type] (after 35-Q)",
+          "2": "Verification eliminated the candidate. Candidate is NOT present in target organisation.",
+          "3": "If co-presence pair: serve OTHER candidate 35-Q instrument. If no other candidate: route to practitioner.",
+          "4": "\u00a74 elimination is itself a finding \u2014 issue an Analyst Assessment recording the elimination."
+        }
+      },
+      {
+        "sourceRow": 21,
+        "cells": {
+          "1": "CRITICAL: NO \"LOCK THE ENVIRONMENT\" EXIT"
+        }
+      },
+      {
+        "sourceRow": 22,
+        "cells": {
+          "1": "Source v1.0 had \"LOCK the environment code. Exit triage framework.\" This contradicts ST_Analyst_Methodology.xlsx \u00a71: no Layer 1 instrument may produce a final environment label as the deliverable. v3.1 replaces this with: \"EXIT triage. Route to analyst workspace with confirmed candidate signal pattern.\" The analyst then composes the final Risk Output records (per \u00a76 of methodology). Environment classifications inform the analyst; they are NOT the deliverable."
+        }
+      }
+    ],
+    "practitionerEscalation": [
+      {
+        "sourceRow": 1,
+        "cells": {
+          "1": "PRACTITIONER ESCALATION \u00b7 Conditions and brief contents \u00b7 v3.1"
+        }
+      },
+      {
+        "sourceRow": 2,
+        "cells": {
+          "1": "Triggered when algorithmic triage cannot resolve. Engine responsibility ends here; practitioner takes over via 90-minute qualitative session. v3.1 additions: \u2463-B pair-identification failure (per documented project rule), reliability tier CRITICAL, contradiction tier BLOCKING, evidence-machinery quality failures."
+        }
+      },
+      {
+        "sourceRow": 4,
+        "cells": {
+          "1": "ESCALATION TRIGGERS"
+        }
+      },
+      {
+        "sourceRow": 5,
+        "cells": {
+          "1": "Trigger",
+          "2": "Source",
+          "3": "Practitioner action"
+        }
+      },
+      {
+        "sourceRow": 6,
+        "cells": {
+          "1": "Both 35-Q returned PARTIAL",
+          "2": "Sheet 6 verification output",
+          "3": "90-min qualitative session. Practitioner reviews both 35-Q outputs + raw respondent answers + reliability flags."
+        }
+      },
+      {
+        "sourceRow": 7,
+        "cells": {
+          "1": "35-Q returned NOT_[ENV] and no other candidate exists",
+          "2": "Sheet 6 verification output (Trigger 4 originated)",
+          "3": "90-min session to identify what positive signal pattern (if any) is observable from documents and qualitative interview."
+        }
+      },
+      {
+        "sourceRow": 8,
+        "cells": {
+          "1": "35-Q returned MIXED with new third environment",
+          "2": "Sheet 6 verification output",
+          "3": "90-min session to determine whether the third environment is genuinely co-present or an instrument artifact."
+        }
+      },
+      {
+        "sourceRow": 9,
+        "cells": {
+          "1": "Accuracy check failed and client cannot supply corrective respondent",
+          "2": "Sheet 2 accuracy check",
+          "3": "90-min session. Practitioner determines whether engagement can proceed with available evidence or requires scope reduction."
+        }
+      },
+      {
+        "sourceRow": 10,
+        "cells": {
+          "1": "Client re-submitted Step 2-B 3+ times without resolving ambiguity",
+          "2": "Engagement metadata",
+          "3": "90-min session. Repeated re-administration producing same result is itself diagnostic \u2014 likely systematic response bias OR genuinely complex dual-environment structure."
+        }
+      },
+      {
+        "sourceRow": 11,
+        "cells": {
+          "1": "\u2463-B (pair-identification failure) from Dual Respondent comparator (v3.1 NEW)",
+          "2": "ST_Dual_Respondent_Axis_Comparison_v1.xlsx sheet 5",
+          "3": "Per documented project rule: \u2463-B is irresolvable by additional respondents. Only practitioner can re-diagnose the pair hypothesis. Adding R3 does NOT resolve."
+        }
+      },
+      {
+        "sourceRow": 12,
+        "cells": {
+          "1": "Reliability tier CRITICAL (v3.1 NEW)",
+          "2": "Sheet 3 reliability-flag count",
+          "3": "90-min session before issuing any paid output. Practitioner determines whether engagement is salvageable or requires rescoping."
+        }
+      },
+      {
+        "sourceRow": 13,
+        "cells": {
+          "1": "Contradiction tier BLOCKING (v3.1 NEW)",
+          "2": "Sheet 4 contradiction count",
+          "3": "90-min session. Practitioner applies methodology \u00a75 with full evidence access and context the engine cannot synthesise."
+        }
+      },
+      {
+        "sourceRow": 14,
+        "cells": {
+          "1": "Evidence-machinery quality < 0.4 across majority of answers (v3.1 NEW)",
+          "2": "Sheet 2 Check 6",
+          "3": "90-min session. Engagement may require additional respondents OR document-based evidence augmentation OR scope reduction."
+        }
+      },
+      {
+        "sourceRow": 16,
+        "cells": {
+          "1": "PRACTITIONER SESSION BRIEF CONTENTS"
+        }
+      },
+      {
+        "sourceRow": 17,
+        "cells": {
+          "1": "Brief item",
+          "2": "Source",
+          "3": "v3.1 update"
+        }
+      },
+      {
+        "sourceRow": 18,
+        "cells": {
+          "1": "22-Q EDv2 result file",
+          "2": "Completed ST_Environment_Diagnostic_v2.xlsx with 7_Evidence_Pattern_Output sheet intact",
+          "3": "v3.1: new sheet name 3_Level_1_Screening + 4_Level_2_Deepening; new evidence-machinery columns"
+        }
+      },
+      {
+        "sourceRow": 19,
+        "cells": {
+          "1": "AEM/TSAM result files",
+          "2": "Completed ST_Acquirer_Environment_Module.xlsx and/or ST_Target_Self_Assessment_Module.xlsx",
+          "3": "v3.1: include Q11 (NF/SFP discriminator)"
+        }
+      },
+      {
+        "sourceRow": 20,
+        "cells": {
+          "1": "Block 0 metadata",
+          "2": "P1 (role), P2 (tenure) for all respondents",
+          "3": "v3.1: extended metadata fields per Phase 1 rebuild (side, role code, seniority, access level, observation tenure, engagement depth)"
+        }
+      },
+      {
+        "sourceRow": 21,
+        "cells": {
+          "1": "35-Q result files (if any)",
+          "2": "All completed [ENV]_Diagnostic_Questionnaire.xlsx files",
+          "3": "No v3.1 change \u2014 instruments preserved in pre-v3.1 form"
+        }
+      },
+      {
+        "sourceRow": 22,
+        "cells": {
+          "1": "Accuracy check log",
+          "2": "Record of which checks ran and client responses",
+          "3": "v3.1: includes Checks 5 and 6 (gate pattern + evidence quality)"
+        }
+      },
+      {
+        "sourceRow": 23,
+        "cells": {
+          "1": "Candidate signal pattern",
+          "2": "Two highest weighted signal directions from EDv2 sheet 6_Layered_Scoring",
+          "3": "v3.1: NOT a \"primary environment\" label \u2014 a weighted pattern"
+        }
+      },
+      {
+        "sourceRow": 24,
+        "cells": {
+          "1": "Acquirer signal pattern",
+          "2": "From AEM v3.1 7_Layered_Scoring sheet (already confirmed or pending)",
+          "3": "v3.1: signal pattern, not ACQUIRER_ENV flag"
+        }
+      },
+      {
+        "sourceRow": 25,
+        "cells": {
+          "1": "Reliability flag list",
+          "2": "NEW: per-respondent + per-question flag tally per sheet 3 of this file",
+          "3": "v3.1 NEW"
+        }
+      },
+      {
+        "sourceRow": 26,
+        "cells": {
+          "1": "Contradiction record list",
+          "2": "NEW: open Contradiction records from Dual Respondent comparator + document divergence",
+          "3": "v3.1 NEW"
+        }
+      },
+      {
+        "sourceRow": 27,
+        "cells": {
+          "1": "Coverage warning status",
+          "2": "Whether thin-coverage environments (NT/STP, NF/NT, NF/SFP) are in primary or secondary signals",
+          "3": "v3.1: dedicated coverage-warning routing"
+        }
+      },
+      {
+        "sourceRow": 28,
+        "cells": {
+          "1": "Deal context",
+          "2": "Deal type, timeline, target leadership structure",
+          "3": "No v3.1 change"
+        }
+      }
+    ],
+    "decisionTree": [
+      {
+        "sourceRow": 5,
+        "step": "1",
+        "conditionAction": "Layer 1 questionnaires complete. Read weighted signal pattern from EDv2 sheet 6_Layered_Scoring + AEM/TSAM 7_Layered_Scoring. Read reliability flags from Answer records. Read open Contradiction records from comparator.",
+        "exitConditions": "\u2192 All quality gates pass + 0 contradictions: EXIT TRIAGE; route to analyst workspace for standard review.\n\u2192 Any trigger condition fires: ENTER TRIAGE (step 2 below)."
+      },
+      {
+        "sourceRow": 6,
+        "step": "2",
+        "conditionAction": "TRIAGE ENTERED. Identify which of six trigger conditions fired (sheet 1):\nTRIGGER 1 weak signal \u00b7 TRIGGER 2 co-presence \u00b7 TRIGGER 3 partial \u00b7 TRIGGER 4 negative-only \u00b7 TRIGGER 5 reliability saturation (v3.1) \u00b7 TRIGGER 6 contradiction blocking (v3.1)",
+        "exitConditions": "\u2192 TRIGGER 6 BLOCKING: Skip to Step 7 (practitioner escalation).\n\u2192 TRIGGER 4 NEGATIVE-ONLY: Skip to Step 7.\n\u2192 TRIGGER 5 SATURATION: Skip Step 4 (do not serve 35-Q); proceed to Step 6.\n\u2192 TRIGGERS 1, 2, 3: Proceed to Step 3."
+      },
+      {
+        "sourceRow": 7,
+        "step": "3",
+        "conditionAction": "Run Accuracy Check (sheet 2). All 6 checks: Tenure \u00b7 Role \u00b7 Event-anchored answers \u00b7 Multiple respondents \u00b7 Gate pattern (v3.1) \u00b7 Evidence-machinery quality (v3.1).",
+        "exitConditions": "\u2192 Checks 1/2/3/4 fail with corrective respondent available: send corrective message; re-run Layer 1; return to Step 1.\n\u2192 Check 5 OR Check 6 fail: skip Step 4 (instrument cannot fix); proceed to Step 6.\n\u2192 3+ checks fail: Step 7.\n\u2192 All pass: Step 4."
+      },
+      {
+        "sourceRow": 8,
+        "step": "4",
+        "conditionAction": "Select 35-Q instrument(s) per Sheet 5. Send client message. Await responses from 8-15 respondents.",
+        "exitConditions": "\u2192 Responses received: Step 5.\n\u2192 Client cannot provide 8-15 respondents: Step 7 with scope-reduction note."
+      },
+      {
+        "sourceRow": 9,
+        "step": "5",
+        "conditionAction": "35-Q responses received. Read aggregated EnvironmentFlag from instrument(s).",
+        "exitConditions": "\u2192 CONFIRMED: Step 6 with confirmed candidate signal pattern.\n\u2192 PARTIAL (one CONFIRMED, other PARTIAL): Step 6 with CONFIRMED pattern.\n\u2192 MIXED: Step 6 with co-present signal pattern.\n\u2192 NOT_[ENV] in co-presence pair: serve OTHER 35-Q (return to Step 4).\n\u2192 All NOT_[ENV] / both PARTIAL / MIXED with new third env: Step 7."
+      },
+      {
+        "sourceRow": 10,
+        "step": "6",
+        "conditionAction": "CANDIDATE SIGNAL PATTERN IDENTIFIED. Apply combined reliability + contradiction tier matrix (sheet 4).",
+        "exitConditions": "\u2192 Combined tier \u2264 MODERATE: route to standard analyst review queue per ST_Analyst_Methodology.xlsx \u00a74.\n\u2192 Combined tier MANY: priority analyst review, senior analyst preferred.\n\u2192 Combined tier HIGH/CRITICAL/BLOCKING: Step 7.\n\u2192 EXIT TRIAGE on routing."
+      },
+      {
+        "sourceRow": 11,
+        "step": "7",
+        "conditionAction": "PRACTITIONER ESCALATION (sheet 7). Compile practitioner brief. Send escalation message to client.",
+        "exitConditions": "\u2192 Engine role complete.\n\u2192 Practitioner schedules 90-minute session.\n\u2192 Practitioner output re-enters at analyst workspace as findings or scope adjustment."
+      },
+      {
+        "sourceRow": 12,
+        "step": "WHAT THIS DECISION TREE DOES NOT DO",
+        "conditionAction": "",
+        "exitConditions": ""
+      },
+      {
+        "sourceRow": 13,
+        "step": "This decision tree does NOT lock environment codes. It does NOT exit to \"environment code resolved\" or \"environment code locked.\" Its terminal states are either: (a) routing to analyst workspace with a signal pattern + reliability/contradiction tier annotations; or (b) routing to practitioner. The analyst or practitioner makes the final call. Per ST_Analyst_Methodology.xlsx \u00a71: no Layer 1 instrument names a final environment as the deliverable.",
+        "conditionAction": "",
+        "exitConditions": ""
+      }
+    ]
+  }
+}

@@ -1,0 +1,21 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[functions]
+  directory = "netlify/functions"
+
+[[redirects]]
+  from = "/api/seal-prediction"
+  to = "/.netlify/functions/seal-prediction"
+  status = 200
+
+[[redirects]]
+  from = "/api/export-prediction-ledger"
+  to = "/.netlify/functions/export-prediction-ledger"
+  status = 200
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

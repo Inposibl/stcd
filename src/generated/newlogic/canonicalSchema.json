@@ -1,0 +1,1333 @@
+{
+  "sourceWorkbook": "ST_Canonical_Schema.xlsx",
+  "sides": [
+    {
+      "sourceRow": 4,
+      "code": "acquirer",
+      "label": "Acquirer",
+      "description": "Buy-side principal organisation. Deal lead, integration lead, HR/People lead, board observer, deal partner.",
+      "overrideNotes": "Acquirer answers about the target are observer-evidence, not self-assessment."
+    },
+    {
+      "sourceRow": 5,
+      "code": "target",
+      "label": "Target",
+      "description": "Sell-side principal organisation. CEO/founder, senior leadership, key talent.",
+      "overrideNotes": "Target answers about own organisation are self-assessment. See sheet 16 for override rules."
+    },
+    {
+      "sourceRow": 6,
+      "code": "advisor",
+      "label": "Advisor",
+      "description": "External professional advisor: investment bank, legal counsel, consulting firm, accountant.",
+      "overrideNotes": "Advisor evidence weighted as second-hand unless documented in working files."
+    },
+    {
+      "sourceRow": 7,
+      "code": "board",
+      "label": "Board",
+      "description": "Board observer, non-executive director, operating partner with board mandate.",
+      "overrideNotes": "Board evidence treated as direct observation only when documented in board materials."
+    },
+    {
+      "sourceRow": 8,
+      "code": "external",
+      "label": "External",
+      "description": "External party with structural visibility: prior acquirer, departed senior employee, regulator, key customer.",
+      "overrideNotes": "External evidence requires documentary corroboration to exceed confidence: low."
+    },
+    {
+      "sourceRow": 9,
+      "code": "other",
+      "label": "Other",
+      "description": "Any role not covered above. Free-text role description required.",
+      "overrideNotes": "Default treatment: confidence: low until role-specific weighting is set."
+    }
+  ],
+  "roles": [
+    {
+      "sourceRow": 4,
+      "side": "acquirer",
+      "roleCode": "deal_lead",
+      "roleLabel": "Deal Lead / Originator",
+      "legitimateAccessScope": "Strategic rationale, valuation, deal structure, target leadership relationship at owner level",
+      "typicalSeniority": "Partner / MD / Principal"
+    },
+    {
+      "sourceRow": 5,
+      "side": "acquirer",
+      "roleCode": "integration_lead",
+      "roleLabel": "Integration Lead",
+      "legitimateAccessScope": "Day-1, Day-100, operating-model design, governance migration, decision rights",
+      "typicalSeniority": "VP / Director / Operating Partner"
+    },
+    {
+      "sourceRow": 6,
+      "side": "acquirer",
+      "roleCode": "people_lead",
+      "roleLabel": "HR / People / Talent Lead",
+      "legitimateAccessScope": "Retention package design, role-mapping, performance system migration, exit planning",
+      "typicalSeniority": "CHRO / VP People / Senior HR"
+    },
+    {
+      "sourceRow": 7,
+      "side": "acquirer",
+      "roleCode": "commercial_lead",
+      "roleLabel": "Commercial / Strategy Lead",
+      "legitimateAccessScope": "Revenue synergy, customer migration, market overlap, pricing harmonisation",
+      "typicalSeniority": "VP Strategy / Commercial Director"
+    },
+    {
+      "sourceRow": 8,
+      "side": "acquirer",
+      "roleCode": "finance_lead",
+      "roleLabel": "Finance / Diligence Lead",
+      "legitimateAccessScope": "Financial diligence, working capital, accounting policy migration, control environment",
+      "typicalSeniority": "CFO / VP Finance / Diligence Partner"
+    },
+    {
+      "sourceRow": 9,
+      "side": "acquirer",
+      "roleCode": "legal_lead",
+      "roleLabel": "Legal / Compliance Lead",
+      "legitimateAccessScope": "Reps and warranties, employment contracts, regulatory clearance, governance materials",
+      "typicalSeniority": "GC / VP Legal / External Counsel"
+    },
+    {
+      "sourceRow": 10,
+      "side": "acquirer",
+      "roleCode": "board_observer",
+      "roleLabel": "Board Observer / Operating Partner",
+      "legitimateAccessScope": "Board-level rationale, strategic governance, post-close oversight design",
+      "typicalSeniority": "NED / Operating Partner"
+    },
+    {
+      "sourceRow": 11,
+      "side": "target",
+      "roleCode": "ceo_founder",
+      "roleLabel": "CEO / Founder / Managing Director",
+      "legitimateAccessScope": "Strategic intent, owner-level commitments, autonomy negotiation, key-person dependencies",
+      "typicalSeniority": "CEO / Founder / MD"
+    },
+    {
+      "sourceRow": 12,
+      "side": "target",
+      "roleCode": "senior_leader",
+      "roleLabel": "Senior Leadership Team Member",
+      "legitimateAccessScope": "Functional operating reality, political dynamics, team-level continuity",
+      "typicalSeniority": "C-suite / SVP / EVP"
+    },
+    {
+      "sourceRow": 13,
+      "side": "target",
+      "roleCode": "key_talent",
+      "roleLabel": "Key Talent / Pivotal Operator",
+      "legitimateAccessScope": "Tacit operational knowledge, customer/IP dependencies, replacement difficulty",
+      "typicalSeniority": "Senior IC / Director"
+    },
+    {
+      "sourceRow": 14,
+      "side": "target",
+      "roleCode": "people_function",
+      "roleLabel": "Target HR / People Lead",
+      "legitimateAccessScope": "Compensation history, performance system in use, retention risks, cultural narrative",
+      "typicalSeniority": "CHRO / VP People"
+    },
+    {
+      "sourceRow": 15,
+      "side": "target",
+      "roleCode": "finance_function",
+      "roleLabel": "Target Finance Lead",
+      "legitimateAccessScope": "Financial controls, accounting practice, governance compliance, reporting cadence",
+      "typicalSeniority": "CFO / VP Finance"
+    },
+    {
+      "sourceRow": 16,
+      "side": "advisor",
+      "roleCode": "lead_banker",
+      "roleLabel": "Lead Investment Banker",
+      "legitimateAccessScope": "Process design, market read, competing-bidder dynamics, pricing context",
+      "typicalSeniority": "MD / Director"
+    },
+    {
+      "sourceRow": 17,
+      "side": "advisor",
+      "roleCode": "legal_counsel",
+      "roleLabel": "Lead Legal Counsel (deal)",
+      "legitimateAccessScope": "Documentary trail, dispute history, structural risk areas, regulatory exposure",
+      "typicalSeniority": "Partner / Senior Associate"
+    },
+    {
+      "sourceRow": 18,
+      "side": "advisor",
+      "roleCode": "consultant",
+      "roleLabel": "Diligence Consultant",
+      "legitimateAccessScope": "Specific workstream evidence: commercial, operational, technology, HR diligence",
+      "typicalSeniority": "Engagement Partner / Manager"
+    },
+    {
+      "sourceRow": 19,
+      "side": "board",
+      "roleCode": "ned",
+      "roleLabel": "Non-Executive Director (target or acquirer)",
+      "legitimateAccessScope": "Board-level visibility into governance, strategic decisions, leadership performance",
+      "typicalSeniority": "NED"
+    },
+    {
+      "sourceRow": 20,
+      "side": "board",
+      "roleCode": "operating_partner",
+      "roleLabel": "Operating Partner / Sponsor",
+      "legitimateAccessScope": "Sponsor-level pattern recognition across portfolio, integration playbook authority",
+      "typicalSeniority": "Operating Partner / Senior Advisor"
+    },
+    {
+      "sourceRow": 21,
+      "side": "external",
+      "roleCode": "departed_senior",
+      "roleLabel": "Departed Senior Employee",
+      "legitimateAccessScope": "Historical operating reality, departure mechanism, retained-employee comparison",
+      "typicalSeniority": "Former C-suite / former VP"
+    },
+    {
+      "sourceRow": 22,
+      "side": "external",
+      "roleCode": "prior_acquirer",
+      "roleLabel": "Prior Acquirer (failed deal)",
+      "legitimateAccessScope": "Prior diligence findings, deal-process behaviour, governance precedent",
+      "typicalSeniority": "Variable"
+    },
+    {
+      "sourceRow": 23,
+      "side": "external",
+      "roleCode": "key_customer",
+      "roleLabel": "Key Customer / Strategic Partner",
+      "legitimateAccessScope": "Service-level reality, dependency dynamics, change-of-control behaviour",
+      "typicalSeniority": "Procurement / Partnership lead"
+    },
+    {
+      "sourceRow": 24,
+      "side": "other",
+      "roleCode": "unspecified",
+      "roleLabel": "Other / Unspecified",
+      "legitimateAccessScope": "Requires free-text role description and analyst review for access scoping",
+      "typicalSeniority": "Variable"
+    }
+  ],
+  "evidenceTypes": [
+    {
+      "sourceRow": 4,
+      "code": "direct_observation",
+      "label": "Direct Observation",
+      "definition": "Respondent personally observed the event in question, in their own role, in the relevant timeframe.",
+      "scoringWeight": "1.00",
+      "confidenceCeiling": "high"
+    },
+    {
+      "sourceRow": 5,
+      "code": "document_supported",
+      "label": "Document-Supported",
+      "definition": "Respondent's answer is corroborated by a specific named document referenced in the EvidenceItem table.",
+      "scoringWeight": "1.00",
+      "confidenceCeiling": "high"
+    },
+    {
+      "sourceRow": 6,
+      "code": "reported_by_others",
+      "label": "Reported by Others",
+      "definition": "Respondent learned the information from a colleague, subordinate, or peer rather than observing it directly.",
+      "scoringWeight": "0.55",
+      "confidenceCeiling": "medium"
+    },
+    {
+      "sourceRow": 7,
+      "code": "inference",
+      "label": "Inference",
+      "definition": "Respondent did not observe the event but is reasoning from related facts they did observe.",
+      "scoringWeight": "0.35",
+      "confidenceCeiling": "medium"
+    },
+    {
+      "sourceRow": 8,
+      "code": "hypothetical",
+      "label": "Hypothetical",
+      "definition": "No actual case exists. Respondent is describing what they expect would happen based on perceived organisational pattern.",
+      "scoringWeight": "0.20",
+      "confidenceCeiling": "low"
+    },
+    {
+      "sourceRow": 9,
+      "code": "unknown",
+      "label": "Unknown / Cannot Answer",
+      "definition": "Respondent explicitly cannot answer from any basis. Must NOT be coerced into a substantive choice.",
+      "scoringWeight": "0.00",
+      "confidenceCeiling": "cannot_determine"
+    },
+    {
+      "sourceRow": 11,
+      "code": "Hypothetical answers and unknown answers are NEVER aggregated into the primary environment score. They are stored for divergence-detection and missing-evidence analysis only.",
+      "label": "",
+      "definition": "",
+      "scoringWeight": "",
+      "confidenceCeiling": ""
+    },
+    {
+      "sourceRow": 12,
+      "code": "Document-supported answers carry the same nominal weight as direct observation, but only if the EvidenceItem is reviewed by an analyst and not contradicted by a more recent or higher-authority document.",
+      "label": "",
+      "definition": "",
+      "scoringWeight": "",
+      "confidenceCeiling": ""
+    }
+  ],
+  "knowledgeLevels": [
+    {
+      "sourceRow": 4,
+      "code": "first_hand",
+      "label": "First-Hand",
+      "definition": "Respondent was a participant or direct decision-maker in the event.",
+      "reliabilityMultiplier": "1.00"
+    },
+    {
+      "sourceRow": 5,
+      "code": "second_hand",
+      "label": "Second-Hand",
+      "definition": "Respondent was present in the same organisational context but did not participate in the specific decision.",
+      "reliabilityMultiplier": "0.70"
+    },
+    {
+      "sourceRow": 6,
+      "code": "document_based",
+      "label": "Document-Based",
+      "definition": "Respondent did not witness the event but has access to authoritative documentation of it.",
+      "reliabilityMultiplier": "0.85"
+    },
+    {
+      "sourceRow": 7,
+      "code": "pattern_based",
+      "label": "Pattern-Based",
+      "definition": "Respondent generalises from repeated similar events rather than describing a specific instance.",
+      "reliabilityMultiplier": "0.50"
+    },
+    {
+      "sourceRow": 8,
+      "code": "speculative",
+      "label": "Speculative",
+      "definition": "Respondent reasons about what might have happened or might happen.",
+      "reliabilityMultiplier": "0.20"
+    },
+    {
+      "sourceRow": 9,
+      "code": "not_known",
+      "label": "Not Known",
+      "definition": "Respondent has no basis for the answer. Use only with EvidenceType: unknown.",
+      "reliabilityMultiplier": "0.00"
+    }
+  ],
+  "confidenceLevels": [
+    {
+      "sourceRow": 4,
+      "code": "high",
+      "label": "High",
+      "definition": "Respondent is confident the answer accurately reflects the underlying reality.",
+      "compatibleEvidencetypes": "direct_observation, document_supported"
+    },
+    {
+      "sourceRow": 5,
+      "code": "medium",
+      "label": "Medium",
+      "definition": "Respondent is reasonably confident but acknowledges some uncertainty.",
+      "compatibleEvidencetypes": "direct_observation, document_supported, reported_by_others, inference"
+    },
+    {
+      "sourceRow": 6,
+      "code": "low",
+      "label": "Low",
+      "definition": "Respondent is uncertain. Answer is best available but not strongly held.",
+      "compatibleEvidencetypes": "reported_by_others, inference, hypothetical"
+    },
+    {
+      "sourceRow": 7,
+      "code": "cannot_determine",
+      "label": "Cannot Determine",
+      "definition": "Respondent has insufficient basis to assign confidence. Used with EvidenceType: unknown.",
+      "compatibleEvidencetypes": "unknown"
+    }
+  ],
+  "reliabilityFlags": [
+    {
+      "sourceRow": 4,
+      "code": "contradicted_by_respondent",
+      "label": "Contradicted by another respondent",
+      "triggerCondition": "A different respondent on the same side answered the same question with a materially different observation.",
+      "effectOnScoring": "Both answers downweighted by 0.5 until analyst resolves."
+    },
+    {
+      "sourceRow": 5,
+      "code": "contradicted_by_document",
+      "label": "Contradicted by document",
+      "triggerCondition": "A reviewed EvidenceItem materially contradicts the answer.",
+      "effectOnScoring": "Answer downweighted to 0.20; document evidence carries forward."
+    },
+    {
+      "sourceRow": 6,
+      "code": "socially_desirable",
+      "label": "Socially desirable response",
+      "triggerCondition": "Answer matches the most flattering organisational self-description for that question.",
+      "effectOnScoring": "Answer downweighted by 0.7; flagged for analyst review."
+    },
+    {
+      "sourceRow": 7,
+      "code": "evasive",
+      "label": "Evasive / non-answer",
+      "triggerCondition": "Respondent provided a meta-comment, scope objection, or generality without engaging the substantive question.",
+      "effectOnScoring": "Answer scored as unknown; flagged for analyst review."
+    },
+    {
+      "sourceRow": 8,
+      "code": "overgeneralized",
+      "label": "Overgeneralised",
+      "triggerCondition": "Respondent answered for the entire organisation when their access scope is narrower.",
+      "effectOnScoring": "Answer downweighted by 0.5; flagged for role-mismatch review."
+    },
+    {
+      "sourceRow": 9,
+      "code": "speaks_for_group_without_access",
+      "label": "Speaks for group without access",
+      "triggerCondition": "Respondent answered a question outside their legitimate access map (Sheet 2_Roles).",
+      "effectOnScoring": "Answer scored as inference at most, regardless of self-reported EvidenceType."
+    },
+    {
+      "sourceRow": 10,
+      "code": "hypothetical",
+      "label": "Hypothetical answer",
+      "triggerCondition": "No actual case exists; answer is about expected behaviour.",
+      "effectOnScoring": "Answer excluded from primary score; retained for divergence and missing-evidence analysis."
+    },
+    {
+      "sourceRow": 11,
+      "code": "structurally_unlikely",
+      "label": "Structurally unlikely event",
+      "triggerCondition": "Answer describes an event that the surrounding organisational structure makes formally improbable (e.g. senior accountability event in deflection-heavy environment).",
+      "effectOnScoring": "Answer flagged for analyst pattern-recognition review."
+    },
+    {
+      "sourceRow": 12,
+      "code": "no_direct_knowledge",
+      "label": "No direct knowledge",
+      "triggerCondition": "Respondent explicitly declared no direct observation or document basis.",
+      "effectOnScoring": "Answer excluded from primary score; preserved for coverage map."
+    }
+  ],
+  "recordSchemas": {
+    "answer": [
+      {
+        "sourceRow": 4,
+        "field": "id",
+        "type": "string (UUID)",
+        "required": "Required",
+        "description": "Globally unique identifier for this answer record.",
+        "referencesSheet": "\u2014"
+      },
+      {
+        "sourceRow": 5,
+        "field": "dealId",
+        "type": "string (UUID)",
+        "required": "Required",
+        "description": "Foreign key to the Deal record this answer belongs to.",
+        "referencesSheet": "\u2014"
+      },
+      {
+        "sourceRow": 6,
+        "field": "questionId",
+        "type": "string",
+        "required": "Required",
+        "description": "Stable identifier of the question, e.g. ACQ-Q1, TGT-OBS-Q5.",
+        "referencesSheet": "See per-questionnaire keys"
+      },
+      {
+        "sourceRow": 7,
+        "field": "respondentId",
+        "type": "string (UUID)",
+        "required": "Required",
+        "description": "Foreign key to the Respondent record.",
+        "referencesSheet": "8_Respondent_Record"
+      },
+      {
+        "sourceRow": 8,
+        "field": "selectedOption",
+        "type": "string (\"A\",\"B\",\"C\",\"D\",\"E\") | null",
+        "required": "Conditional",
+        "description": "Multiple-choice selection. Null permitted only when freeText is present.",
+        "referencesSheet": "\u2014"
+      },
+      {
+        "sourceRow": 9,
+        "field": "freeText",
+        "type": "string | null",
+        "required": "Conditional",
+        "description": "Open-text response. Required when no option is selected.",
+        "referencesSheet": "\u2014"
+      },
+      {
+        "sourceRow": 10,
+        "field": "directObservationGate",
+        "type": "enum: yes / no / document_supported",
+        "required": "Required",
+        "description": "Has the respondent personally observed this in the relevant timeframe? Set BEFORE seeing options.",
+        "referencesSheet": "\u2014"
+      },
+      {
+        "sourceRow": 11,
+        "field": "evidenceType",
+        "type": "enum",
+        "required": "Required",
+        "description": "How the answer was obtained.",
+        "referencesSheet": "3_EvidenceType"
+      },
+      {
+        "sourceRow": 12,
+        "field": "knowledgeLevel",
+        "type": "enum",
+        "required": "Required",
+        "description": "Respondent proximity to the underlying event.",
+        "referencesSheet": "4_KnowledgeLevel"
+      },
+      {
+        "sourceRow": 13,
+        "field": "confidence",
+        "type": "enum",
+        "required": "Required",
+        "description": "Self-rated certainty.",
+        "referencesSheet": "5_Confidence"
+      },
+      {
+        "sourceRow": 14,
+        "field": "reliabilityFlags",
+        "type": "enum[] (multi)",
+        "required": "Optional",
+        "description": "Zero or more reliability concerns. May be respondent-set, engine-set, or analyst-set.",
+        "referencesSheet": "6_ReliabilityFlags"
+      },
+      {
+        "sourceRow": 15,
+        "field": "observedRoles",
+        "type": "string[] | null",
+        "required": "Optional",
+        "description": "When the question is about specific roles (e.g. \"leadership team\"), list which roles the respondent actually observed.",
+        "referencesSheet": "2_Roles"
+      },
+      {
+        "sourceRow": 16,
+        "field": "evidenceItemIds",
+        "type": "string[] | null",
+        "required": "Optional",
+        "description": "List of EvidenceItem references that corroborate this answer.",
+        "referencesSheet": "9_EvidenceItem_Record"
+      },
+      {
+        "sourceRow": 17,
+        "field": "createdAt",
+        "type": "ISO 8601 datetime",
+        "required": "Required",
+        "description": "Server-side timestamp of answer submission.",
+        "referencesSheet": "\u2014"
+      },
+      {
+        "sourceRow": 18,
+        "field": "updatedAt",
+        "type": "ISO 8601 datetime | null",
+        "required": "Optional",
+        "description": "Set if the answer was revised (e.g. respondent returned to amend).",
+        "referencesSheet": "\u2014"
+      },
+      {
+        "sourceRow": 19,
+        "field": "analystOverride",
+        "type": "enum: none / downweight / disregard / corroborate",
+        "required": "Optional",
+        "description": "Set by analyst during review. Tracks whether the analyst has applied special treatment to this answer.",
+        "referencesSheet": "10_AnalystAssessment"
+      },
+      {
+        "sourceRow": 20,
+        "field": "analystNote",
+        "type": "string | null",
+        "required": "Optional",
+        "description": "Analyst free-text note attached to this answer.",
+        "referencesSheet": "\u2014"
+      },
+      {
+        "sourceRow": 22,
+        "field": "Validation rule (engine-enforced): if directObservationGate = no, evidenceType must be one of {reported_by_others, inference, hypothetical, unknown}. directObservationGate = yes does NOT permit unknown.",
+        "type": "",
+        "required": "",
+        "description": "",
+        "referencesSheet": ""
+      },
+      {
+        "sourceRow": 23,
+        "field": "Validation rule (engine-enforced): if evidenceType = unknown, confidence must be cannot_determine, knowledgeLevel must be not_known, and selectedOption must be E (\"I cannot answer from direct observation\").",
+        "type": "",
+        "required": "",
+        "description": "",
+        "referencesSheet": ""
+      }
+    ],
+    "respondent": [
+      {
+        "sourceRow": 4,
+        "field": "id",
+        "type": "string (UUID)",
+        "required": "Required",
+        "description": "Globally unique identifier.",
+        "referencesSheet": "\u2014"
+      },
+      {
+        "sourceRow": 5,
+        "field": "dealId",
+        "type": "string (UUID)",
+        "required": "Required",
+        "description": "Deal this respondent is participating in.",
+        "referencesSheet": "\u2014"
+      },
+      {
+        "sourceRow": 6,
+        "field": "side",
+        "type": "enum",
+        "required": "Required",
+        "description": "Which side of the deal.",
+        "referencesSheet": "1_Sides"
+      },
+      {
+        "sourceRow": 7,
+        "field": "roleCode",
+        "type": "enum",
+        "required": "Required",
+        "description": "Functional role within their side.",
+        "referencesSheet": "2_Roles"
+      },
+      {
+        "sourceRow": 8,
+        "field": "roleFreeText",
+        "type": "string | null",
+        "required": "Conditional",
+        "description": "Required when roleCode = unspecified.",
+        "referencesSheet": "\u2014"
+      },
+      {
+        "sourceRow": 9,
+        "field": "seniorityLevel",
+        "type": "enum: c_suite / vp / director / manager / ic / external",
+        "required": "Required",
+        "description": "Decision authority and observation altitude.",
+        "referencesSheet": "\u2014"
+      },
+      {
+        "sourceRow": 10,
+        "field": "accessLevel",
+        "type": "enum: full / functional / limited / external_only",
+        "required": "Required",
+        "description": "Scope of legitimate organisational visibility.",
+        "referencesSheet": "\u2014"
+      },
+      {
+        "sourceRow": 11,
+        "field": "observationTenureMonths",
+        "type": "integer",
+        "required": "Required",
+        "description": "How long the respondent has occupied their current role. < 18 months downweighted per ST methodology.",
+        "referencesSheet": "\u2014"
+      },
+      {
+        "sourceRow": 12,
+        "field": "engagementDepth",
+        "type": "enum: deal_team_member / interview_only / written_only",
+        "required": "Required",
+        "description": "How this respondent engaged with the diagnostic.",
+        "referencesSheet": "\u2014"
+      },
+      {
+        "sourceRow": 13,
+        "field": "priorRelationshipToOtherSide",
+        "type": "enum: none / professional / personal / family / financial",
+        "required": "Required",
+        "description": "Disclosable conflict-of-interest information.",
+        "referencesSheet": "\u2014"
+      },
+      {
+        "sourceRow": 14,
+        "field": "createdAt",
+        "type": "ISO 8601 datetime",
+        "required": "Required",
+        "description": "Server-side timestamp of profile creation.",
+        "referencesSheet": "\u2014"
+      },
+      {
+        "sourceRow": 15,
+        "field": "analystVerified",
+        "type": "boolean",
+        "required": "Required",
+        "description": "Has the analyst reviewed and verified this respondent's role and access scope.",
+        "referencesSheet": "10_AnalystAssessment"
+      }
+    ],
+    "evidenceItem": [
+      {
+        "sourceRow": 4,
+        "field": "id",
+        "type": "string (UUID)",
+        "required": "Required",
+        "description": "Globally unique identifier.",
+        "referencesSheet": "\u2014"
+      },
+      {
+        "sourceRow": 5,
+        "field": "dealId",
+        "type": "string (UUID)",
+        "required": "Required",
+        "description": "Deal this evidence belongs to.",
+        "referencesSheet": "\u2014"
+      },
+      {
+        "sourceRow": 6,
+        "field": "itemType",
+        "type": "enum: document / interview / dataroom_extract / public_record / other",
+        "required": "Required",
+        "description": "Category of evidence.",
+        "referencesSheet": "\u2014"
+      },
+      {
+        "sourceRow": 7,
+        "field": "title",
+        "type": "string",
+        "required": "Required",
+        "description": "Human-readable title.",
+        "referencesSheet": "\u2014"
+      },
+      {
+        "sourceRow": 8,
+        "field": "sourceParty",
+        "type": "enum (Side)",
+        "required": "Required",
+        "description": "Which side produced this item.",
+        "referencesSheet": "1_Sides"
+      },
+      {
+        "sourceRow": 9,
+        "field": "producedDate",
+        "type": "ISO 8601 date | null",
+        "required": "Optional",
+        "description": "Date the item was produced. Null if unknown.",
+        "referencesSheet": "\u2014"
+      },
+      {
+        "sourceRow": 10,
+        "field": "relevantQuestionIds",
+        "type": "string[]",
+        "required": "Optional",
+        "description": "Which questionnaire questions this item bears on.",
+        "referencesSheet": "\u2014"
+      },
+      {
+        "sourceRow": 11,
+        "field": "relevantRiskCategories",
+        "type": "string[]",
+        "required": "Optional",
+        "description": "Which risk categories this item bears on.",
+        "referencesSheet": "13_RiskCategories"
+      },
+      {
+        "sourceRow": 12,
+        "field": "storageReference",
+        "type": "string",
+        "required": "Required",
+        "description": "URI or dataroom path where the item is stored. Sensitive: encrypted at rest.",
+        "referencesSheet": "\u2014"
+      },
+      {
+        "sourceRow": 13,
+        "field": "analystExtract",
+        "type": "string | null",
+        "required": "Optional",
+        "description": "Analyst-curated summary of the evidentially relevant content.",
+        "referencesSheet": "\u2014"
+      },
+      {
+        "sourceRow": 14,
+        "field": "contradictsAnswerIds",
+        "type": "string[] | null",
+        "required": "Optional",
+        "description": "Answer IDs this item contradicts.",
+        "referencesSheet": "7_Answer_Record"
+      },
+      {
+        "sourceRow": 15,
+        "field": "corroboratesAnswerIds",
+        "type": "string[] | null",
+        "required": "Optional",
+        "description": "Answer IDs this item corroborates.",
+        "referencesSheet": "7_Answer_Record"
+      },
+      {
+        "sourceRow": 16,
+        "field": "reviewStatus",
+        "type": "enum: unreviewed / under_review / verified / disputed",
+        "required": "Required",
+        "description": "Analyst review state.",
+        "referencesSheet": "10_AnalystAssessment"
+      },
+      {
+        "sourceRow": 17,
+        "field": "createdAt",
+        "type": "ISO 8601 datetime",
+        "required": "Required",
+        "description": "Server-side timestamp.",
+        "referencesSheet": "\u2014"
+      }
+    ],
+    "analystAssessment": [
+      {
+        "sourceRow": 4,
+        "field": "id",
+        "type": "string (UUID)",
+        "required": "Required",
+        "description": "Globally unique identifier.",
+        "referencesSheet": "\u2014"
+      },
+      {
+        "sourceRow": 5,
+        "field": "dealId",
+        "type": "string (UUID)",
+        "required": "Required",
+        "description": "Deal this assessment belongs to.",
+        "referencesSheet": "\u2014"
+      },
+      {
+        "sourceRow": 6,
+        "field": "analystId",
+        "type": "string (UUID)",
+        "required": "Required",
+        "description": "Analyst who authored the assessment.",
+        "referencesSheet": "\u2014"
+      },
+      {
+        "sourceRow": 7,
+        "field": "riskCategory",
+        "type": "enum",
+        "required": "Required",
+        "description": "Which risk category this assessment addresses.",
+        "referencesSheet": "13_RiskCategories"
+      },
+      {
+        "sourceRow": 8,
+        "field": "findingTitle",
+        "type": "string",
+        "required": "Required",
+        "description": "Short headline of the finding.",
+        "referencesSheet": "\u2014"
+      },
+      {
+        "sourceRow": 9,
+        "field": "findingNarrative",
+        "type": "string",
+        "required": "Required",
+        "description": "Full evidentially-supported narrative.",
+        "referencesSheet": "\u2014"
+      },
+      {
+        "sourceRow": 10,
+        "field": "supportingAnswerIds",
+        "type": "string[]",
+        "required": "Optional",
+        "description": "Answers that support the finding.",
+        "referencesSheet": "7_Answer_Record"
+      },
+      {
+        "sourceRow": 11,
+        "field": "supportingEvidenceItemIds",
+        "type": "string[]",
+        "required": "Optional",
+        "description": "Evidence items that support the finding.",
+        "referencesSheet": "9_EvidenceItem_Record"
+      },
+      {
+        "sourceRow": 12,
+        "field": "contradictionIds",
+        "type": "string[]",
+        "required": "Optional",
+        "description": "Contradictions the analyst is interpreting.",
+        "referencesSheet": "11_Contradiction_Record"
+      },
+      {
+        "sourceRow": 13,
+        "field": "evidenceLabel",
+        "type": "enum: directly_observed / document_supported / inferred / unknown / contradicted / follow_up_required",
+        "required": "Required",
+        "description": "Per the brief's section 16: every finding must label the evidentiary basis.",
+        "referencesSheet": "3_EvidenceType"
+      },
+      {
+        "sourceRow": 14,
+        "field": "severity",
+        "type": "enum: critical / high / medium / low / informational",
+        "required": "Required",
+        "description": "Analyst-assigned severity.",
+        "referencesSheet": "\u2014"
+      },
+      {
+        "sourceRow": 15,
+        "field": "confidenceLevel",
+        "type": "enum: high / medium / low",
+        "required": "Required",
+        "description": "Analyst confidence in the finding.",
+        "referencesSheet": "5_Confidence"
+      },
+      {
+        "sourceRow": 16,
+        "field": "preCloseAction",
+        "type": "string | null",
+        "required": "Optional",
+        "description": "Recommended action before deal close.",
+        "referencesSheet": "\u2014"
+      },
+      {
+        "sourceRow": 17,
+        "field": "postCloseAction",
+        "type": "string | null",
+        "required": "Optional",
+        "description": "Recommended action during integration.",
+        "referencesSheet": "\u2014"
+      },
+      {
+        "sourceRow": 18,
+        "field": "approvalStatus",
+        "type": "enum: draft / under_review / approved / rejected",
+        "required": "Required",
+        "description": "Workflow state.",
+        "referencesSheet": "\u2014"
+      },
+      {
+        "sourceRow": 19,
+        "field": "approvedBy",
+        "type": "string (UUID) | null",
+        "required": "Conditional",
+        "description": "Senior analyst who approved (required if approvalStatus = approved).",
+        "referencesSheet": "\u2014"
+      },
+      {
+        "sourceRow": 20,
+        "field": "createdAt",
+        "type": "ISO 8601 datetime",
+        "required": "Required",
+        "description": "Server-side timestamp.",
+        "referencesSheet": "\u2014"
+      },
+      {
+        "sourceRow": 21,
+        "field": "approvedAt",
+        "type": "ISO 8601 datetime | null",
+        "required": "Conditional",
+        "description": "Set when approvalStatus moves to approved.",
+        "referencesSheet": "\u2014"
+      }
+    ],
+    "contradiction": [
+      {
+        "sourceRow": 4,
+        "field": "id",
+        "type": "string (UUID)",
+        "required": "Required",
+        "description": "Globally unique identifier.",
+        "referencesSheet": "\u2014"
+      },
+      {
+        "sourceRow": 5,
+        "field": "dealId",
+        "type": "string (UUID)",
+        "required": "Required",
+        "description": "Deal this contradiction belongs to.",
+        "referencesSheet": "\u2014"
+      },
+      {
+        "sourceRow": 6,
+        "field": "contradictionType",
+        "type": "enum: cross_respondent_same_side / cross_side / answer_vs_document / answer_vs_pattern / self_contradiction",
+        "required": "Required",
+        "description": "Structural type of the contradiction.",
+        "referencesSheet": "\u2014"
+      },
+      {
+        "sourceRow": 7,
+        "field": "answerIds",
+        "type": "string[]",
+        "required": "Required",
+        "description": "The answers in tension.",
+        "referencesSheet": "7_Answer_Record"
+      },
+      {
+        "sourceRow": 8,
+        "field": "evidenceItemIds",
+        "type": "string[] | null",
+        "required": "Optional",
+        "description": "Documents in tension with the answers.",
+        "referencesSheet": "9_EvidenceItem_Record"
+      },
+      {
+        "sourceRow": 9,
+        "field": "detectionSource",
+        "type": "enum: engine / analyst / respondent_self_report",
+        "required": "Required",
+        "description": "How the contradiction was detected.",
+        "referencesSheet": "\u2014"
+      },
+      {
+        "sourceRow": 10,
+        "field": "severity",
+        "type": "enum: critical / high / medium / low / informational",
+        "required": "Required",
+        "description": "Severity for triage and reporting.",
+        "referencesSheet": "\u2014"
+      },
+      {
+        "sourceRow": 11,
+        "field": "reviewStatus",
+        "type": "enum: open / under_review / resolved / escalated_to_finding",
+        "required": "Required",
+        "description": "Workflow state.",
+        "referencesSheet": "\u2014"
+      },
+      {
+        "sourceRow": 12,
+        "field": "analystResolution",
+        "type": "string | null",
+        "required": "Optional",
+        "description": "Analyst-supplied interpretation.",
+        "referencesSheet": "10_AnalystAssessment"
+      },
+      {
+        "sourceRow": 13,
+        "field": "escalatedToAssessmentId",
+        "type": "string (UUID) | null",
+        "required": "Optional",
+        "description": "If resolution = escalated_to_finding, points to the AnalystAssessment that contains the finding.",
+        "referencesSheet": "10_AnalystAssessment"
+      },
+      {
+        "sourceRow": 14,
+        "field": "createdAt",
+        "type": "ISO 8601 datetime",
+        "required": "Required",
+        "description": "Server-side timestamp.",
+        "referencesSheet": "\u2014"
+      },
+      {
+        "sourceRow": 15,
+        "field": "resolvedAt",
+        "type": "ISO 8601 datetime | null",
+        "required": "Optional",
+        "description": "Set when reviewStatus moves to resolved or escalated.",
+        "referencesSheet": "\u2014"
+      }
+    ],
+    "riskOutput": [
+      {
+        "sourceRow": 4,
+        "field": "id",
+        "type": "string (UUID)",
+        "required": "Required",
+        "description": "Globally unique identifier."
+      },
+      {
+        "sourceRow": 5,
+        "field": "dealId",
+        "type": "string (UUID)",
+        "required": "Required",
+        "description": "Deal this output belongs to."
+      },
+      {
+        "sourceRow": 6,
+        "field": "riskCategory",
+        "type": "enum",
+        "required": "Required",
+        "description": "See sheet 13_RiskCategories for the canonical list."
+      },
+      {
+        "sourceRow": 7,
+        "field": "overallSeverity",
+        "type": "enum: critical / high / medium / low / informational",
+        "required": "Required",
+        "description": "Composite severity for this risk category."
+      },
+      {
+        "sourceRow": 8,
+        "field": "overallConfidence",
+        "type": "enum: high / medium / low / cannot_determine",
+        "required": "Required",
+        "description": "Composite confidence \u2014 capped by sheet 15_ConfidenceGate rules."
+      },
+      {
+        "sourceRow": 9,
+        "field": "compositeAssessmentIds",
+        "type": "string[]",
+        "required": "Required",
+        "description": "Approved AnalystAssessments composing this output."
+      },
+      {
+        "sourceRow": 10,
+        "field": "coverageNote",
+        "type": "string",
+        "required": "Required",
+        "description": "Coverage limitations: which roles answered, which evidence types dominate."
+      },
+      {
+        "sourceRow": 11,
+        "field": "preCloseActions",
+        "type": "string[]",
+        "required": "Optional",
+        "description": "Aggregated pre-close recommendations from constituent assessments."
+      },
+      {
+        "sourceRow": 12,
+        "field": "postCloseActions",
+        "type": "string[]",
+        "required": "Optional",
+        "description": "Aggregated post-close recommendations."
+      },
+      {
+        "sourceRow": 13,
+        "field": "months_6_18_failureProbability",
+        "type": "enum: very_high / high / medium / low / very_low / cannot_determine",
+        "required": "Required",
+        "description": "Per brief section 13: dedicated 6\u201318 month failure-probability output line."
+      },
+      {
+        "sourceRow": 14,
+        "field": "createdAt",
+        "type": "ISO 8601 datetime",
+        "required": "Required",
+        "description": "Server-side timestamp."
+      },
+      {
+        "sourceRow": 15,
+        "field": "finalReportSection",
+        "type": "string",
+        "required": "Required",
+        "description": "Which final-report section this risk output appears in. See ST_B_Single_Output_Template_v1 (Phase 3 rebuild)."
+      }
+    ]
+  },
+  "riskCategories": [
+    {
+      "sourceRow": 4,
+      "code": "integration_fracture",
+      "label": "Integration Fracture Risk",
+      "definition": "Probability the integration produces a structural break in the combined organisation: leadership exits, parallel operations, governance impasse.",
+      "primarySignalSources": "Acquirer authority mechanism + Target acquiescence pattern + Cross-side divergence."
+    },
+    {
+      "sourceRow": 5,
+      "code": "leadership_accountability",
+      "label": "Leadership Accountability Risk",
+      "definition": "Probability senior actors evade accountability post-close, creating misalignment between formal commitments and observed behaviour.",
+      "primarySignalSources": "Accountability symmetry questions + observed responsibility-shedding pattern."
+    },
+    {
+      "sourceRow": 6,
+      "code": "key_person_retention",
+      "label": "Key-Person Retention Risk",
+      "definition": "Probability that pivotal target operators exit within the 18-month window post-close.",
+      "primarySignalSources": "Retention mechanism questions + departure-mechanism precedents + compensation lock-in evidence."
+    },
+    {
+      "sourceRow": 7,
+      "code": "founder_dependency",
+      "label": "Founder Dependency Risk",
+      "definition": "Probability that target operating performance is contingent on founder presence.",
+      "primarySignalSources": "Decision-rights pattern + key-person dependency mapping + pre-close founder commitments."
+    },
+    {
+      "sourceRow": 8,
+      "code": "decision_rights_conflict",
+      "label": "Decision-Rights Conflict Risk",
+      "definition": "Probability of post-close conflict over who decides what.",
+      "primarySignalSources": "Authority mechanism + integration-planning response patterns + governance documentation."
+    },
+    {
+      "sourceRow": 9,
+      "code": "governance_risk",
+      "label": "Governance Risk",
+      "definition": "Probability of governance failure: control environment gaps, board misalignment, regulatory exposure.",
+      "primarySignalSources": "Documentary evidence + finance/legal respondent answers + governance materials."
+    },
+    {
+      "sourceRow": 10,
+      "code": "political_protection",
+      "label": "Political Protection Risk",
+      "definition": "Probability that internal coalitions protect specific actors at the cost of operational performance.",
+      "primarySignalSources": "Advancement-pattern analysis + observed exit mechanisms + cross-respondent divergence on accountability."
+    },
+    {
+      "sourceRow": 11,
+      "code": "talent_flight",
+      "label": "Talent Flight Risk",
+      "definition": "Probability of broad-based talent departure beyond key-person retention concerns.",
+      "primarySignalSources": "Resource-flow questions + cultural-narrative comparison + people-function answers."
+    },
+    {
+      "sourceRow": 12,
+      "code": "management_performance_drop",
+      "label": "Management Performance Drop Risk",
+      "definition": "Probability that management effectiveness materially declines post-close.",
+      "primarySignalSources": "Strategy-decision questions + commercial-period response patterns + integration-planning behaviour."
+    },
+    {
+      "sourceRow": 13,
+      "code": "months_6_18_failure",
+      "label": "Months 6\u201318 Failure Risk",
+      "definition": "Composite forward-looking failure indicator for the integration's second half-year through 18-month mark.",
+      "primarySignalSources": "All of the above, weighted by analyst severity assignment."
+    }
+  ],
+  "roleCoverageMatrix": [
+    {
+      "sourceRow": 4,
+      "tier": "Tier 1",
+      "dealSize": "< $50M EV",
+      "mandatoryAcquirerRoles": "deal_lead, integration_lead",
+      "mandatoryTargetRoles": "ceo_founder",
+      "optionalButRecommended": "people_lead, senior_leader"
+    },
+    {
+      "sourceRow": 5,
+      "tier": "Tier 2",
+      "dealSize": "$50M \u2013 $500M EV",
+      "mandatoryAcquirerRoles": "deal_lead, integration_lead, people_lead",
+      "mandatoryTargetRoles": "ceo_founder, senior_leader",
+      "optionalButRecommended": "finance_lead, key_talent, lead_banker"
+    },
+    {
+      "sourceRow": 6,
+      "tier": "Tier 3",
+      "dealSize": "> $500M EV",
+      "mandatoryAcquirerRoles": "deal_lead, integration_lead, people_lead, board_observer",
+      "mandatoryTargetRoles": "ceo_founder, senior_leader, key_talent",
+      "optionalButRecommended": "finance_lead, legal_lead, finance_function, ned, operating_partner"
+    },
+    {
+      "sourceRow": 8,
+      "tier": "Coverage gap behaviour: if a Tier-mandatory role is not represented in the respondent set, the engine flags coverage_insufficient and confidence is capped at medium for any risk category that depends on that role.",
+      "dealSize": "",
+      "mandatoryAcquirerRoles": "",
+      "mandatoryTargetRoles": "",
+      "optionalButRecommended": ""
+    }
+  ],
+  "confidenceGate": [
+    {
+      "sourceRow": 4,
+      "threshold": "Direct-observation or document-supported answer share",
+      "requiredLevelForHigh": ">= 60% of all answers",
+      "requiredLevelForMedium": ">= 35% of all answers",
+      "notes": "Computed across the deal's full answer set."
+    },
+    {
+      "sourceRow": 5,
+      "threshold": "Cross-respondent triangulation per risk category",
+      "requiredLevelForHigh": ">= 1 triangulation point per category",
+      "requiredLevelForMedium": "No requirement",
+      "notes": "Triangulation = at least 2 respondents on the same question with materially aligned answers."
+    },
+    {
+      "sourceRow": 6,
+      "threshold": "Documentary corroboration per critical risk category",
+      "requiredLevelForHigh": ">= 1 EvidenceItem per category",
+      "requiredLevelForMedium": "No requirement",
+      "notes": "Critical = severity \u2265 high in any constituent assessment."
+    },
+    {
+      "sourceRow": 7,
+      "threshold": "Reliability flag rate",
+      "requiredLevelForHigh": "< 20% of answers carry any flag",
+      "requiredLevelForMedium": "< 40% of answers carry any flag",
+      "notes": "Computed across the deal's full answer set."
+    },
+    {
+      "sourceRow": 8,
+      "threshold": "Role coverage",
+      "requiredLevelForHigh": "Tier minimum (sheet 14) met in full",
+      "requiredLevelForMedium": "Tier minimum met for at least one side",
+      "notes": "Below medium = coverage_insufficient flag forced."
+    }
+  ],
+  "overridePrecedence": [
+    {
+      "sourceRow": 4,
+      "scenario": "Target self-assessment matches acquirer observer",
+      "defaultTreatment": "Both retained. Score is corroborated.",
+      "notes": "Confidence increases by triangulation rule."
+    },
+    {
+      "sourceRow": 5,
+      "scenario": "Target self-assessment diverges from acquirer observer",
+      "defaultTreatment": "Acquirer-observer answer enters scoring. Self-assessment retained as divergence record.",
+      "notes": "Self-assessment NEVER overrides observer evidence in canonical scoring."
+    },
+    {
+      "sourceRow": 6,
+      "scenario": "Target self-assessment diverges from documentary evidence",
+      "defaultTreatment": "Documentary evidence governs. Self-assessment downweighted by socially_desirable flag.",
+      "notes": "Document trumps self-report."
+    },
+    {
+      "sourceRow": 7,
+      "scenario": "Acquirer observer diverges from documentary evidence",
+      "defaultTreatment": "Documentary evidence governs. Observer answer downweighted by contradicted_by_document flag.",
+      "notes": "Document trumps observer claim."
+    },
+    {
+      "sourceRow": 8,
+      "scenario": "Both sides diverge from each other and from document",
+      "defaultTreatment": "Three-way contradiction. Escalated to analyst as a critical contradiction.",
+      "notes": "No automated resolution."
+    },
+    {
+      "sourceRow": 10,
+      "scenario": "Rationale: target self-assessment is by definition status-protective. Observer evidence has lower reputational stake in target's narrative. This default may be overridden per-deal if the analyst documents specific reasons (e.g. observer is structurally biased).",
+      "defaultTreatment": "",
+      "notes": ""
+    }
+  ],
+  "analystGate": [
+    {
+      "sourceRow": 4,
+      "outputType": "Free-tier directional indicator",
+      "analystReviewRequirement": "No analyst review.",
+      "permittedOutputLanguage": "\"Directional pattern only. Not diligence.\" Must NOT name a final environment or risk severity."
+    },
+    {
+      "sourceRow": 5,
+      "outputType": "Engagement-priced full report ($90K \u2013 $200K)",
+      "analystReviewRequirement": "Analyst review MANDATORY before final report issuance.",
+      "permittedOutputLanguage": "Full risk-category outputs, severity, confidence, pre-close and post-close actions."
+    },
+    {
+      "sourceRow": 6,
+      "outputType": "Sealed prediction (e.g. Eli Lilly / Ventyx forward-verification)",
+      "analystReviewRequirement": "Analyst review MANDATORY. Senior analyst sign-off required.",
+      "permittedOutputLanguage": "Sealed ECS prediction with locked timestamp and sign-off audit trail."
+    },
+    {
+      "sourceRow": 7,
+      "outputType": "Practitioner-only diagnostic output",
+      "analystReviewRequirement": "No analyst review for output, but practitioner certification required.",
+      "permittedOutputLanguage": "Per practitioner training scope. Not a paid report."
+    },
+    {
+      "sourceRow": 9,
+      "outputType": "No paid output may be issued by automated aggregation alone. The architecture forbids the prior practice of computing an environment pair from summed signals and presenting that as the deliverable.",
+      "analystReviewRequirement": "",
+      "permittedOutputLanguage": ""
+    }
+  ]
+}

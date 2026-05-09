@@ -1,0 +1,411 @@
+import { createHash, randomInt, randomUUID } from "node:crypto";
+import {
+  buildTargetObservationSetupRecord,
+  canStartTargetObservation,
+  hashObservationSetupCode,
+  scoreTargetObservation,
+} from "../src/flow/targetObservationFlow.js";
+import {
+  scoreTargetDiagnosticCombined,
+  scoreTargetDiagnosticLevel1,
+  scoreTargetDiagnosticQuestions,
+} from "../src/flow/targetDiagnosticFlow.js";
+import { validateEvidenceClassifiedAnswers } from "../src/flow/evidenceClassification.js";
+import { TARGET_DIAGNOSTIC_DATA } from "../src/data/targetDiagnosticData.js";
+
+const TARGET_INVITE_TTL_HOURS = 72;
+
+type SessionRecord = {
+  sessionId: string;
+  createdAt: string;
+  updatedAt: string;
+  targetObservationSetup: ReturnType<typeof buildTargetObservationSetupRecord> | null;
+  targetObservation: unknown | null;
+  target2B: unknown | null;
+  targetInvite?: TargetInviteRecord | null;
+};
+
+type LedgerGlobal = typeof globalThis & {
+  __stPublicSessionLedger?: Map<string, SessionRecord>;
+};
+
+type TargetInviteRecord = {
+  targetSessionId: string;
+  assessmentSessionId: string;
+  preliminaryAssessmentId: string;
+  reportBinding: unknown;
+  codeHash: string;
+  createdAt: string;
+  expiresAt: string;
+  completed: boolean;
+  revoked: boolean;
+  completedAt?: string;
+  revokedAt?: string;
+  revokedReason?: string;
+  targetSelfAssessment?: unknown;
+};
+
+function ledger() {
+  const root = globalThis as LedgerGlobal;
+  if (!root.__stPublicSessionLedger) {
+    root.__stPublicSessionLedger = new Map<string, SessionRecord>();
+  }
+  return root.__stPublicSessionLedger;
+}
+
+export function getSession(sessionId: string) {
+  const store = ledger();
+  const existing = store.get(sessionId);
+  if (existing) return existing;
+
+  const now = new Date().toISOString();
+  const session: SessionRecord = {
+    sessionId,
+    createdAt: now,
+    updatedAt: now,
+    targetObservationSetup: null,
+    targetObservation: null,
+    target2B: null,
+    targetInvite: null,
+  };
+  store.set(sessionId, session);
+  return session;
+}
+
+export function saveTargetObservationSetup(sessionId: string, setupInput: Record<string, unknown>) {
+  const session = getSession(sessionId);
+  const setup = buildTargetObservationSetupRecord(setupInput);
+  const nextSession: SessionRecord = {
+    ...session,
+    updatedAt: new Date().toISOString(),
+    targetObservationSetup: setup,
+  };
+  ledger().set(sessionId, nextSession);
+  return nextSession;
+}
+
+export function targetObservationState(sessionId: string) {
+  const session = getSession(sessionId);
+  return {
+    sessionId,
+    targetObservationSetup: session.targetObservationSetup,
+    targetObservation: session.targetObservation,
+    target2B: session.target2B,
+    canStartTargetObservation: canStartTargetObservation(session),
+    authorizedTargetObservationComplete: Boolean((session.targetObservation as { completed?: boolean } | null)?.completed),
+    authorizedTargetObserverComplete: Boolean(
+      (session.targetObservation as { completed?: boolean } | null)?.completed
+      && (session.target2B as { completed?: boolean } | null)?.completed,
+    ),
+  };
+}
+
+function buildTargetDiagnosticRecord(input: {
+  level1Answers?: Record<string, unknown>;
+  level2Answers?: Record<string, unknown>;
+}) {
+  const level1Answers = typeof input.level1Answers === "object" && input.level1Answers ? input.level1Answers : {};
+  const level2Answers = typeof input.level2Answers === "object" && input.level2Answers ? input.level2Answers : {};
+  const level1Score = scoreTargetDiagnosticLevel1(level1Answers);
+  const level1ClassificationValidation = validateEvidenceClassifiedAnswers(TARGET_DIAGNOSTIC_DATA.level1.questions, level1Answers);
+
+  if (!level1Score.valid) {
+    return {
+      ok: false,
+      status: "target-diagnostic-level-1-incomplete",
+      missingQuestionIds: level1Score.missingQuestionIds,
+    };
+  }
+  if (!level1ClassificationValidation.valid) {
+    return {
+      ok: false,
+      status: "target-diagnostic-level-1-classification-incomplete",
+      invalidClassification: level1ClassificationValidation.invalid,
+    };
+  }
+
+  const now = new Date().toISOString();
+  if (!level1Score.requiresLevel2) {
+    return {
+      ok: true,
+      target2B: Object.freeze({
+        level1: Object.freeze({
+          completed: true,
+          storedAt: now,
+          answers: Object.freeze({ ...level1Answers }),
+          classificationValidation: level1ClassificationValidation,
+          score: level1Score,
+        }),
+        requiresLevel2: false,
+        completed: true,
+        finalScore: level1Score,
+      }),
+    };
+  }
+
+  const level2Score = scoreTargetDiagnosticQuestions(TARGET_DIAGNOSTIC_DATA.level2.questions, level2Answers);
+  const level2ClassificationValidation = validateEvidenceClassifiedAnswers(TARGET_DIAGNOSTIC_DATA.level2.questions, level2Answers);
+  const finalClassificationValidation = validateEvidenceClassifiedAnswers(
+    [...TARGET_DIAGNOSTIC_DATA.level1.questions, ...TARGET_DIAGNOSTIC_DATA.level2.questions],
+    { ...level1Answers, ...level2Answers },
+  );
+  if (!level2Score.valid) {
+    return {
+      ok: false,
+      status: "target-diagnostic-level-2-incomplete",
+      requiresLevel2: true,
+      level1Score,
+      missingQuestionIds: level2Score.missingQuestionIds,
+    };
+  }
+  if (!level2ClassificationValidation.valid || !finalClassificationValidation.valid) {
+    return {
+      ok: false,
+      status: "target-diagnostic-level-2-classification-incomplete",
+      requiresLevel2: true,
+      invalidClassification: finalClassificationValidation.invalid,
+    };
+  }
+
+  return {
+    ok: true,
+    target2B: Object.freeze({
+      level1: Object.freeze({
+        completed: true,
+        storedAt: now,
+        answers: Object.freeze({ ...level1Answers }),
+        classificationValidation: level1ClassificationValidation,
+        score: level1Score,
+      }),
+      level2: Object.freeze({
+        completed: true,
+        storedAt: now,
+        answers: Object.freeze({ ...level2Answers }),
+        classificationValidation: level2ClassificationValidation,
+        score: level2Score,
+      }),
+      requiresLevel2: true,
+      completed: true,
+      classificationValidation: finalClassificationValidation,
+      finalScore: scoreTargetDiagnosticCombined(level1Answers, level2Answers),
+    }),
+  };
+}
+
+export function saveTargetObservationCompletion(input: {
+  assessmentSessionId: string;
+  observationSessionId: string;
+  codeHash: string;
+  digitalCode: string;
+  setup: Record<string, unknown>;
+  answers: Record<string, unknown>;
+  targetDiagnostic?: {
+    level1Answers?: Record<string, unknown>;
+    level2Answers?: Record<string, unknown>;
+  };
+}) {
+  const expectedHash = hashObservationSetupCode(input.digitalCode, input.observationSessionId, input.assessmentSessionId);
+  if (!/^\d{6}$/.test(input.digitalCode) || expectedHash !== input.codeHash) {
+    return {
+      ok: false,
+      status: "wrong-code",
+    };
+  }
+
+  const setupRecord = buildTargetObservationSetupRecord(input.setup);
+  if (!setupRecord.completed) {
+    return {
+      ok: false,
+      status: "setup-incomplete",
+      missing: setupRecord.missing,
+    };
+  }
+
+  const score = scoreTargetObservation(input.answers);
+  if (!score.valid) {
+    if (score.invalidClassification?.length) {
+      return {
+        ok: false,
+        status: "target-observation-classification-incomplete",
+        invalidClassification: score.invalidClassification,
+      };
+    }
+    return {
+      ok: false,
+      status: "target-observation-incomplete",
+      missingQuestionIds: score.missingQuestionIds,
+    };
+  }
+
+  const targetDiagnostic = buildTargetDiagnosticRecord(input.targetDiagnostic ?? {});
+  if (!targetDiagnostic.ok) {
+    return targetDiagnostic;
+  }
+
+  const now = new Date().toISOString();
+  const setupData = setupRecord.data as Record<string, unknown>;
+  const targetObservation = Object.freeze({
+    completed: true,
+    storedAt: now,
+    observationSessionId: input.observationSessionId,
+    answers: Object.freeze({ ...input.answers }),
+    classificationValidation: score.classificationValidation,
+    score,
+    outputContext: Object.freeze({
+      observationPosition: setupData.observationPosition,
+      respondentContext: setupData.respondentContext,
+      respondentContextProfile: setupData.respondentContextProfile ?? null,
+      integrationTimeline: setupData.integrationTimeline,
+      observedTargetEnvironment: score.topEnvironmentCode,
+      evidenceConfidence: score.evidenceConfidence,
+    }),
+  });
+
+  const session = getSession(input.assessmentSessionId);
+  const nextSession: SessionRecord = {
+    ...session,
+    updatedAt: now,
+    targetObservationSetup: setupRecord,
+    targetObservation,
+    target2B: targetDiagnostic.target2B,
+  };
+  ledger().set(input.assessmentSessionId, nextSession);
+
+  return {
+    ok: true,
+    status: "target-observation-received",
+    sessionId: input.assessmentSessionId,
+    targetObservationSetup: setupRecord,
+    targetObservation,
+    target2B: targetDiagnostic.target2B,
+  };
+}
+
+function codeHash(code: string, targetSessionId: string, preliminaryAssessmentId: string) {
+  return createHash("sha256").update(`${targetSessionId}:${preliminaryAssessmentId}:${code}`).digest("hex");
+}
+
+function sixDigitCode() {
+  return String(randomInt(100000, 1000000));
+}
+
+function expiresAt(createdAt: string) {
+  return new Date(new Date(createdAt).getTime() + TARGET_INVITE_TTL_HOURS * 60 * 60 * 1000).toISOString();
+}
+
+function findInvite(targetSessionId: string) {
+  for (const session of ledger().values()) {
+    if (session.targetInvite?.targetSessionId === targetSessionId) {
+      return { session, invite: session.targetInvite };
+    }
+  }
+  return null;
+}
+
+export function createServerTargetSession(input: {
+  assessmentSessionId: string;
+  preliminaryAssessmentId: string;
+  track1Complete: boolean;
+  preliminaryAssessmentCreated: boolean;
+  reportBinding?: unknown;
+  baseUrl?: string;
+}) {
+  if (!input.track1Complete || !input.preliminaryAssessmentCreated) {
+    return {
+      ok: false,
+      status: "track-1-or-preliminary-incomplete",
+    };
+  }
+
+  const session = getSession(input.assessmentSessionId);
+  const now = new Date().toISOString();
+  const digitalCode = sixDigitCode();
+  const targetSessionId = `tgt-${randomUUID()}`;
+  const invite: TargetInviteRecord = {
+    targetSessionId,
+    assessmentSessionId: input.assessmentSessionId,
+    preliminaryAssessmentId: input.preliminaryAssessmentId,
+    reportBinding: input.reportBinding ?? null,
+    codeHash: codeHash(digitalCode, targetSessionId, input.preliminaryAssessmentId),
+    createdAt: now,
+    expiresAt: expiresAt(now),
+    completed: false,
+    revoked: false,
+  };
+
+  const priorInvite = session.targetInvite && !session.targetInvite.completed
+    ? {
+        ...session.targetInvite,
+        revoked: true,
+        revokedAt: now,
+        revokedReason: "superseded",
+      }
+    : session.targetInvite;
+
+  const nextSession: SessionRecord = {
+    ...session,
+    updatedAt: now,
+    targetInvite: invite,
+  };
+  ledger().set(input.assessmentSessionId, nextSession);
+
+  const baseUrl = input.baseUrl?.replace(/\/$/, "") ?? "";
+  return {
+    ok: true,
+    status: "target-session-created",
+    priorInvite,
+    targetSessionId,
+    surveyLink: `${baseUrl}/screen-9a-target-code-gate?targetSessionId=${encodeURIComponent(targetSessionId)}`,
+    digitalCode,
+    expiresAt: invite.expiresAt,
+    ttlHours: TARGET_INVITE_TTL_HOURS,
+    codeDigits: 6,
+  };
+}
+
+export function verifyServerTargetCode(targetSessionId: string, code: string, now = new Date().toISOString()) {
+  const found = findInvite(targetSessionId);
+  const normalizedCode = typeof code === "string" ? code.trim() : "";
+  if (!found) return { ok: false, status: "not-found" };
+  const { invite } = found;
+  if (invite.revoked) return { ok: false, status: "revoked" };
+  if (invite.completed) return { ok: false, status: "completed" };
+  if (new Date(now).getTime() > new Date(invite.expiresAt).getTime()) return { ok: false, status: "expired" };
+  if (!/^\d{6}$/.test(normalizedCode)) return { ok: false, status: "invalid-format" };
+  if (codeHash(normalizedCode, targetSessionId, invite.preliminaryAssessmentId) !== invite.codeHash) {
+    return { ok: false, status: "wrong-code" };
+  }
+  return {
+    ok: true,
+    status: "verified",
+    targetSessionId,
+    verificationToken: createHash("sha256").update(`${targetSessionId}:${invite.codeHash}:verified`).digest("hex"),
+  };
+}
+
+export function completeServerTargetSession(targetSessionId: string, code: string, targetSelfAssessment: unknown) {
+  const verification = verifyServerTargetCode(targetSessionId, code);
+  if (!verification.ok) return verification;
+
+  const found = findInvite(targetSessionId);
+  if (!found) return { ok: false, status: "not-found" };
+  const now = new Date().toISOString();
+  const invite: TargetInviteRecord = {
+    ...found.invite,
+    completed: true,
+    completedAt: now,
+    targetSelfAssessment,
+  };
+  const session: SessionRecord = {
+    ...found.session,
+    updatedAt: now,
+    targetInvite: invite,
+  };
+  ledger().set(found.session.sessionId, session);
+  return {
+    ok: true,
+    status: "target-self-assessment-received",
+    targetSessionId,
+    completedAt: now,
+  };
+}

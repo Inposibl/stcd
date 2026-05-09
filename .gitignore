@@ -1,0 +1,13 @@
+.vercel
+node_modules/
+dist/
+.lighthouse-profile/
+.lighthouse-tmp/
+.browser-authorized-*/
+__pycache__/
+*.pyc
+*.log
+*.tmp
+~$*
+.env
+.env.*

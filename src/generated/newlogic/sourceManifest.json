@@ -1,0 +1,280 @@
+{
+  "sourcePackage": {
+    "id": "newlogic-2026-05-03",
+    "name": "NewLogic 03.05.2026",
+    "path": "NewLogic 03.05.2026",
+    "exportedAt": "2026-05-06T15:51:00.487281+00:00"
+  },
+  "environmentAliases": {
+    "NF/NT": "The Idea Lab",
+    "NT/STJ": "The Performance Arena",
+    "NT/STP": "The Disruption Lab",
+    "NF/SFJ": "The Mission Field",
+    "NF/SFP": "The Creative Commons",
+    "SFJ/SFP": "The Hometown Network",
+    "SFP/SFJ": "The Franchise Machine",
+    "STJ/STP": "The Power Racket",
+    "STP/STJ": "The Enforcer Network"
+  },
+  "workbooks": [
+    {
+      "file": "ST_Acquirer_Environment_Module.xlsx",
+      "sizeBytes": 42888,
+      "lastModified": "2026-05-06T15:25:52.499565+00:00",
+      "sheets": [
+        "0_Instructions",
+        "1_Respondent_Metadata",
+        "2_Positioning",
+        "3_Screening",
+        "4_Reliability_Audit",
+        "5_Layered_Scoring",
+        "6_Evidence_Pattern_Output",
+        "7_Methodology_Audit",
+        "8_v3_1_Correction_Log"
+      ]
+    },
+    {
+      "file": "ST_Analyst_Methodology.xlsx",
+      "sizeBytes": 42611,
+      "lastModified": "2026-05-06T15:25:52.589903+00:00",
+      "sheets": [
+        "0_Index",
+        "1_Three_Layer_Architecture",
+        "2_Analyst_Mandate",
+        "3_Workflow_Gates",
+        "4_Assessment_Authoring",
+        "5_Contradiction_Triage",
+        "6_Risk_Output_Composition",
+        "7_Severity_and_Confidence",
+        "8_Approval_Workflow",
+        "9_Senior_Sign_Off",
+        "10_Audit_Trail",
+        "11_Methodology_Position",
+        "12_Change_Log"
+      ]
+    },
+    {
+      "file": "ST_B_Single_Output_Template_v1.xlsx",
+      "sizeBytes": 63692,
+      "lastModified": "2026-05-06T15:25:52.609741+00:00",
+      "sheets": [
+        "0_Index",
+        "1_Executive_Summary",
+        "2_The_Deal",
+        "3_Methodology_Evidence_Base",
+        "4_Acquirer_Environment",
+        "5_Target_Environment",
+        "6_Cross_Side_Contradictions",
+        "7_ECS",
+        "8_Integration_Fracture",
+        "9_Leadership_Accountability",
+        "10_Key_Person_Retention",
+        "11_Founder_Dependency",
+        "12_Decision_Rights_Conflict",
+        "13_Governance_Risk",
+        "14_Political_Protection",
+        "15_Talent_Flight",
+        "16_Management_Performance_Drop",
+        "17_Months_6_18_Failure",
+        "18_Actions_Roadmap",
+        "19_Audit_Sealed_Prediction",
+        "Buyer_Facing_Aliases",
+        "20_v3_1_Build_Notes"
+      ]
+    },
+    {
+      "file": "ST_Canonical_Schema.xlsx",
+      "sizeBytes": 49008,
+      "lastModified": "2026-05-06T15:25:52.652230+00:00",
+      "sheets": [
+        "0_Index",
+        "1_Sides",
+        "2_Roles",
+        "3_EvidenceType",
+        "4_KnowledgeLevel",
+        "5_Confidence",
+        "6_ReliabilityFlags",
+        "7_Answer_Record",
+        "8_Respondent_Record",
+        "9_EvidenceItem_Record",
+        "10_AnalystAssessment",
+        "11_Contradiction_Record",
+        "12_RiskOutput_Record",
+        "13_RiskCategories",
+        "14_RoleCoverageMatrix",
+        "15_ConfidenceGate",
+        "16_OverridePrecedence",
+        "17_AnalystGate",
+        "18_VisualStandard",
+        "19_ChangeLog"
+      ]
+    },
+    {
+      "file": "ST_Client_Journey_v5.xlsx",
+      "sizeBytes": 21070,
+      "lastModified": "2026-05-06T15:25:52.437147+00:00",
+      "sheets": [
+        "Client Journey",
+        "v3_1_Build_Notes",
+        "Dependency_Register"
+      ]
+    },
+    {
+      "file": "ST_Dual_Respondent_Axis_Comparison_v1.xlsx",
+      "sizeBytes": 40817,
+      "lastModified": "2026-05-06T15:25:52.638464+00:00",
+      "sheets": [
+        "0_Index",
+        "1_Answer_Env_Map",
+        "2_Pair_Specific_Weights",
+        "3_Comparison_Engine",
+        "4_Evidence_Quality_Layer",
+        "5_Divergence_Classification",
+        "6_Contradiction_Output",
+        "7_Edge_Cases",
+        "8_Audit_Trail",
+        "9_Methodology_Audit",
+        "10_v3_1_Build_Notes"
+      ]
+    },
+    {
+      "file": "ST_Environment_Diagnostic_v2.xlsx",
+      "sizeBytes": 54609,
+      "lastModified": "2026-05-06T15:25:52.459894+00:00",
+      "sheets": [
+        "0_Instructions",
+        "1_Respondent_Metadata",
+        "2_Block_0_Positioning",
+        "3_Level_1_Screening",
+        "4_Level_2_Deepening",
+        "5_Reliability_Audit",
+        "6_Layered_Scoring",
+        "7_Evidence_Pattern_Output",
+        "8_Methodology_Audit",
+        "9_v3_1_Correction_Log"
+      ]
+    },
+    {
+      "file": "ST_Form_Binding_Prompt.xlsx",
+      "sizeBytes": 60478,
+      "lastModified": "2026-05-06T15:25:52.533347+00:00",
+      "sheets": [
+        "MASTER PROMPT",
+        "STEP-1",
+        "STEP-2A",
+        "STEP-2C",
+        "STEP-2B-L1",
+        "STEP-2B-L2",
+        "STEP-2B ROUTING",
+        "STEP-TOD",
+        "PATCH_LOG"
+      ]
+    },
+    {
+      "file": "ST_Free_Tier_Output_Narratives_updated.xlsx",
+      "sizeBytes": 49155,
+      "lastModified": "2026-05-06T15:25:52.624350+00:00",
+      "sheets": [
+        "Implementation_Guide",
+        "All_72_Narratives",
+        "Band_Summary",
+        "Confidence_Gate_Mapping",
+        "Schema_Methodology_Dependencies",
+        "v3_1_Build_Notes"
+      ]
+    },
+    {
+      "file": "ST_Friction_Point_Lookup_updated.xlsx",
+      "sizeBytes": 49704,
+      "lastModified": "2026-05-06T15:25:52.575979+00:00",
+      "sheets": [
+        "Friction_Lookup",
+        "ECS_Matrix",
+        "Derivation_Method",
+        "Risk_Category_Tagging",
+        "v3_1_Build_Notes"
+      ]
+    },
+    {
+      "file": "ST_Prediction_Ledger_v1.xlsx",
+      "sizeBytes": 33512,
+      "lastModified": "2026-05-06T15:25:52.666221+00:00",
+      "sheets": [
+        "PROVENANCE",
+        "SEALED_PREDICTIONS",
+        "VERIFICATION_LOG",
+        "CALIBRATION_LOG",
+        "ACCURACY_DASHBOARD",
+        "AGENT_READ_INSTRUCTIONS",
+        "Eli_Lilly_Ventyx_Canonical",
+        "Schema_Methodology_Dependencies",
+        "v3_1_Build_Notes"
+      ]
+    },
+    {
+      "file": "ST_Step3_Output_Screens_Spec.xlsx",
+      "sizeBytes": 39029,
+      "lastModified": "2026-05-06T15:25:52.562094+00:00",
+      "sheets": [
+        "0_Index",
+        "SCREEN_1_WEAK_RESULT",
+        "SCREEN_2_SECOND_SUBMISSION",
+        "SCREEN_3_FINAL_OUTPUT",
+        "COPY_TEMPLATES"
+      ]
+    },
+    {
+      "file": "ST_Target_Observed_Environment_Diagnostic.xlsx",
+      "sizeBytes": 56420,
+      "lastModified": "2026-05-06T15:25:52.519581+00:00",
+      "sheets": [
+        "README",
+        "0_Respondent_Metadata",
+        "Environment_Name_Guide",
+        "Questionnaire",
+        "Answer_Key",
+        "Scoring_Model",
+        "Evidence_Confidence",
+        "Output_Interpretation",
+        "Survey_Methodology_Check",
+        "Validation_Checks",
+        "v3_1_Correction_Log"
+      ]
+    },
+    {
+      "file": "ST_Target_Self_Assessment_Module.xlsx",
+      "sizeBytes": 46609,
+      "lastModified": "2026-05-06T15:25:52.548419+00:00",
+      "sheets": [
+        "0_Instructions",
+        "1_Respondent_Metadata",
+        "2_Positioning",
+        "3_Screening",
+        "4_Reliability_Audit",
+        "5_Layered_Scoring",
+        "6_Evidence_Pattern_Output",
+        "7_Reconciliation_Module",
+        "8_Methodology_Audit",
+        "9_v3_1_Correction_Log"
+      ]
+    },
+    {
+      "file": "ST_Triage_Framework.xlsx",
+      "sizeBytes": 38487,
+      "lastModified": "2026-05-06T15:25:52.485676+00:00",
+      "sheets": [
+        "0_Index",
+        "1_Trigger_Conditions",
+        "2_Accuracy_Check",
+        "3_Reliability_Flag_Count",
+        "4_Contradiction_Count",
+        "5_Instrument_Selection",
+        "6_Verification_Output",
+        "7_Practitioner_Escalation",
+        "8_Decision_Tree",
+        "9_Methodology_Audit",
+        "10_v3_1_Build_Notes"
+      ]
+    }
+  ]
+}

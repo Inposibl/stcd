@@ -1,0 +1,119 @@
+import assert from "node:assert/strict";
+import { TARGET_SELF_ASSESSMENT_DATA } from "../src/data/targetSelfAssessmentData.js";
+import {
+  buildTargetSelfAssessmentRecord,
+  isTargetSelfAssessmentSourceLoaded,
+  scoreTargetSelfAssessment,
+} from "../src/flow/targetSelfAssessmentFlow.js";
+import {
+  attachPreliminaryAssessment,
+  canGenerateTargetInvite,
+  completeTargetInvite,
+  createTargetInvite,
+  resetPublicAssessmentSession,
+  targetInviteFromLinkParams,
+  verifyTargetInvite,
+} from "../src/flow/targetInviteFlow.js";
+import { evidenceClassifiedAnswer } from "../src/flow/evidenceClassification.js";
+
+function completeTrack1Session() {
+  return Object.freeze({
+    sessionId: "g4b-session",
+    dealContext: Object.freeze({
+      completed: true,
+      data: Object.freeze({
+        acquisitionMotive: "management_buyout",
+        transactionRole: "partner_md",
+        firmTenure: "more_than_3_years",
+        integrationTimeline: "standard",
+      }),
+    }),
+    acquirer2A: Object.freeze({
+      completed: true,
+      score: Object.freeze({ primaryEnvironmentCode: "NT/STJ" }),
+    }),
+    targetObservation: Object.freeze({
+      completed: true,
+      score: Object.freeze({ topEnvironmentCode: "NF/NT" }),
+      outputContext: Object.freeze({ observationPosition: "Acquirer diligence lead" }),
+    }),
+    target2B: Object.freeze({
+      completed: true,
+      finalScore: Object.freeze({
+        primaryEnvironmentCode: "NF/NT",
+        signalStrength: "confirmed",
+      }),
+    }),
+  });
+}
+
+assert.equal(isTargetSelfAssessmentSourceLoaded(), true);
+assert.deepEqual(TARGET_SELF_ASSESSMENT_DATA.sources, [
+  "ST_Target_Self_Assessment_Module.xlsx",
+  "ST_Form_Binding_Prompt.xlsx",
+]);
+assert.equal(TARGET_SELF_ASSESSMENT_DATA.targetSelfAssessment.questionCount, 10);
+assert.equal(TARGET_SELF_ASSESSMENT_DATA.targetSelfAssessment.questions.length, 10);
+
+const incompleteSession = Object.freeze({ sessionId: "incomplete" });
+const blockedPreliminary = attachPreliminaryAssessment(incompleteSession, "2026-05-01T00:00:00.000Z");
+assert.equal(blockedPreliminary.preliminaryAssessment.completed, false);
+assert.equal(canGenerateTargetInvite(blockedPreliminary.session), false);
+
+const sessionWithPreliminary = attachPreliminaryAssessment(completeTrack1Session(), "2026-05-01T00:00:00.000Z").session;
+assert.equal(sessionWithPreliminary.preliminaryAssessment.completed, true);
+assert.equal(canGenerateTargetInvite(sessionWithPreliminary), true);
+
+const inviteResult = createTargetInvite(sessionWithPreliminary, {
+  createdAt: "2026-05-01T00:00:00.000Z",
+  digitalCode: "123456",
+  targetSessionId: "tgt-g4b",
+});
+assert.equal(inviteResult.ok, true);
+assert.equal(inviteResult.invite.digitalCode, "123456");
+assert.equal(inviteResult.invite.codeDigits, 6);
+assert.equal(inviteResult.invite.ttlHours, 72);
+assert.equal(inviteResult.invite.expiresAt, "2026-05-04T00:00:00.000Z");
+assert.match(inviteResult.invite.surveyLink, /targetSessionId=tgt-g4b/);
+assert.match(inviteResult.invite.surveyLink, /assessmentId=/);
+assert.match(inviteResult.invite.surveyLink, /codeHash=/);
+assert.match(inviteResult.invite.surveyLink, /expiresAt=/);
+
+const parsedInvite = targetInviteFromLinkParams(new URL(`https://example.com${inviteResult.invite.surveyLink}`).searchParams);
+assert.equal(parsedInvite.targetSessionId, "tgt-g4b");
+assert.equal(parsedInvite.assessmentId, inviteResult.invite.assessmentId);
+assert.equal(verifyTargetInvite(parsedInvite, "123456", "2026-05-01T01:00:00.000Z").status, "verified");
+assert.equal(targetInviteFromLinkParams(new URLSearchParams("targetSessionId=tgt-missing")), null);
+
+assert.equal(verifyTargetInvite(inviteResult.invite, "000000", "2026-05-01T01:00:00.000Z").status, "wrong-code");
+assert.equal(verifyTargetInvite(inviteResult.invite, "123456", "2026-05-04T00:00:01.000Z").status, "expired");
+assert.equal(verifyTargetInvite(inviteResult.invite, "123456", "2026-05-01T01:00:00.000Z").status, "verified");
+
+const positioning = { targetRole: "A", targetTenure: "C" };
+const answers = Object.fromEntries(
+  TARGET_SELF_ASSESSMENT_DATA.targetSelfAssessment.questions.map((question) => [question.id, evidenceClassifiedAnswer("A")]),
+);
+const targetScore = scoreTargetSelfAssessment(answers);
+assert.equal(targetScore.valid, true);
+assert.equal(targetScore.answeredQuestionCount, 10);
+assert.equal(targetScore.scoringModelVersion, "newlogic-layered-evidence-v1");
+assert.equal(targetScore.outputKind, "weighted_signal_pattern");
+assert.equal(targetScore.requiresAnalystReview, true);
+assert.equal(targetScore.legacyAdditiveScoring, false);
+assert.equal(targetScore.confidence, "high");
+assert.equal(targetScore.evidenceQuality.legacyOptionOnlyCount, 0);
+assert.equal(targetScore.evidenceQuality.directObservationCount, 10);
+
+const targetSelfAssessment = buildTargetSelfAssessmentRecord(positioning, answers, "2026-05-01T01:30:00.000Z");
+assert.equal(targetSelfAssessment.completed, true);
+assert.equal(targetSelfAssessment.classificationValidation.valid, true);
+const completedInvite = completeTargetInvite(inviteResult.invite, targetSelfAssessment, "2026-05-01T01:31:00.000Z").invite;
+assert.equal(completedInvite.completed, true);
+assert.equal(verifyTargetInvite(completedInvite, "123456", "2026-05-01T01:32:00.000Z").status, "completed");
+
+const resetSession = resetPublicAssessmentSession(inviteResult.session, "2026-05-01T02:00:00.000Z");
+assert.equal(resetSession.invalidatedInvite.revoked, true);
+assert.equal(verifyTargetInvite(resetSession.invalidatedInvite, "123456", "2026-05-01T02:01:00.000Z").status, "revoked");
+assert.notEqual(resetSession.sessionId, inviteResult.session.sessionId);
+
+console.log("G-4b target link/code isolation smoke test passed");
