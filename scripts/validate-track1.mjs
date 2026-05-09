@@ -72,10 +72,13 @@ assert.ok(RESPONDENT_ROLE_OPTIONS.length >= 19);
 assert.ok(RESPONDENT_SENIORITY_OPTIONS.length >= 7);
 assert.ok(RESPONDENT_FUNCTION_OPTIONS.length >= 12);
 assert.ok(RESPONDENT_ACCESS_LEVEL_OPTIONS.length >= 5);
-assert.equal(ACQUIRER_TRACK_DATA.acquirerModule.questionCount, 10);
-assert.equal(ACQUIRER_TRACK_DATA.acquirerModule.questions.length, 10);
+assert.equal(ACQUIRER_TRACK_DATA.acquirerModule.worksheet, "3_Screening");
+assert.equal(ACQUIRER_TRACK_DATA.acquirerModule.questionCount, 11);
+assert.equal(ACQUIRER_TRACK_DATA.acquirerModule.questions.length, 11);
 assert.equal(isAcquirerModuleSourceLoaded(), true);
-assert.equal(ACQUIRER_TRACK_DATA.acquirerModule.questions.every((question) => question.options.length === 4), true);
+assert.equal(ACQUIRER_TRACK_DATA.acquirerModule.questions.every((question) => question.options.length >= 5), true);
+assert.equal(ACQUIRER_TRACK_DATA.acquirerModule.questions.every((question) => Boolean(question.directObservationGate)), true);
+assert.equal(ACQUIRER_TRACK_DATA.acquirerModule.questions.every((question) => question.options.some((option) => option.value === "E")), true);
 
 const expectedOrder = [
   "/",
@@ -205,14 +208,14 @@ const allAAnswers = Object.fromEntries(
 );
 const score = scoreAcquirerModule(allAAnswers);
 assert.equal(score.valid, true);
-assert.equal(score.answeredQuestionCount, 10);
+assert.equal(score.answeredQuestionCount, 11);
 assert.equal(score.scoringModelVersion, "newlogic-layered-evidence-v1");
 assert.equal(score.outputKind, "weighted_signal_pattern");
 assert.equal(score.requiresAnalystReview, true);
 assert.equal(score.legacyAdditiveScoring, false);
 assert.equal(score.confidence, "high");
 assert.equal(score.evidenceQuality.legacyOptionOnlyCount, 0);
-assert.equal(score.evidenceQuality.directObservationCount, 10);
+assert.equal(score.evidenceQuality.directObservationCount, 11);
 assert.ok(score.primaryEnvironmentCode);
 assert.ok(score.primarySignalScore > 0);
 assert.ok(["strong", "confirmed", "weak"].includes(score.signalStrength));

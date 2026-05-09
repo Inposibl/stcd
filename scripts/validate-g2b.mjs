@@ -24,8 +24,11 @@ function routeIndex(route) {
 
 assert.equal(TARGET_OBSERVATION_DIAGNOSTIC.source, "ST_Target_Observed_Environment_Diagnostic.xlsx");
 assert.equal(TARGET_OBSERVATION_DIAGNOSTIC.worksheet, "Questionnaire");
-assert.equal(TARGET_OBSERVATION_DIAGNOSTIC.questionCount, 22);
-assert.equal(TARGET_OBSERVATION_DIAGNOSTIC.questions.length, 22);
+assert.equal(TARGET_OBSERVATION_DIAGNOSTIC.questionCount, 23);
+assert.equal(TARGET_OBSERVATION_DIAGNOSTIC.questions.length, 23);
+assert.equal(TARGET_OBSERVATION_DIAGNOSTIC.questions.at(-1).id, "TED Q19");
+assert.equal(TARGET_OBSERVATION_DIAGNOSTIC.questions.filter((question) => question.id.startsWith("TED ")).every((question) => Boolean(question.directObservationGate)), true);
+assert.equal(TARGET_OBSERVATION_DIAGNOSTIC.questions.filter((question) => question.id.startsWith("TED ")).every((question) => question.options.some((option) => option.value === "E")), true);
 assert.equal(isTargetObservationSourceLoaded(), true, "Target Observation source workbook data must be loaded");
 assert.equal(TARGET_OBSERVATION_SETUP_FIELDS.length, 3);
 assert.equal(TARGET_OBSERVATION_SETUP_FIELDS[1].type, "structured-context");
@@ -109,8 +112,8 @@ const expectedEvidenceConfidence = TARGET_OBSERVATION_DIAGNOSTIC.questions.reduc
   return total + (match ? Number(match[1]) : 0);
 }, 0);
 assert.equal(score.valid, true, "Complete Target Observation answers must score");
-assert.equal(score.answeredQuestionCount, 22);
-assert.equal(score.diagnosticAnswerCount, 18);
+assert.equal(score.answeredQuestionCount, 23);
+assert.equal(score.diagnosticAnswerCount, 19);
 assert.equal(score.evidenceConfidence, expectedEvidenceConfidence);
 assert.equal(score.scoringModelVersion, "newlogic-layered-evidence-v1");
 assert.equal(score.outputKind, "weighted_signal_pattern");
@@ -119,7 +122,7 @@ assert.equal(score.legacyAdditiveScoring, false);
 assert.equal(score.confidence, "high");
 assert.equal(score.classificationValidation.valid, true);
 assert.equal(score.evidenceQuality.legacyOptionOnlyCount, 0);
-assert.equal(score.evidenceQuality.directObservationCount, 22);
+assert.equal(score.evidenceQuality.directObservationCount, 23);
 assert.ok(score.topEnvironmentCode, "Observed target environment must be produced");
 
 const outputContext = createTargetObservationOutputContext(attached.session, score);

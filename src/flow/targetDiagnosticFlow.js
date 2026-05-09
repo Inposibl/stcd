@@ -17,9 +17,11 @@ export const TARGET_DIAGNOSTIC_ENVIRONMENT_CODES = Object.freeze([
 export function isTargetDiagnosticSourceLoaded(data = TARGET_DIAGNOSTIC_DATA) {
   return Boolean(
     data?.level1?.source === "ST_Environment_Diagnostic_v2.xlsx"
+      && data?.level1?.worksheet === "3_Level_1_Screening"
       && data?.level1?.questionCount === 12
       && data?.level1?.questions?.length === 12
       && data?.level2?.source === "ST_Environment_Diagnostic_v2.xlsx"
+      && data?.level2?.worksheet === "4_Level_2_Deepening"
       && data?.level2?.questionCount === 10
       && data?.level2?.questions?.length === 10
       && data.level1.questions.every((question) => question.options.length >= 4)

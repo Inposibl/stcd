@@ -1288,7 +1288,54 @@ function PromiseScreen({ session }) {
   );
 }
 
-function EvidenceClassificationPanel({ answer, onChange }) {
+function selectedOptionPatch(question, value) {
+  const option = question.options.find((item) => item.value === value);
+  const cannotAnswer = value === "E"
+    || value === "F"
+    || option?.excludedFromPrimaryScoring === true
+    || /cannot answer|no direct observation|unknown/i.test(option?.text ?? "");
+
+  return cannotAnswer
+    ? { selectedOption: value, evidenceType: "unknown" }
+    : { selectedOption: value };
+}
+
+function DirectObservationGatePanel({ question, answer, onChange }) {
+  const gate = question.directObservationGate;
+  if (!gate) return null;
+
+  const normalized = normalizeEvidenceAnswer(answer);
+  const prompt = typeof gate === "string" ? gate : gate.prompt;
+
+  function updateGate(value) {
+    onChange(updateEvidenceAnswer(normalized, { directObservationGate: value }));
+  }
+
+  return (
+    <section className="direct-observation-gate" aria-label="Direct observation gate">
+      <div>
+        <strong>Direct Observation Gate</strong>
+        <p>{publicText(prompt)}</p>
+      </div>
+      <div className="direct-observation-options">
+        {DIRECT_OBSERVATION_GATE_OPTIONS.map((option) => (
+          <label key={option.value}>
+            <input
+              checked={normalized.directObservationGate === option.value}
+              name={`${question.id}-direct-observation`}
+              onChange={() => updateGate(option.value)}
+              type="radio"
+              value={option.value}
+            />
+            <span>{option.title}</span>
+          </label>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function EvidenceClassificationPanel({ answer, onChange, showDirectObservation = true }) {
   const normalized = normalizeEvidenceAnswer(answer);
 
   function updateField(fieldId, value) {
@@ -1307,6 +1354,20 @@ function EvidenceClassificationPanel({ answer, onChange }) {
   }
 
   const noFlagsSelected = normalized.reliabilityFlagsAcknowledged && normalized.reliabilityFlags.length === 0;
+  const unknownAnswer = normalized.evidenceType === "unknown"
+    && normalized.knowledgeLevel === "not_known"
+    && normalized.confidence === "cannot_determine";
+
+  if (unknownAnswer) {
+    return (
+      <section className="evidence-classification-panel" aria-label="Evidence classification">
+        <div className="evidence-classification-header">
+          <h2>Evidence classification</h2>
+          <p>This answer is recorded as no direct knowledge. It is excluded from primary environment scoring and preserved as coverage evidence.</p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="evidence-classification-panel" aria-label="Evidence classification">
@@ -1315,18 +1376,20 @@ function EvidenceClassificationPanel({ answer, onChange }) {
         <p>Classify the basis for this answer. The score treats answers as evidence, not as facts.</p>
       </div>
       <div className="evidence-classification-grid">
-        <label className="field-block">
-          <span>Direct observation</span>
-          <select
-            value={normalized.directObservationGate}
-            onChange={(event) => updateField("directObservationGate", event.target.value)}
-          >
-            <option value="">Select basis</option>
-            {DIRECT_OBSERVATION_GATE_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>{option.title}</option>
-            ))}
-          </select>
-        </label>
+        {showDirectObservation ? (
+          <label className="field-block">
+            <span>Direct observation</span>
+            <select
+              value={normalized.directObservationGate}
+              onChange={(event) => updateField("directObservationGate", event.target.value)}
+            >
+              <option value="">Select basis</option>
+              {DIRECT_OBSERVATION_GATE_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>{option.title}</option>
+              ))}
+            </select>
+          </label>
+        ) : null}
         <label className="field-block">
           <span>Evidence type</span>
           <select
@@ -1416,7 +1479,7 @@ function AcquirerModuleScreen({ session, setSession }) {
   function updateAnswer(value) {
     setAnswers((current) => ({
       ...current,
-      [question.id]: updateEvidenceAnswer(current[question.id], { selectedOption: value }),
+      [question.id]: updateEvidenceAnswer(current[question.id], selectedOptionPatch(question, value)),
     }));
     setError("");
   }
@@ -1459,6 +1522,11 @@ function AcquirerModuleScreen({ session, setSession }) {
       <p className="eyebrow">Step 2-A - Q{activeIndex + 1} of {questions.length} - {publicText(question.axis)}</p>
       <h1>{publicText(question.text)}</h1>
       <form className="question-form" onSubmit={nextQuestion}>
+        <DirectObservationGatePanel
+          question={question}
+          answer={answers[question.id]}
+          onChange={updateCurrentEvidenceAnswer}
+        />
         <div className="option-list">
           {question.options.map((option) => (
             <label key={option.value} className="option-row">
@@ -1477,6 +1545,7 @@ function AcquirerModuleScreen({ session, setSession }) {
           <EvidenceClassificationPanel
             answer={answers[question.id]}
             onChange={updateCurrentEvidenceAnswer}
+            showDirectObservation={!question.directObservationGate}
           />
         ) : null}
         {error ? <p className="form-error">{error}</p> : null}
@@ -1660,7 +1729,7 @@ function AcquirerVerificationQuestionnaire({ onComplete }) {
   function updateAnswer(value) {
     setAnswers((current) => ({
       ...current,
-      [question.id]: updateEvidenceAnswer(current[question.id], { selectedOption: value }),
+      [question.id]: updateEvidenceAnswer(current[question.id], selectedOptionPatch(question, value)),
     }));
     setError("");
   }
@@ -1700,6 +1769,11 @@ function AcquirerVerificationQuestionnaire({ onComplete }) {
       <p className="eyebrow">Acquirer verification - Q{activeIndex + 1} of {questions.length} - {publicText(question.axis)}</p>
       <h1>{publicText(question.text)}</h1>
       <form className="question-form" onSubmit={submit}>
+        <DirectObservationGatePanel
+          question={question}
+          answer={answers[question.id]}
+          onChange={updateCurrentEvidenceAnswer}
+        />
         <div className="option-list">
           {question.options.map((option) => (
             <label key={option.value} className="option-row">
@@ -1718,6 +1792,7 @@ function AcquirerVerificationQuestionnaire({ onComplete }) {
           <EvidenceClassificationPanel
             answer={answers[question.id]}
             onChange={updateCurrentEvidenceAnswer}
+            showDirectObservation={!question.directObservationGate}
           />
         ) : null}
         {error ? <p className="form-error">{error}</p> : null}
@@ -2172,7 +2247,7 @@ function TargetObservationQuestionnaire({ answers, setAnswers, setup, onComplete
   function updateAnswer(value) {
     setAnswers((current) => ({
       ...current,
-      [question.id]: updateEvidenceAnswer(current[question.id], { selectedOption: value }),
+      [question.id]: updateEvidenceAnswer(current[question.id], selectedOptionPatch(question, value)),
     }));
     setError("");
   }
@@ -2229,6 +2304,11 @@ function TargetObservationQuestionnaire({ answers, setAnswers, setup, onComplete
         <span>{setup.respondentContext}</span>
       </section>
       <form className="question-form" onSubmit={submit}>
+        <DirectObservationGatePanel
+          question={question}
+          answer={answers[question.id]}
+          onChange={updateCurrentEvidenceAnswer}
+        />
         <div className="option-list">
           {question.options.map((option) => (
             <label key={option.value} className="option-row">
@@ -2247,6 +2327,7 @@ function TargetObservationQuestionnaire({ answers, setAnswers, setup, onComplete
           <EvidenceClassificationPanel
             answer={answers[question.id]}
             onChange={updateCurrentEvidenceAnswer}
+            showDirectObservation={!question.directObservationGate}
           />
         ) : null}
         {error ? <p className="form-error">{error}</p> : null}
@@ -2351,7 +2432,7 @@ function TargetObserverDiagnosticSurvey({ baseSession, onComplete }) {
   function updateAnswer(value) {
     setAnswers((current) => ({
       ...current,
-      [question.id]: updateEvidenceAnswer(current[question.id], { selectedOption: value }),
+      [question.id]: updateEvidenceAnswer(current[question.id], selectedOptionPatch(question, value)),
     }));
     setError("");
   }
@@ -2425,6 +2506,11 @@ function TargetObserverDiagnosticSurvey({ baseSession, onComplete }) {
         <h1>{publicText(question.text)}</h1>
         <p className="source-note">Source: {data.source} / {data.questionCount} {phase === "level1" ? "Level 1" : "Level 2"} questions</p>
         <form className="question-form" onSubmit={submit}>
+          <DirectObservationGatePanel
+            question={question}
+            answer={answers[question.id]}
+            onChange={updateCurrentEvidenceAnswer}
+          />
           <div className="option-list">
             {question.options.map((option) => (
               <label key={option.value} className="option-row">
@@ -2443,6 +2529,7 @@ function TargetObserverDiagnosticSurvey({ baseSession, onComplete }) {
             <EvidenceClassificationPanel
               answer={answers[question.id]}
               onChange={updateCurrentEvidenceAnswer}
+              showDirectObservation={!question.directObservationGate}
             />
           ) : null}
           {error ? <p className="form-error">{error}</p> : null}
@@ -2711,7 +2798,7 @@ function Step2BLevel1Screen({ session, setSession }) {
   function updateAnswer(value) {
     setAnswers((current) => ({
       ...current,
-      [question.id]: updateEvidenceAnswer(current[question.id], { selectedOption: value }),
+      [question.id]: updateEvidenceAnswer(current[question.id], selectedOptionPatch(question, value)),
     }));
     setError("");
   }
@@ -2759,6 +2846,11 @@ function Step2BLevel1Screen({ session, setSession }) {
       <h1>{publicText(question.text)}</h1>
       <p className="source-note">Source: {TARGET_DIAGNOSTIC_DATA.level1.source} / {TARGET_DIAGNOSTIC_DATA.level1.questionCount} Level 1 questions</p>
       <form className="question-form" onSubmit={nextQuestion}>
+        <DirectObservationGatePanel
+          question={question}
+          answer={answers[question.id]}
+          onChange={updateCurrentEvidenceAnswer}
+        />
         <div className="option-list">
           {question.options.map((option) => (
             <label key={option.value} className="option-row">
@@ -2777,6 +2869,7 @@ function Step2BLevel1Screen({ session, setSession }) {
           <EvidenceClassificationPanel
             answer={answers[question.id]}
             onChange={updateCurrentEvidenceAnswer}
+            showDirectObservation={!question.directObservationGate}
           />
         ) : null}
         {error ? <p className="form-error">{error}</p> : null}
@@ -2867,7 +2960,7 @@ function Step2BLevel2Screen({ session, setSession }) {
   function updateAnswer(value) {
     setAnswers((current) => ({
       ...current,
-      [question.id]: updateEvidenceAnswer(current[question.id], { selectedOption: value }),
+      [question.id]: updateEvidenceAnswer(current[question.id], selectedOptionPatch(question, value)),
     }));
     setError("");
   }
@@ -2916,6 +3009,11 @@ function Step2BLevel2Screen({ session, setSession }) {
       <h1>{publicText(question.text)}</h1>
       <p className="source-note">Source: {TARGET_DIAGNOSTIC_DATA.level2.source} / {TARGET_DIAGNOSTIC_DATA.level2.questionCount} Level 2 questions</p>
       <form className="question-form" onSubmit={nextQuestion}>
+        <DirectObservationGatePanel
+          question={question}
+          answer={answers[question.id]}
+          onChange={updateCurrentEvidenceAnswer}
+        />
         <div className="option-list">
           {question.options.map((option) => (
             <label key={option.value} className="option-row">
@@ -2934,6 +3032,7 @@ function Step2BLevel2Screen({ session, setSession }) {
           <EvidenceClassificationPanel
             answer={answers[question.id]}
             onChange={updateCurrentEvidenceAnswer}
+            showDirectObservation={!question.directObservationGate}
           />
         ) : null}
         {error ? <p className="form-error">{error}</p> : null}
@@ -2996,7 +3095,7 @@ function TargetSelfAssessmentSurvey({ session, setSession, invite = null }) {
   function updateAnswer(value) {
     setAnswers((current) => ({
       ...current,
-      [question.id]: updateEvidenceAnswer(current[question.id], { selectedOption: value }),
+      [question.id]: updateEvidenceAnswer(current[question.id], selectedOptionPatch(question, value)),
     }));
     setError("");
   }
@@ -3093,6 +3192,11 @@ function TargetSelfAssessmentSurvey({ session, setSession, invite = null }) {
           </section>
         ) : null}
         <form className="question-form" onSubmit={submit}>
+          <DirectObservationGatePanel
+            question={question}
+            answer={answers[question.id]}
+            onChange={updateCurrentEvidenceAnswer}
+          />
           <div className="option-list">
             {question.options.map((option) => (
               <label key={option.value} className="option-row">
@@ -3111,6 +3215,7 @@ function TargetSelfAssessmentSurvey({ session, setSession, invite = null }) {
             <EvidenceClassificationPanel
               answer={answers[question.id]}
               onChange={updateCurrentEvidenceAnswer}
+              showDirectObservation={!question.directObservationGate}
             />
           ) : null}
           {error ? <p className="form-error">{error}</p> : null}

@@ -1676,6 +1676,51 @@ textarea {
   margin-right: 8px;
 }
 
+.direct-observation-gate {
+  background: #eef4fb;
+  border: 1px solid #c8d7e8;
+  border-radius: 8px;
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+}
+
+.direct-observation-gate strong {
+  color: #183a63;
+  display: block;
+  font-size: 13px;
+  letter-spacing: 0;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.direct-observation-gate p {
+  color: #334155;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.direct-observation-options {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.direct-observation-options label {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #d9dee8;
+  border-radius: 8px;
+  color: #334155;
+  cursor: pointer;
+  display: grid;
+  font-size: 13px;
+  font-weight: 700;
+  gap: 8px;
+  grid-template-columns: 16px 1fr;
+  padding: 10px;
+}
+
 .evidence-classification-panel {
   background: #f8fafc;
   border: 1px solid #d9dee8;
@@ -3296,6 +3341,7 @@ textarea {
   .resource-conflict-row,
   .protocol-insight-grid,
   .compact-anchors,
+  .direct-observation-options,
   .evidence-classification-grid,
   .reliability-flag-grid {
     grid-template-columns: 1fr;

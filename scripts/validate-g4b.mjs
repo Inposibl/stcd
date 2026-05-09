@@ -52,8 +52,12 @@ assert.deepEqual(TARGET_SELF_ASSESSMENT_DATA.sources, [
   "ST_Target_Self_Assessment_Module.xlsx",
   "ST_Form_Binding_Prompt.xlsx",
 ]);
-assert.equal(TARGET_SELF_ASSESSMENT_DATA.targetSelfAssessment.questionCount, 10);
-assert.equal(TARGET_SELF_ASSESSMENT_DATA.targetSelfAssessment.questions.length, 10);
+assert.equal(TARGET_SELF_ASSESSMENT_DATA.targetSelfAssessment.worksheet, "3_Screening");
+assert.equal(TARGET_SELF_ASSESSMENT_DATA.targetSelfAssessment.questionCount, 11);
+assert.equal(TARGET_SELF_ASSESSMENT_DATA.targetSelfAssessment.questions.length, 11);
+assert.equal(TARGET_SELF_ASSESSMENT_DATA.targetSelfAssessment.questions.every((question) => question.options.length >= 5), true);
+assert.equal(TARGET_SELF_ASSESSMENT_DATA.targetSelfAssessment.questions.every((question) => Boolean(question.directObservationGate)), true);
+assert.equal(TARGET_SELF_ASSESSMENT_DATA.targetSelfAssessment.questions.every((question) => question.options.some((option) => option.value === "E")), true);
 
 const incompleteSession = Object.freeze({ sessionId: "incomplete" });
 const blockedPreliminary = attachPreliminaryAssessment(incompleteSession, "2026-05-01T00:00:00.000Z");
@@ -89,20 +93,20 @@ assert.equal(verifyTargetInvite(inviteResult.invite, "000000", "2026-05-01T01:00
 assert.equal(verifyTargetInvite(inviteResult.invite, "123456", "2026-05-04T00:00:01.000Z").status, "expired");
 assert.equal(verifyTargetInvite(inviteResult.invite, "123456", "2026-05-01T01:00:00.000Z").status, "verified");
 
-const positioning = { targetRole: "A", targetTenure: "C" };
+const positioning = { p1: "A", p2: "C" };
 const answers = Object.fromEntries(
   TARGET_SELF_ASSESSMENT_DATA.targetSelfAssessment.questions.map((question) => [question.id, evidenceClassifiedAnswer("A")]),
 );
 const targetScore = scoreTargetSelfAssessment(answers);
 assert.equal(targetScore.valid, true);
-assert.equal(targetScore.answeredQuestionCount, 10);
+assert.equal(targetScore.answeredQuestionCount, 11);
 assert.equal(targetScore.scoringModelVersion, "newlogic-layered-evidence-v1");
 assert.equal(targetScore.outputKind, "weighted_signal_pattern");
 assert.equal(targetScore.requiresAnalystReview, true);
 assert.equal(targetScore.legacyAdditiveScoring, false);
 assert.equal(targetScore.confidence, "high");
 assert.equal(targetScore.evidenceQuality.legacyOptionOnlyCount, 0);
-assert.equal(targetScore.evidenceQuality.directObservationCount, 10);
+assert.equal(targetScore.evidenceQuality.directObservationCount, 11);
 
 const targetSelfAssessment = buildTargetSelfAssessmentRecord(positioning, answers, "2026-05-01T01:30:00.000Z");
 assert.equal(targetSelfAssessment.completed, true);

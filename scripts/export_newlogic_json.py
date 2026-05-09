@@ -551,7 +551,7 @@ def parse_form_bindings():
                 "step2C": table_records(workbook, "STEP-2C", "Q #"),
                 "step2BLevel1": table_records(workbook, "STEP-2B-L1", "Q #"),
                 "step2BLevel2": table_records(workbook, "STEP-2B-L2", "Q #"),
-                "stepTargetObserved": table_records(workbook, "STEP-TOD", "Question_ID"),
+                "stepTargetObserved": table_records(workbook, "STEP-TOD", "Q #"),
             },
             "routingRows": compact_rows(workbook, "STEP-2B ROUTING"),
         }

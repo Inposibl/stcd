@@ -46,8 +46,14 @@ assert.equal(TARGET_DIAGNOSTIC_DATA.level1.questionCount, 12);
 assert.equal(TARGET_DIAGNOSTIC_DATA.level1.questions.length, 12);
 assert.equal(TARGET_DIAGNOSTIC_DATA.level2.questionCount, 10);
 assert.equal(TARGET_DIAGNOSTIC_DATA.level2.questions.length, 10);
-assert.equal(TARGET_DIAGNOSTIC_DATA.level1.questions.every((question) => question.options.length === 4), true);
-assert.equal(TARGET_DIAGNOSTIC_DATA.level2.questions.every((question) => question.options.length === 4), true);
+assert.equal(TARGET_DIAGNOSTIC_DATA.level1.worksheet, "3_Level_1_Screening");
+assert.equal(TARGET_DIAGNOSTIC_DATA.level2.worksheet, "4_Level_2_Deepening");
+assert.equal(TARGET_DIAGNOSTIC_DATA.level1.questions.every((question) => question.options.length >= 5), true);
+assert.equal(TARGET_DIAGNOSTIC_DATA.level2.questions.every((question) => question.options.length === 5), true);
+assert.equal(TARGET_DIAGNOSTIC_DATA.level1.questions.every((question) => Boolean(question.directObservationGate)), true);
+assert.equal(TARGET_DIAGNOSTIC_DATA.level2.questions.every((question) => Boolean(question.directObservationGate)), true);
+assert.equal(TARGET_DIAGNOSTIC_DATA.level1.questions.every((question) => question.options.some((option) => option.value === "E")), true);
+assert.equal(TARGET_DIAGNOSTIC_DATA.level2.questions.every((question) => question.options.some((option) => option.value === "E")), true);
 assert.equal(isTargetDiagnosticSourceLoaded(), true);
 
 const expectedOrder = [
