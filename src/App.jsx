@@ -4722,12 +4722,25 @@ function wrapPdfText(value, maxCharacters) {
   return lines.length ? lines : [""];
 }
 
+const PDF_BRAND = Object.freeze({
+  navy: "1F3864",
+  blue: "2E5FA3",
+  body: "222222",
+  muted: "666666",
+  lightText: "FFFFFF",
+  tableLine: "C8D7E8",
+  tableStripe: "F6F9FC",
+  panelFill: "EEF4FB",
+});
+
 function createSimplePdf(lineItems) {
   const pageWidth = 612;
   const pageHeight = 792;
   const left = 54;
+  const right = 54;
   const top = 742;
   const bottom = 54;
+  const contentWidth = pageWidth - left - right;
   const pages = [[]];
   let y = top;
 
@@ -4736,38 +4749,167 @@ function createSimplePdf(lineItems) {
     y = top;
   }
 
-  for (const item of lineItems) {
+  function rgb(hex = PDF_BRAND.body) {
+    const clean = String(hex).replace("#", "");
+    const value = clean.length === 3
+      ? clean.split("").map((part) => `${part}${part}`).join("")
+      : clean.padEnd(6, "0").slice(0, 6);
+    const red = parseInt(value.slice(0, 2), 16) / 255;
+    const green = parseInt(value.slice(2, 4), 16) / 255;
+    const blue = parseInt(value.slice(4, 6), 16) / 255;
+    return `${red.toFixed(3)} ${green.toFixed(3)} ${blue.toFixed(3)}`;
+  }
+
+  function rect(x, rectY, width, height, fill, stroke = "") {
+    const commands = [];
+    if (fill) commands.push(`${rgb(fill)} rg ${x} ${rectY} ${width} ${height} re f`);
+    if (stroke) commands.push(`${rgb(stroke)} RG ${x} ${rectY} ${width} ${height} re S`);
+    pages[pages.length - 1].push(commands.join("\n"));
+  }
+
+  function approximateTextWidth(text, fontSize) {
+    return normalizePdfText(text).length * fontSize * 0.48;
+  }
+
+  function textX(line, fontSize, align = "left") {
+    if (align === "center") return Math.max(left, (pageWidth - approximateTextWidth(line, fontSize)) / 2);
+    if (align === "right") return Math.max(left, pageWidth - right - approximateTextWidth(line, fontSize));
+    return left;
+  }
+
+  function addFooter() {
+    pages.forEach((page, index) => {
+      const footer = `Academy of Structural Typology  -  Confidential  -  ${index + 1}`;
+      const fontSize = 8;
+      page.push(`${rgb(PDF_BRAND.muted)} rg BT /F1 ${fontSize} Tf ${textX(footer, fontSize, "center")} 30 Td (${escapePdfText(footer)}) Tj ET`);
+    });
+  }
+
+  function ensureSpace(height) {
+    if (y - height < bottom) newPage();
+  }
+
+  function addTextItem(item) {
     const fontSize = item.size ?? 10;
     const lineHeight = item.lineHeight ?? Math.ceil(fontSize * 1.35);
     const maxCharacters = item.maxCharacters ?? (fontSize >= 16 ? 56 : 92);
+    const align = item.align ?? "left";
+    const font = item.bold ? "F2" : "F1";
 
     if (!item.text) {
       y -= item.space ?? 10;
       if (y < bottom) newPage();
-      continue;
+      return;
+    }
+
+    if (item.before) {
+      y -= item.before;
+      if (y < bottom) newPage();
+    }
+
+    if (item.fill) {
+      const wrapped = wrapPdfText(item.text, maxCharacters);
+      const boxHeight = wrapped.length * lineHeight + 14;
+      ensureSpace(boxHeight);
+      rect(left - 8, y - boxHeight + 5, contentWidth + 16, boxHeight, item.fill, item.stroke ?? PDF_BRAND.tableLine);
+      y -= 7;
     }
 
     for (const line of wrapPdfText(item.text, maxCharacters)) {
       if (y < bottom) newPage();
-      pages[pages.length - 1].push(`BT /F1 ${fontSize} Tf ${left} ${y} Td (${escapePdfText(line)}) Tj ET`);
+      pages[pages.length - 1].push(`${rgb(item.color ?? PDF_BRAND.body)} rg BT /${font} ${fontSize} Tf ${textX(line, fontSize, align)} ${y} Td (${escapePdfText(line)}) Tj ET`);
       y -= lineHeight;
     }
     y -= item.after ?? 0;
   }
 
+  function addRule(item) {
+    ensureSpace(16);
+    y -= item.before ?? 4;
+    pages[pages.length - 1].push(`${rgb(item.color ?? PDF_BRAND.tableLine)} RG ${left} ${y} m ${pageWidth - right} ${y} l S`);
+    y -= item.after ?? 10;
+  }
+
+  function tableCellText(value, limit) {
+    const text = normalizePdfText(value);
+    if (!limit || text.length <= limit) return text;
+    return `${text.slice(0, Math.max(0, limit - 3)).trim()}...`;
+  }
+
+  function addTable(item) {
+    const rows = item.rows ?? [];
+    if (rows.length === 0) return;
+    const columns = item.columns ?? rows[0].map(() => (contentWidth / rows[0].length));
+    const tableWidth = columns.reduce((sum, width) => sum + width, 0);
+    const padding = item.padding ?? 6;
+    const fontSize = item.size ?? 8.5;
+    const headerSize = item.headerSize ?? 8.5;
+    const lineHeight = item.lineHeight ?? 11;
+    const maxCellCharacters = item.maxCellCharacters ?? 280;
+
+    y -= item.before ?? 4;
+
+    rows.forEach((row, rowIndex) => {
+      const isHeader = rowIndex === 0 && item.header !== false;
+      const activeFontSize = isHeader ? headerSize : fontSize;
+      const cellLines = row.map((cell, cellIndex) => {
+        const width = columns[cellIndex] ?? (contentWidth / row.length);
+        const maxCharacters = Math.max(10, Math.floor((width - padding * 2) / (activeFontSize * 0.46)));
+        return wrapPdfText(tableCellText(cell, maxCellCharacters), maxCharacters);
+      });
+      const rowHeight = Math.max(...cellLines.map((lines) => lines.length)) * lineHeight + padding * 2;
+      ensureSpace(rowHeight + 4);
+      const rowY = y - rowHeight;
+      const fill = isHeader ? PDF_BRAND.navy : rowIndex % 2 === 0 ? PDF_BRAND.tableStripe : "FFFFFF";
+      rect(left, rowY, tableWidth, rowHeight, fill, PDF_BRAND.tableLine);
+
+      let x = left;
+      row.forEach((_, cellIndex) => {
+        const width = columns[cellIndex] ?? (contentWidth / row.length);
+        pages[pages.length - 1].push(`${rgb(PDF_BRAND.tableLine)} RG ${x} ${rowY} ${width} ${rowHeight} re S`);
+        const textColor = isHeader ? PDF_BRAND.lightText : PDF_BRAND.body;
+        const font = isHeader ? "F2" : "F1";
+        let textY = y - padding - activeFontSize;
+        for (const line of cellLines[cellIndex]) {
+          pages[pages.length - 1].push(`${rgb(textColor)} rg BT /${font} ${activeFontSize} Tf ${x + padding} ${textY} Td (${escapePdfText(line)}) Tj ET`);
+          textY -= lineHeight;
+        }
+        x += width;
+      });
+      y -= rowHeight;
+    });
+
+    y -= item.after ?? 12;
+  }
+
+  for (const item of lineItems) {
+    if (item.type === "pageBreak") {
+      newPage();
+    } else if (item.type === "rule") {
+      addRule(item);
+    } else if (item.type === "table") {
+      addTable(item);
+    } else {
+      addTextItem(item);
+    }
+  }
+
+  addFooter();
+
   const pageRefs = [];
   const objects = [];
   objects[1] = "<< /Type /Catalog /Pages 2 0 R >>";
   objects[3] = "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>";
+  objects[4] = "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>";
 
-  let objectId = 4;
+  let objectId = 5;
   for (const pageLines of pages) {
     const pageId = objectId;
     const contentId = objectId + 1;
     objectId += 2;
     pageRefs.push(`${pageId} 0 R`);
     const content = pageLines.join("\n");
-    objects[pageId] = `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pageWidth} ${pageHeight}] /Resources << /Font << /F1 3 0 R >> >> /Contents ${contentId} 0 R >>`;
+    objects[pageId] = `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pageWidth} ${pageHeight}] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents ${contentId} 0 R >>`;
     objects[contentId] = `<< /Length ${content.length} >>\nstream\n${content}\nendstream`;
   }
 
@@ -4958,78 +5100,319 @@ function listPublicResourceNames(rows) {
   return `${rows.slice(0, -1).map((row) => row.resource).join(", ")}, and ${rows.at(-1).resource}`;
 }
 
+function addCaseStudyPdfSection(items, number, title) {
+  items.push({ type: "rule", color: PDF_BRAND.tableLine, before: 4, after: 10 });
+  items.push({
+    text: `${number}. ${title}`,
+    size: 14,
+    bold: true,
+    color: PDF_BRAND.navy,
+    after: 8,
+    maxCharacters: 68,
+  });
+}
+
+function addCaseStudyPdfParagraph(items, text, options = {}) {
+  if (!text) return;
+  items.push({
+    text,
+    size: options.size ?? 10,
+    color: options.color ?? PDF_BRAND.body,
+    bold: options.bold ?? false,
+    after: options.after ?? 7,
+    maxCharacters: options.maxCharacters ?? 92,
+    fill: options.fill,
+    stroke: options.stroke,
+  });
+}
+
+function addCaseStudyPdfBulletList(items, bullets) {
+  for (const bullet of bullets.filter(Boolean)) {
+    addCaseStudyPdfParagraph(items, `- ${bullet}`, { after: 4 });
+  }
+}
+
 function buildFinalDeliverablesReportLines(deliverable, session) {
   if (!deliverable?.ready) {
     return [
-      { text: "Structural Typology Integration Risk Report", size: 18, after: 10 },
-      { text: "The report is not ready for this session.", size: 11 },
+      { text: "ACADEMY OF STRUCTURAL TYPOLOGY", size: 11, bold: true, align: "center", color: PDF_BRAND.navy, after: 8 },
+      { text: "M&A INTEGRATION RISK DUE DILIGENCE", size: 17, bold: true, align: "center", color: PDF_BRAND.navy, after: 10 },
+      { text: "The report is not ready for this session.", size: 11, align: "center", color: PDF_BRAND.muted },
     ];
   }
 
-  const seen = new Set();
-  const lines = [
-    { text: "Structural Typology Integration Risk Report", size: 18, after: 6, maxCharacters: 56 },
-    { text: "Preliminary Assessment and Final Deliverables", size: 13, after: 10, maxCharacters: 70 },
-    { text: `${deliverable.acquirerAlias} acquiring ${deliverable.targetAlias}`, size: 15, after: 10, maxCharacters: 64 },
+  const finalReport = finalReportStructureForSession(session, deliverable);
+  const dealContext = session?.dealContext?.data ?? {};
+  const evidenceItems = evidenceItemsFromSession(session).slice(0, 6);
+  const evidenceCoverage = finalReport.evidenceCoverage;
+  const contradictionFindings = finalReport.contradictionReport.findings.slice(0, 6);
+  const triageReport = finalReport.triageReport;
+  const riskOutputReport = finalReport.riskOutputReport;
+  const resourceRows = deliverable.resourceConflictProfile?.highProbabilityConflicts?.slice(0, 4) ?? [];
+  const analystWorksheet = finalReport.analystWorksheet;
+  const generatedDate = new Date(finalReport.generatedAt).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+  const items = [
+    { text: "ACADEMY OF STRUCTURAL TYPOLOGY", size: 11, bold: true, align: "center", color: PDF_BRAND.navy, after: 8, maxCharacters: 80 },
+    { text: "M&A INTEGRATION RISK DUE DILIGENCE", size: 17, bold: true, align: "center", color: PDF_BRAND.navy, after: 8, maxCharacters: 80 },
+    {
+      text: `${deliverable.acquirerAlias} - ${deliverable.targetAlias}: Structural Typology Final Report`,
+      size: 12,
+      align: "center",
+      color: PDF_BRAND.blue,
+      after: 7,
+      maxCharacters: 82,
+    },
+    {
+      text: "Preliminary Assessment Report, Final Deliverables Report, Analyst Findings, and Final Risk Outputs",
+      size: 10,
+      align: "center",
+      color: "444444",
+      after: 7,
+      maxCharacters: 88,
+    },
+    {
+      text: `M&A Integration Risk Due Diligence Series  -  ${generatedDate}`,
+      size: 9,
+      align: "center",
+      color: PDF_BRAND.muted,
+      after: 5,
+      maxCharacters: 90,
+    },
+    {
+      text: "structural-typology.com  -  info@structural-typology.academy",
+      size: 9,
+      align: "center",
+      color: PDF_BRAND.muted,
+      after: 16,
+      maxCharacters: 90,
+    },
   ];
 
-  addReportSection(lines, seen, "Executive Summary");
-  addReportBullets(lines, seen, [
-    `Compatibility range: ${deliverable.compatibilityRange}.`,
-    `Risk band: ${deliverable.riskBand}.`,
+  addCaseStudyPdfSection(items, 1, "Executive Summary");
+  addCaseStudyPdfParagraph(
+    items,
     deliverable.narrative?.headline ?? deliverable.headline,
-  ]);
-
-  buildPreliminaryAssessmentReportLines(lines, seen, session, deliverable);
-
-  const finalReport = finalReportStructureForSession(session, deliverable);
-  addReportSection(lines, seen, "Structured Final Report");
-  for (const sectionItem of finalReport.sections) {
-    addReportLine(lines, seen, sectionItem.title, { size: 12, after: 3, unique: false });
-    addReportLine(lines, seen, sectionItem.summary, { size: 10, after: 3, unique: false });
-    addReportBullets(lines, seen, sectionItem.items);
+    { size: 11, bold: true, color: PDF_BRAND.navy, fill: PDF_BRAND.panelFill, stroke: PDF_BRAND.tableLine, after: 10 },
+  );
+  addCaseStudyPdfParagraph(
+    items,
+    deliverable.screen === "screen-10b"
+      ? deliverable.body
+      : deliverable.narrative?.situation,
+  );
+  if (deliverable.narrative?.implication) {
+    addCaseStudyPdfParagraph(items, `If the signal appears: ${deliverable.narrative.implication}`);
   }
 
-  addReportSection(lines, seen, "Final Deliverables Report");
-  if (deliverable.screen === "screen-10b") {
-    addReportLine(lines, seen, "Integration Thesis", { size: 12, after: 3, unique: false });
-    addReportLine(lines, seen, deliverable.body, { size: 10, after: 8 });
-  } else {
-    addReportLine(lines, seen, "Integration Thesis", { size: 12, after: 3, unique: false });
-    addReportLine(lines, seen, deliverable.narrative?.situation, { size: 10, after: 5 });
-    addReportLine(lines, seen, `If the signal appears: ${deliverable.narrative?.implication ?? ""}`, { size: 10, after: 8 });
+  items.push({
+    type: "table",
+    columns: [170, 334],
+    rows: [
+      ["Report Field", "Data"],
+      ["Compatibility range", deliverable.compatibilityRange],
+      ["Risk band", deliverable.riskBand],
+      ["Report gate", triageReport.routing?.gateLabel ?? "Analyst review required"],
+      ["Confidence cap", triageReport.routing?.confidenceCap ?? riskOutputReport.confidenceCap],
+      ["Top risk output", riskOutputReport.rankedOutputs[0]?.riskCategory ?? "Monitor"],
+    ],
+    maxCellCharacters: 260,
+  });
+
+  addCaseStudyPdfSection(items, 2, "Deal Context");
+  items.push({
+    type: "table",
+    columns: [170, 334],
+    rows: [
+      ["Transaction Detail", "Data"],
+      ["Acquirer", dealContext.acquirerName ?? "Acquirer pending"],
+      ["Target", dealContext.targetName ?? "Target pending"],
+      ["Deal type", optionTitle(DEAL_TYPE_OPTIONS, dealContext.dealType)],
+      ["Acquisition motive", optionTitle(ACQUISITION_MOTIVE_OPTIONS, dealContext.acquisitionMotive)],
+      ["Respondent", [
+        optionTitle(RESPONDENT_SIDE_OPTIONS, dealContext.respondentSide),
+        optionTitle(RESPONDENT_ROLE_OPTIONS, dealContext.respondentRole),
+        optionTitle(RESPONDENT_SENIORITY_OPTIONS, dealContext.respondentSeniority),
+        optionTitle(RESPONDENT_FUNCTION_OPTIONS, dealContext.respondentFunction),
+        optionTitle(RESPONDENT_ACCESS_LEVEL_OPTIONS, dealContext.respondentAccessLevel),
+      ].filter(Boolean).join("; ")],
+    ],
+    maxCellCharacters: 320,
+  });
+
+  addCaseStudyPdfSection(items, 3, "Evidence Coverage and Reliability");
+  addCaseStudyPdfParagraph(
+    items,
+    "The final report separates respondent answers from documentary and analyst-reviewed evidence. Respondent answers are interpreted as structured evidence, not treated as factual truth.",
+  );
+  items.push({
+    type: "table",
+    columns: [170, 334],
+    rows: [
+      ["Coverage Item", "Status"],
+      ["Evidence captured", `${evidenceCoverage.totalCount} item(s)`],
+      ["Verified evidence", `${evidenceCoverage.verifiedCount} verified; ${evidenceCoverage.disputedCount} disputed`],
+      ["Linked findings", `${evidenceCoverage.linkedFindingCount} linked to contradiction or analyst findings`],
+      ["Verified risk coverage", evidenceCoverage.verifiedRiskCategories.length ? evidenceCoverage.verifiedRiskCategories.join(", ") : "No verified risk-category evidence captured yet"],
+      ["Analyst worksheet", `${analystWorksheet.reviewedCount}/${analystWorksheet.findingCount} finding(s) reviewed`],
+    ],
+    maxCellCharacters: 320,
+  });
+  if (evidenceItems.length > 0) {
+    items.push({
+      type: "table",
+      columns: [150, 94, 260],
+      rows: [
+        ["Evidence Item", "Status", "Analyst Extract"],
+        ...evidenceItems.map((item) => [
+          item.title,
+          optionLabel(EVIDENCE_REVIEW_STATUS_OPTIONS, item.reviewStatus),
+          item.analystExtract || item.storageReference,
+        ]),
+      ],
+      maxCellCharacters: 220,
+    });
   }
 
+  addCaseStudyPdfSection(items, 4, "Contradiction Review and Triage");
+  items.push({
+    type: "table",
+    columns: [150, 94, 260],
+    rows: [
+      ["Finding", "Severity", "Diagnostic Meaning"],
+      ...contradictionFindings.map((finding) => [
+        finding.title,
+        contradictionSeverityLabel(finding.severity),
+        finding.explanation,
+      ]),
+    ],
+    maxCellCharacters: 260,
+  });
+  items.push({
+    type: "table",
+    columns: [170, 334],
+    rows: [
+      ["Triage Item", "Data"],
+      ["Effective tier", triageTierLabel(triageReport.effectiveTier)],
+      ["Reliability tier", triageTierLabel(triageReport.reliabilityTier)],
+      ["Contradiction tier", triageTierLabel(triageReport.contradictionTier)],
+      ["Instrument action", triageReport.instrumentAction],
+      ["Routing", `${triageReport.routing?.label ?? ""}. ${triageReport.routing?.action ?? ""}`],
+    ],
+    maxCellCharacters: 320,
+  });
+
+  addCaseStudyPdfSection(items, 5, "Formal Risk Output Records");
+  items.push({
+    type: "table",
+    columns: [144, 74, 62, 224],
+    rows: [
+      ["Risk Category", "Severity", "Score", "Analyst Interpretation"],
+      ...riskOutputReport.rankedOutputs.map((risk) => [
+        risk.riskCategory,
+        `${risk.severity}; ${risk.confidence}`,
+        `${risk.score}/100`,
+        `${risk.divergenceSummary} ${risk.evidenceSummary}`,
+      ]),
+    ],
+    maxCellCharacters: 230,
+  });
+
+  addCaseStudyPdfSection(items, 6, "Final Deliverables Report");
+  addCaseStudyPdfParagraph(
+    items,
+    "This section translates the diagnostic findings into the integration-control agenda for the specific deal pair.",
+  );
   if (deliverable.protocol?.dealInsights?.length) {
-    addReportLine(lines, seen, "Integration Control Agenda", { size: 12, after: 3, unique: false });
-    for (const insight of deliverable.protocol.dealInsights) {
-      addReportLine(lines, seen, insight.title, { size: 11, after: 2, unique: false });
-      addReportLine(lines, seen, insight.text, { size: 10, after: 5 });
-    }
+    items.push({
+      type: "table",
+      columns: [170, 334],
+      rows: [
+        ["Control Area", "Recommendation"],
+        ...deliverable.protocol.dealInsights.map((insight) => [insight.title, insight.text]),
+      ],
+      maxCellCharacters: 340,
+    });
+  }
+
+  if (resourceRows.length > 0) {
+    addCaseStudyPdfParagraph(items, "Primary resource-risk cluster", { size: 11, bold: true, color: PDF_BRAND.blue, after: 4 });
+    addCaseStudyPdfBulletList(items, resourceRows.map((row) => `${row.resource}: ${row.potentialRisk}`));
   }
 
   if (deliverable.anchors?.length) {
-    addReportLine(lines, seen, "Integration Friction Outlook", { size: 12, after: 3, unique: false });
-    for (const anchor of deliverable.anchors) {
-      addReportLine(lines, seen, `${anchor.label}: ${anchor.text}`, { size: 10, after: 4 });
-    }
+    items.push({
+      type: "table",
+      columns: [150, 354],
+      rows: [
+        ["Prediction Anchor", "Friction Outlook"],
+        ...deliverable.anchors.map((anchor) => [anchor.label, anchor.text]),
+      ],
+      maxCellCharacters: 320,
+    });
   }
 
-  const riskOutputReport = riskOutputReportForSession(session);
-  addReportLine(lines, seen, "Final Risk Outputs", { size: 12, after: 3, unique: false });
-  addReportBullets(lines, seen, riskOutputReport.rankedOutputs.map((risk) => (
-    `${risk.riskCategory}: ${risk.severity} severity, confidence ${risk.confidence}, score ${risk.score}/100. ${risk.divergenceSummary} ${risk.evidenceSummary}`
-  )));
-
-  addReportLine(lines, seen, "Recommended Action", { size: 12, after: 3, unique: false });
-  addReportLine(
-    lines,
-    seen,
+  addCaseStudyPdfSection(items, 7, "Recommended Action and Limitations");
+  addCaseStudyPdfParagraph(
+    items,
     "Use this report as the deal-level integration hypothesis. Confirm individual leadership fit before final sequencing decisions, and open a practitioner consultation when the transaction moves into integration planning.",
-    { size: 10, after: 6 },
+    { fill: PDF_BRAND.panelFill, stroke: PDF_BRAND.tableLine },
+  );
+  addCaseStudyPdfBulletList(
+    items,
+    finalReport.sections.find((section) => section.id === "limitations")?.items ?? [],
   );
 
-  return lines;
+  addCaseStudyPdfSection(items, 8, "Final Report Structure");
+  items.push({
+    type: "table",
+    columns: [42, 170, 292],
+    rows: [
+      ["No.", "Section", "Purpose"],
+      ...finalReport.sections.map((section, index) => [
+        String(index + 1),
+        section.title,
+        section.summary,
+      ]),
+    ],
+    maxCellCharacters: 260,
+  });
+
+  items.push({ type: "rule", color: PDF_BRAND.tableLine, before: 8, after: 10 });
+  addCaseStudyPdfParagraph(items, "ABOUT STRUCTURAL TYPOLOGY", {
+    size: 10,
+    bold: true,
+    color: PDF_BRAND.navy,
+    after: 4,
+    maxCharacters: 90,
+  });
+  addCaseStudyPdfParagraph(
+    items,
+    "Structural Typology is a predictive model of organisational behaviour applied here to M&A integration risk. Its final diagnostic output distinguishes what respondents said, what evidence supports, what evidence contradicts, what remains unknown, and where analyst interpretation is required.",
+    { size: 9, color: "444444", after: 8 },
+  );
+  items.push({
+    text: "structural-typology.com  -  info@structural-typology.academy",
+    size: 9,
+    align: "center",
+    color: PDF_BRAND.blue,
+    after: 4,
+    maxCharacters: 90,
+  });
+  items.push({
+    text: `Academy of Structural Typology  -  ${generatedDate}  -  Confidential`,
+    size: 9,
+    align: "center",
+    color: "888888",
+    after: 4,
+    maxCharacters: 90,
+  });
+
+  return items;
 }
 
 function downloadFinalDeliverablesReportPdf(deliverable, offer, session) {
