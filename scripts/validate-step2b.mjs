@@ -38,16 +38,15 @@ function lowConfidenceAnswers(questions, value) {
   );
 }
 
-assert.deepEqual(TARGET_DIAGNOSTIC_DATA.sources, [
-  "ST_Environment_Diagnostic_v2.xlsx",
-  "ST_Form_Binding_Prompt.xlsx",
-]);
+assert.equal("sources" in TARGET_DIAGNOSTIC_DATA, false);
 assert.equal(TARGET_DIAGNOSTIC_DATA.level1.questionCount, 12);
 assert.equal(TARGET_DIAGNOSTIC_DATA.level1.questions.length, 12);
 assert.equal(TARGET_DIAGNOSTIC_DATA.level2.questionCount, 10);
 assert.equal(TARGET_DIAGNOSTIC_DATA.level2.questions.length, 10);
-assert.equal(TARGET_DIAGNOSTIC_DATA.level1.worksheet, "3_Level_1_Screening");
-assert.equal(TARGET_DIAGNOSTIC_DATA.level2.worksheet, "4_Level_2_Deepening");
+assert.equal("source" in TARGET_DIAGNOSTIC_DATA.level1, false);
+assert.equal("worksheet" in TARGET_DIAGNOSTIC_DATA.level1, false);
+assert.equal("source" in TARGET_DIAGNOSTIC_DATA.level2, false);
+assert.equal("worksheet" in TARGET_DIAGNOSTIC_DATA.level2, false);
 assert.equal(TARGET_DIAGNOSTIC_DATA.level1.questions.every((question) => question.options.length >= 5), true);
 assert.equal(TARGET_DIAGNOSTIC_DATA.level2.questions.every((question) => question.options.length === 5), true);
 assert.equal(TARGET_DIAGNOSTIC_DATA.level1.questions.every((question) => Boolean(question.directObservationGate)), true);

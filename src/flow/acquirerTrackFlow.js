@@ -464,9 +464,7 @@ export function attachDealContext(session, input, storedAt = new Date().toISOStr
 
 export function isAcquirerModuleSourceLoaded(data = ACQUIRER_TRACK_DATA) {
   return Boolean(
-    data?.acquirerModule?.source === "ST_Acquirer_Environment_Module.xlsx"
-      && data?.acquirerModule?.worksheet === "3_Screening"
-      && data.acquirerModule.questionCount >= 11
+    data?.acquirerModule?.questionCount >= 11
       && Array.isArray(data.acquirerModule.questions)
       && data.acquirerModule.questions.length === data.acquirerModule.questionCount
       && data.acquirerModule.questions.every((question) => question.options.length >= 4),

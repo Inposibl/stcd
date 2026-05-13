@@ -43,7 +43,6 @@ export const CASE_STUDIES = Object.freeze([
     acquirerEnvironment: "The Performance Arena",
     targetEnvironment: "The Disruption Lab",
     excerpt: "The $36 billion merger of equals between two analytical-execution environments destroyed value because Daimler forced Chrysler's speed-first operating model into a long-horizon engineering hierarchy.",
-    sourceFile: "ST_Daimler_Chrysler_Case_Study.docx",
     protocolBody: "High surface compatibility required strict boundary design. Full integration was possible only through explicit interface protocols between Daimler's standards architecture and Chrysler's fast-market product system.",
     protocolStabilization: "Structural stabilisation: before Day 1 integration design",
     acquirer: {
@@ -104,7 +103,6 @@ export const CASE_STUDIES = Object.freeze([
     acquirerEnvironment: "The Performance Arena",
     targetEnvironment: "The Power Racket",
     excerpt: "A Performance Arena absorbing a Dominance Structure introduced an irreconcilable conflict into the world's largest bank: disciplined institutional governance versus predatory trading autonomy.",
-    sourceFile: "ST_Deutsche_Bankers_Trust_Case_Study.docx",
     protocolBody: "Selective integration was required. Bankers Trust's trading capability could be imported only behind hard external compliance rules and ring-fenced internal operating conditions.",
     protocolStabilization: "Structural stabilisation: 12-18 months with permanent governance boundary",
     acquirer: {
@@ -165,7 +163,6 @@ export const CASE_STUDIES = Object.freeze([
     acquirerEnvironment: "The Performance Arena",
     targetEnvironment: "The Idea Lab",
     excerpt: "Pfizer's three acquisitions systematically destroyed the world's most productive pharmaceutical R&D engines by applying process governance to discovery environments.",
-    sourceFile: "ST_Pfizer_Case_Study.docx",
     protocolBody: "High compatibility concealed the dangerous conflict. Commercial assets could integrate; discovery research needed a protected Idea Lab governance model outside Pfizer portfolio-management control.",
     protocolStabilization: "Structural stabilisation: discovery units ring-fenced before portfolio integration",
     acquirer: {
@@ -226,7 +223,6 @@ export const CASE_STUDIES = Object.freeze([
     acquirerEnvironment: "The Disruption Lab",
     targetEnvironment: "The Performance Arena",
     excerpt: "The largest merger in history between a Disruption Lab and a Performance Arena produced the largest annual corporate loss in history because each side rejected the other's validation logic.",
-    sourceFile: "ST_AOL_TimeWarner_Case_Study.docx",
     protocolBody: "High ECS required a formal validation-boundary protocol. AOL's fast subscriber and advertising logic could not be treated as the same operating system as Time Warner's standards-driven content institutions.",
     protocolStabilization: "Structural stabilisation: before synergy targets were assigned",
     acquirer: {
@@ -287,7 +283,6 @@ export const CASE_STUDIES = Object.freeze([
     acquirerEnvironment: "The Performance Arena",
     targetEnvironment: "The Hometown Network",
     excerpt: "The largest engineering merger in history produced a net loss, $4.6B in debt, and the eventual sale of the business it was built to create because client relationships were treated as transferable assets.",
-    sourceFile: "ST_AECOM_URS_Case_Study.docx",
     protocolBody: "Selective integration was mandatory. AECOM could add global delivery capability to URS relationships, but could not replace URS's trust-based client architecture with a single Performance Arena management model.",
     protocolStabilization: "Structural stabilisation: 18-24 months, with permanent relationship-capital boundary",
     acquirer: {
@@ -348,7 +343,6 @@ export const CASE_STUDIES = Object.freeze([
     acquirerEnvironment: "The Performance Arena",
     targetEnvironment: "The Performance Arena",
     excerpt: "Two Performance Arena giants created the world's most profitable corporation because they shared the same resource hierarchy, authority logic, and definition of operating success.",
-    sourceFile: "ST_ExxonMobil_Case_Study.docx",
     protocolBody: "Full integration confirmed. The remaining risk was execution complexity: redundant infrastructure, antitrust divestitures, and performance-standard consistency across the combined entity.",
     protocolStabilization: "Structural stabilisation: 3-6 months",
     acquirer: {
@@ -409,7 +403,6 @@ export const CASE_STUDIES = Object.freeze([
     acquirerEnvironment: "The Performance Arena",
     targetEnvironment: "The Performance Arena",
     excerpt: "Installing the target's CEO and risk governance reversed standard integration logic and built the Fortress Balance Sheet that survived 2008.",
-    sourceFile: "ST_JPMorganBankOne_Case_Study.docx",
     protocolBody: "Full integration confirmed, with one additional requirement: identify the superior implementation of the shared Performance Arena and install that architecture as the governing model.",
     protocolStabilization: "Structural stabilisation: 6-12 months",
     acquirer: {
@@ -470,7 +463,6 @@ export const CASE_STUDIES = Object.freeze([
     acquirerEnvironment: "The Disruption Lab",
     targetEnvironment: "The Disruption Lab",
     excerpt: "The $50M acquisition that became a trillion: two Disruption Labs sharing identical engineering credibility hierarchies, platform thinking, and open-systems philosophy.",
-    sourceFile: "ST_GoogleAndroid_Case_Study.docx",
     protocolBody: "Full integration confirmed. Integration is viable without governance conflict because both environments share compressed time, engineering authority, open-systems logic, and natural consolidation.",
     protocolStabilization: "Structural stabilisation: 3-6 months",
     acquirer: {
@@ -532,7 +524,6 @@ export const CASE_STUDIES = Object.freeze([
     acquirerEnvironment: "The Performance Arena",
     targetEnvironment: "The Idea Lab",
     excerpt: "A $7.4B purchase created over $100B in franchise value by refusing what every integration playbook recommended: Disney protected Pixar's Idea Lab governance.",
-    sourceFile: "ST_DisneyPixar_Case_Study.docx",
     protocolBody: "Full corporate integration was viable only because creative governance was not integrated. Pixar's creative authority had to govern the animation system rather than sit beneath Disney's commercial review hierarchy.",
     protocolStabilization: "Structural stabilisation: immediate creative-governance boundary",
     acquirer: {
@@ -593,7 +584,6 @@ export const CASE_STUDIES = Object.freeze([
     acquirerEnvironment: "The Disruption Lab",
     targetEnvironment: "The Hometown Network",
     excerpt: "The most structurally complex success case: a Disruption Lab acquired a Hometown Network at a strained ECS and preserved the asset by integrating only the infrastructure layer.",
-    sourceFile: "ST_AmazonWholeFoods_Case_Study.docx",
     protocolBody: "Selective integration was mandatory. Amazon could integrate data, Prime pricing, logistics, and supply-chain infrastructure; it could not replace the human-mediated trust layer of the stores.",
     protocolStabilization: "Structural stabilisation: permanent boundary management",
     acquirer: {
