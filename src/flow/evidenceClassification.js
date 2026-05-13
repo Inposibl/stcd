@@ -77,7 +77,9 @@ const EVIDENCE_TYPE_VALUES = new Set(EVIDENCE_TYPE_OPTIONS.map((option) => optio
 const KNOWLEDGE_LEVEL_VALUES = new Set(KNOWLEDGE_LEVEL_OPTIONS.map((option) => option.value));
 const CONFIDENCE_LEVEL_VALUES = new Set(CONFIDENCE_LEVEL_OPTIONS.map((option) => option.value));
 const RELIABILITY_FLAG_VALUES = new Set(RELIABILITY_FLAG_OPTIONS.map((option) => option.value));
-const INDIRECT_EVIDENCE_TYPES = new Set(["reported_by_others", "inference", "hypothetical", "unknown"]);
+const CANNOT_ANSWER_OPTION_VALUES = new Set(["E"]);
+const INDIRECT_EVIDENCE_TYPES = new Set(["document_supported", "reported_by_others", "inference", "hypothetical", "unknown"]);
+const NO_DIRECT_KNOWLEDGE_FLAG = "no_direct_knowledge";
 
 function normalizeString(value) {
   return typeof value === "string" ? value.trim() : "";
@@ -130,8 +132,21 @@ function withFlag(flags, flag) {
   return Object.freeze([...new Set([...flags, flag])]);
 }
 
+function withoutFlag(flags, flag) {
+  return Object.freeze(flags.filter((item) => item !== flag));
+}
+
+function isCannotAnswerOption(value) {
+  return CANNOT_ANSWER_OPTION_VALUES.has(normalizeString(value));
+}
+
 export function updateEvidenceAnswer(answer, patch = {}) {
   const current = normalizeEvidenceAnswer(answer);
+  const selectedOptionChanged = Object.prototype.hasOwnProperty.call(patch, "selectedOption")
+    && normalizeString(patch.selectedOption) !== current.selectedOption;
+  const evidenceTypeChangedAwayFromUnknown = Object.prototype.hasOwnProperty.call(patch, "evidenceType")
+    && current.evidenceType === "unknown"
+    && normalizeString(patch.evidenceType) !== "unknown";
   let next = {
     ...current,
     ...patch,
@@ -149,13 +164,30 @@ export function updateEvidenceAnswer(answer, patch = {}) {
     source: "structured_answer",
   };
 
-  if (next.evidenceType === "unknown") {
+  if (
+    (selectedOptionChanged && isCannotAnswerOption(current.selectedOption) && !isCannotAnswerOption(next.selectedOption))
+    || (evidenceTypeChangedAwayFromUnknown && !isCannotAnswerOption(next.selectedOption))
+  ) {
+    const reliabilityFlags = withoutFlag(next.reliabilityFlags, NO_DIRECT_KNOWLEDGE_FLAG);
+    next = {
+      ...next,
+      directObservationGate: "",
+      evidenceType: evidenceTypeChangedAwayFromUnknown ? next.evidenceType : "",
+      knowledgeLevel: "",
+      confidence: "",
+      reliabilityFlags,
+      reliabilityFlagsAcknowledged: reliabilityFlags.length > 0,
+    };
+  }
+
+  if (isCannotAnswerOption(next.selectedOption) || next.evidenceType === "unknown") {
     next = {
       ...next,
       directObservationGate: "no",
       knowledgeLevel: "not_known",
       confidence: "cannot_determine",
-      reliabilityFlags: withFlag(next.reliabilityFlags, "no_direct_knowledge"),
+      evidenceType: "unknown",
+      reliabilityFlags: withFlag(next.reliabilityFlags, NO_DIRECT_KNOWLEDGE_FLAG),
       reliabilityFlagsAcknowledged: true,
     };
   }
@@ -203,7 +235,7 @@ export function validateEvidenceClassifiedAnswer(answer) {
 
   const consistencyIssues = [];
   if (normalized.directObservationGate === "no" && !INDIRECT_EVIDENCE_TYPES.has(normalized.evidenceType)) {
-    consistencyIssues.push("indirect answers cannot use direct-observation or document-supported evidence type");
+    consistencyIssues.push("indirect answers cannot use direct-observation evidence type");
   }
   if (normalized.directObservationGate === "yes" && normalized.evidenceType === "unknown") {
     consistencyIssues.push("directly observed answers cannot use unknown evidence type");
