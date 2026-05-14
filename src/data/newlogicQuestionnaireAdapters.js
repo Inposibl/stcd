@@ -1,4 +1,4 @@
-import questionnairesArtifact from "../generated/newlogic/publicQuestionnaires.json" with { type: "json" };
+import questionnairesArtifact from "../generated/newlogic/questionnaires.json" with { type: "json" };
 
 const MODULES = Object.freeze(Object.fromEntries(
   questionnairesArtifact.modules.map((module) => [module.id, module]),
@@ -61,14 +61,18 @@ function normalizeGate(question) {
   if (typeof question.directObservationGate === "string" && question.directObservationGate.trim()) {
     return Object.freeze({
       prompt: question.directObservationGate.trim(),
+      validation: "yes / no / document_supported",
       note: "Answer this before selecting an option.",
+      sourceRow: question.sourceRow,
     });
   }
 
   if (question.questionType === "single_choice" && question.workbookQuestionId?.startsWith("TED")) {
     return Object.freeze({
       prompt: "Direct Observation Gate - did your diligence team produce direct, observable evidence on this dimension?",
+      validation: "yes / no / document_supported",
       note: "Answer this before selecting an option.",
+      sourceRow: question.sourceRow,
     });
   }
 
@@ -103,7 +107,8 @@ function runtimeQuestionnaireModule(id, worksheet) {
   const module = moduleById(id);
   const questions = freezeQuestions(module.questions);
   return Object.freeze({
-    label: worksheet,
+    source: module.sourceWorkbook,
+    worksheet,
     questionCount: questions.length,
     questions,
   });
@@ -112,11 +117,12 @@ function runtimeQuestionnaireModule(id, worksheet) {
 export function buildAcquirerTrackData() {
   const module = moduleById("acquirerEnvironment");
   return Object.freeze({
+    sources: Object.freeze(["ST_Acquirer_Environment_Module.xlsx", "ST_Form_Binding_Prompt.xlsx", "ST_Consulting_Pages_v2.xlsx"]),
     landing: LANDING_COPY,
     promise: PROMISE_COPY,
     dealContextFields: Object.freeze([]),
     positioningFields: freezePositioningFields(module.positioningFields),
-    acquirerModule: runtimeQuestionnaireModule("acquirerEnvironment", "Acquirer module"),
+    acquirerModule: runtimeQuestionnaireModule("acquirerEnvironment", "3_Screening"),
   });
 }
 
@@ -124,25 +130,28 @@ export function buildTargetDiagnosticData() {
   const level1 = moduleById("environmentLevel1");
   const level2 = moduleById("environmentLevel2");
   return Object.freeze({
+    sources: Object.freeze(["ST_Environment_Diagnostic_v2.xlsx", "ST_Form_Binding_Prompt.xlsx"]),
     positioningFields: freezePositioningFields(level1.positioningFields),
-    level1: runtimeQuestionnaireModule("environmentLevel1", "Target diagnostic Level 1"),
-    level2: runtimeQuestionnaireModule("environmentLevel2", "Target diagnostic Level 2"),
+    level1: runtimeQuestionnaireModule("environmentLevel1", "3_Level_1_Screening"),
+    level2: runtimeQuestionnaireModule("environmentLevel2", "4_Level_2_Deepening"),
   });
 }
 
 export function buildTargetSelfAssessmentData() {
   const module = moduleById("targetSelfAssessment");
   return Object.freeze({
+    sources: Object.freeze(["ST_Target_Self_Assessment_Module.xlsx", "ST_Form_Binding_Prompt.xlsx"]),
     positioningFields: freezePositioningFields(module.positioningFields),
-    targetSelfAssessment: runtimeQuestionnaireModule("targetSelfAssessment", "Target self-assessment"),
+    targetSelfAssessment: runtimeQuestionnaireModule("targetSelfAssessment", "3_Screening"),
     receipt: TARGET_SELF_RECEIPT,
   });
 }
 
 export function buildTargetObservationDiagnosticData() {
-  const module = runtimeQuestionnaireModule("targetObservedEnvironment", "Target Observer questionnaire");
+  const module = runtimeQuestionnaireModule("targetObservedEnvironment", "Questionnaire");
   return Object.freeze({
-    label: module.label,
+    source: module.source,
+    worksheet: module.worksheet,
     questionCount: module.questionCount,
     questions: module.questions,
   });

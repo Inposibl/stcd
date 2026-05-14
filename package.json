@@ -5,7 +5,6 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
-    "prebuild": "node scripts/build-public-questionnaires.mjs",
     "build": "vite build",
     "preview": "vite preview --host 127.0.0.1",
     "validate:g2": "node scripts/validate-g2.mjs",
@@ -26,10 +25,7 @@
     "validate:screen12": "node scripts/validate-screen12.mjs",
     "validate:consultation": "node scripts/validate-consultation.mjs",
     "validate:g5": "node scripts/validate-g5.mjs",
-    "export:newlogic": "python scripts/export_newlogic_json.py && node scripts/build-public-questionnaires.mjs",
-    "build:public-questionnaires": "node scripts/build-public-questionnaires.mjs",
-    "redact:public-final-data": "node scripts/redact-public-final-deliverable-data.mjs",
-    "validate:public-redaction": "node scripts/validate-public-redaction.mjs"
+    "export:newlogic": "python scripts/export_newlogic_json.py"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^5.0.0",

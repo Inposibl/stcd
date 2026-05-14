@@ -1,8 +1,16 @@
 /* Generated from final deliverable source files. Do not edit manually. */
 export const FINAL_DELIVERABLE_DATA = Object.freeze({
-  "sources": [],
+  "sources": [
+    "ST_Free_Tier_Output_Narratives_updated.xlsx",
+    "ST_Friction_Point_Lookup_updated.xlsx",
+    "ST_UI_Track_Coder_Agent_Specification_v1.xlsx",
+    "ST_Client_Journey_v5.xlsx",
+    "ST_B_Single_Output_Template_v1.xlsx",
+    "ST_Investment_Memorandum_final.docx"
+  ],
   "narratives": [
     {
+      "sourceRow": 6,
       "acquirerEnvironmentCode": "NF/NT",
       "targetEnvironmentCode": "NT/STP",
       "ecs": 88.2,
@@ -14,6 +22,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 7,
       "acquirerEnvironmentCode": "NF/NT",
       "targetEnvironmentCode": "NT/STJ",
       "ecs": 85.3,
@@ -25,6 +34,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 8,
       "acquirerEnvironmentCode": "NF/NT",
       "targetEnvironmentCode": "NF/SFP",
       "ecs": 82.4,
@@ -36,6 +46,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 9,
       "acquirerEnvironmentCode": "NF/NT",
       "targetEnvironmentCode": "SFJ/SFP",
       "ecs": 67.6,
@@ -47,6 +58,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 10,
       "acquirerEnvironmentCode": "NF/NT",
       "targetEnvironmentCode": "STJ/STP",
       "ecs": 61.8,
@@ -58,6 +70,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 11,
       "acquirerEnvironmentCode": "NF/NT",
       "targetEnvironmentCode": "STP/STJ",
       "ecs": 64.7,
@@ -69,6 +82,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 12,
       "acquirerEnvironmentCode": "NF/NT",
       "targetEnvironmentCode": "NF/SFJ",
       "ecs": 17.6,
@@ -80,6 +94,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 13,
       "acquirerEnvironmentCode": "NF/NT",
       "targetEnvironmentCode": "SFP/SFJ",
       "ecs": 17.6,
@@ -91,6 +106,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 15,
       "acquirerEnvironmentCode": "NF/SFJ",
       "targetEnvironmentCode": "SFP/SFJ",
       "ecs": 88.2,
@@ -102,6 +118,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 16,
       "acquirerEnvironmentCode": "NF/SFJ",
       "targetEnvironmentCode": "SFJ/SFP",
       "ecs": 38.2,
@@ -113,6 +130,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 17,
       "acquirerEnvironmentCode": "NF/SFJ",
       "targetEnvironmentCode": "STJ/STP",
       "ecs": 38.2,
@@ -124,6 +142,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 18,
       "acquirerEnvironmentCode": "NF/SFJ",
       "targetEnvironmentCode": "STP/STJ",
       "ecs": 35.3,
@@ -135,6 +154,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 19,
       "acquirerEnvironmentCode": "NF/SFJ",
       "targetEnvironmentCode": "NF/SFP",
       "ecs": 29.4,
@@ -146,6 +166,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 20,
       "acquirerEnvironmentCode": "NF/SFJ",
       "targetEnvironmentCode": "NT/STP",
       "ecs": 23.5,
@@ -157,6 +178,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 21,
       "acquirerEnvironmentCode": "NF/SFJ",
       "targetEnvironmentCode": "NF/NT",
       "ecs": 17.6,
@@ -168,6 +190,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 22,
       "acquirerEnvironmentCode": "NF/SFJ",
       "targetEnvironmentCode": "NT/STJ",
       "ecs": 14.7,
@@ -179,6 +202,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 24,
       "acquirerEnvironmentCode": "NF/SFP",
       "targetEnvironmentCode": "NF/NT",
       "ecs": 82.4,
@@ -190,6 +214,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 25,
       "acquirerEnvironmentCode": "NF/SFP",
       "targetEnvironmentCode": "SFJ/SFP",
       "ecs": 79.4,
@@ -201,6 +226,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 26,
       "acquirerEnvironmentCode": "NF/SFP",
       "targetEnvironmentCode": "NT/STP",
       "ecs": 76.5,
@@ -212,6 +238,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 27,
       "acquirerEnvironmentCode": "NF/SFP",
       "targetEnvironmentCode": "NT/STJ",
       "ecs": 67.6,
@@ -223,6 +250,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 28,
       "acquirerEnvironmentCode": "NF/SFP",
       "targetEnvironmentCode": "STP/STJ",
       "ecs": 64.7,
@@ -234,6 +262,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 29,
       "acquirerEnvironmentCode": "NF/SFP",
       "targetEnvironmentCode": "STJ/STP",
       "ecs": 61.8,
@@ -245,6 +274,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 30,
       "acquirerEnvironmentCode": "NF/SFP",
       "targetEnvironmentCode": "NF/SFJ",
       "ecs": 29.4,
@@ -256,6 +286,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 31,
       "acquirerEnvironmentCode": "NF/SFP",
       "targetEnvironmentCode": "SFP/SFJ",
       "ecs": 23.5,
@@ -267,6 +298,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 33,
       "acquirerEnvironmentCode": "NT/STJ",
       "targetEnvironmentCode": "NT/STP",
       "ecs": 91.2,
@@ -278,6 +310,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 34,
       "acquirerEnvironmentCode": "NT/STJ",
       "targetEnvironmentCode": "NF/NT",
       "ecs": 85.3,
@@ -289,6 +322,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 35,
       "acquirerEnvironmentCode": "NT/STJ",
       "targetEnvironmentCode": "STP/STJ",
       "ecs": 73.5,
@@ -300,6 +334,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 36,
       "acquirerEnvironmentCode": "NT/STJ",
       "targetEnvironmentCode": "STJ/STP",
       "ecs": 76.5,
@@ -311,6 +346,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 37,
       "acquirerEnvironmentCode": "NT/STJ",
       "targetEnvironmentCode": "NF/SFP",
       "ecs": 67.6,
@@ -322,6 +358,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 38,
       "acquirerEnvironmentCode": "NT/STJ",
       "targetEnvironmentCode": "SFJ/SFP",
       "ecs": 58.8,
@@ -333,6 +370,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 39,
       "acquirerEnvironmentCode": "NT/STJ",
       "targetEnvironmentCode": "NF/SFJ",
       "ecs": 14.7,
@@ -344,6 +382,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 40,
       "acquirerEnvironmentCode": "NT/STJ",
       "targetEnvironmentCode": "SFP/SFJ",
       "ecs": 14.7,
@@ -355,6 +394,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 42,
       "acquirerEnvironmentCode": "NT/STP",
       "targetEnvironmentCode": "NT/STJ",
       "ecs": 91.2,
@@ -366,6 +406,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 43,
       "acquirerEnvironmentCode": "NT/STP",
       "targetEnvironmentCode": "NF/NT",
       "ecs": 88.2,
@@ -377,6 +418,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 44,
       "acquirerEnvironmentCode": "NT/STP",
       "targetEnvironmentCode": "STP/STJ",
       "ecs": 70.6,
@@ -388,6 +430,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 45,
       "acquirerEnvironmentCode": "NT/STP",
       "targetEnvironmentCode": "STJ/STP",
       "ecs": 73.5,
@@ -399,6 +442,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 46,
       "acquirerEnvironmentCode": "NT/STP",
       "targetEnvironmentCode": "NF/SFP",
       "ecs": 76.5,
@@ -410,6 +454,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 47,
       "acquirerEnvironmentCode": "NT/STP",
       "targetEnvironmentCode": "SFJ/SFP",
       "ecs": 55.9,
@@ -421,6 +466,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 48,
       "acquirerEnvironmentCode": "NT/STP",
       "targetEnvironmentCode": "NF/SFJ",
       "ecs": 23.5,
@@ -432,6 +478,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 49,
       "acquirerEnvironmentCode": "NT/STP",
       "targetEnvironmentCode": "SFP/SFJ",
       "ecs": 23.5,
@@ -443,6 +490,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 51,
       "acquirerEnvironmentCode": "SFJ/SFP",
       "targetEnvironmentCode": "NF/SFP",
       "ecs": 79.4,
@@ -454,6 +502,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 52,
       "acquirerEnvironmentCode": "SFJ/SFP",
       "targetEnvironmentCode": "NF/NT",
       "ecs": 67.6,
@@ -465,6 +514,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 53,
       "acquirerEnvironmentCode": "SFJ/SFP",
       "targetEnvironmentCode": "STP/STJ",
       "ecs": 61.8,
@@ -476,6 +526,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 54,
       "acquirerEnvironmentCode": "SFJ/SFP",
       "targetEnvironmentCode": "NT/STJ",
       "ecs": 58.8,
@@ -487,6 +538,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 55,
       "acquirerEnvironmentCode": "SFJ/SFP",
       "targetEnvironmentCode": "STJ/STP",
       "ecs": 58.8,
@@ -498,6 +550,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 56,
       "acquirerEnvironmentCode": "SFJ/SFP",
       "targetEnvironmentCode": "NT/STP",
       "ecs": 55.9,
@@ -509,6 +562,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 57,
       "acquirerEnvironmentCode": "SFJ/SFP",
       "targetEnvironmentCode": "NF/SFJ",
       "ecs": 38.2,
@@ -520,6 +574,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 58,
       "acquirerEnvironmentCode": "SFJ/SFP",
       "targetEnvironmentCode": "SFP/SFJ",
       "ecs": 32.4,
@@ -531,6 +586,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 60,
       "acquirerEnvironmentCode": "SFP/SFJ",
       "targetEnvironmentCode": "NF/SFJ",
       "ecs": 88.2,
@@ -542,6 +598,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 61,
       "acquirerEnvironmentCode": "SFP/SFJ",
       "targetEnvironmentCode": "STP/STJ",
       "ecs": 35.3,
@@ -553,6 +610,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 62,
       "acquirerEnvironmentCode": "SFP/SFJ",
       "targetEnvironmentCode": "STJ/STP",
       "ecs": 38.2,
@@ -564,6 +622,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 63,
       "acquirerEnvironmentCode": "SFP/SFJ",
       "targetEnvironmentCode": "SFJ/SFP",
       "ecs": 32.4,
@@ -575,6 +634,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 64,
       "acquirerEnvironmentCode": "SFP/SFJ",
       "targetEnvironmentCode": "NF/SFP",
       "ecs": 23.5,
@@ -586,6 +646,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 65,
       "acquirerEnvironmentCode": "SFP/SFJ",
       "targetEnvironmentCode": "NT/STP",
       "ecs": 23.5,
@@ -597,6 +658,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 66,
       "acquirerEnvironmentCode": "SFP/SFJ",
       "targetEnvironmentCode": "NF/NT",
       "ecs": 17.6,
@@ -608,6 +670,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 67,
       "acquirerEnvironmentCode": "SFP/SFJ",
       "targetEnvironmentCode": "NT/STJ",
       "ecs": 14.7,
@@ -619,6 +682,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 69,
       "acquirerEnvironmentCode": "STJ/STP",
       "targetEnvironmentCode": "NT/STJ",
       "ecs": 76.5,
@@ -630,6 +694,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 70,
       "acquirerEnvironmentCode": "STJ/STP",
       "targetEnvironmentCode": "NT/STP",
       "ecs": 73.5,
@@ -641,6 +706,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 71,
       "acquirerEnvironmentCode": "STJ/STP",
       "targetEnvironmentCode": "STP/STJ",
       "ecs": 91.2,
@@ -652,6 +718,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 72,
       "acquirerEnvironmentCode": "STJ/STP",
       "targetEnvironmentCode": "NF/NT",
       "ecs": 61.8,
@@ -663,6 +730,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 73,
       "acquirerEnvironmentCode": "STJ/STP",
       "targetEnvironmentCode": "NF/SFP",
       "ecs": 61.8,
@@ -674,6 +742,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 74,
       "acquirerEnvironmentCode": "STJ/STP",
       "targetEnvironmentCode": "SFJ/SFP",
       "ecs": 58.8,
@@ -685,6 +754,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 75,
       "acquirerEnvironmentCode": "STJ/STP",
       "targetEnvironmentCode": "NF/SFJ",
       "ecs": 38.2,
@@ -696,6 +766,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 76,
       "acquirerEnvironmentCode": "STJ/STP",
       "targetEnvironmentCode": "SFP/SFJ",
       "ecs": 38.2,
@@ -707,6 +778,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 78,
       "acquirerEnvironmentCode": "STP/STJ",
       "targetEnvironmentCode": "STJ/STP",
       "ecs": 91.2,
@@ -718,6 +790,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 79,
       "acquirerEnvironmentCode": "STP/STJ",
       "targetEnvironmentCode": "NT/STJ",
       "ecs": 73.5,
@@ -729,6 +802,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 80,
       "acquirerEnvironmentCode": "STP/STJ",
       "targetEnvironmentCode": "NT/STP",
       "ecs": 70.6,
@@ -740,6 +814,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 81,
       "acquirerEnvironmentCode": "STP/STJ",
       "targetEnvironmentCode": "NF/NT",
       "ecs": 64.7,
@@ -751,6 +826,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 82,
       "acquirerEnvironmentCode": "STP/STJ",
       "targetEnvironmentCode": "NF/SFP",
       "ecs": 64.7,
@@ -762,6 +838,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 83,
       "acquirerEnvironmentCode": "STP/STJ",
       "targetEnvironmentCode": "SFJ/SFP",
       "ecs": 61.8,
@@ -773,6 +850,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 84,
       "acquirerEnvironmentCode": "STP/STJ",
       "targetEnvironmentCode": "NF/SFJ",
       "ecs": 35.3,
@@ -784,6 +862,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "cta": "This is a preliminary signal, not a confirmed risk assessment. The full analysis \u2014 confirmed environment codes, individual type profiles for your target's leadership team, and a precise ECS score across all 17 behavioural resources \u2014 takes approximately two weeks and tells you exactly which leaders will thrive in the environment your integration plan creates, and which will not.\n\n\u2192 Talk to Us  \u00b7  structural-typology.com"
     },
     {
+      "sourceRow": 85,
       "acquirerEnvironmentCode": "STP/STJ",
       "targetEnvironmentCode": "SFP/SFJ",
       "ecs": 35.3,
@@ -797,6 +876,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
   ],
   "frictionPoints": [
     {
+      "sourceRow": 6,
       "acquirerEnvironmentCode": "NF/NT",
       "targetEnvironmentCode": "NT/STP",
       "ecs": 88.2,
@@ -808,6 +888,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Organisation/System (~NF/NT vs ~NT/STP), Decisiveness (~NF/NT vs +NT/STP)"
     },
     {
+      "sourceRow": 7,
       "acquirerEnvironmentCode": "NF/NT",
       "targetEnvironmentCode": "NT/STJ",
       "ecs": 85.3,
@@ -819,6 +900,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Information (+NF/NT vs +NT/STJ \u2014 different flow logic), Knowledge (+NF/NT vs +NT/STJ \u2014 shared vs competitive)"
     },
     {
+      "sourceRow": 8,
       "acquirerEnvironmentCode": "NF/NT",
       "targetEnvironmentCode": "NF/SFP",
       "ecs": 82.4,
@@ -830,6 +912,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Organisation/System (~NF/NT vs \u2212NF/SFP), Money (~NF/NT vs ~NF/SFP), Decisiveness (~NF/NT vs ~NF/SFP)"
     },
     {
+      "sourceRow": 9,
       "acquirerEnvironmentCode": "NF/NT",
       "targetEnvironmentCode": "SFJ/SFP",
       "ecs": 67.6,
@@ -841,6 +924,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Knowledge (+NF/NT vs \u2212SFJ/SFP), Information (+NF/NT vs ~SFJ/SFP), Creativity (+NF/NT vs \u2212SFJ/SFP)"
     },
     {
+      "sourceRow": 10,
       "acquirerEnvironmentCode": "NF/NT",
       "targetEnvironmentCode": "STJ/STP",
       "ecs": 61.8,
@@ -852,6 +936,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Trust (+NF/NT vs \u2212STJ/STP), Knowledge (+NF/NT vs \u2212STJ/STP), Energy (+NF/NT vs \u2212STJ/STP)"
     },
     {
+      "sourceRow": 11,
       "acquirerEnvironmentCode": "NF/NT",
       "targetEnvironmentCode": "NF/SFJ",
       "ecs": 17.6,
@@ -863,6 +948,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Energy (+NF/NT vs \u2212NF/SFJ), Attention (+NF/NT vs \u2212NF/SFJ), Information (+NF/NT vs \u2212NF/SFJ), Trust (+NF/NT vs \u2212NF/SFJ)"
     },
     {
+      "sourceRow": 12,
       "acquirerEnvironmentCode": "NF/NT",
       "targetEnvironmentCode": "SFP/SFJ",
       "ecs": 17.6,
@@ -874,6 +960,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Trust (+NF/NT vs \u2212SFP/SFJ), Knowledge (+NF/NT vs \u2212SFP/SFJ), Energy (+NF/NT vs ~SFP/SFJ), Information (+NF/NT vs \u2212SFP/SFJ)"
     },
     {
+      "sourceRow": 14,
       "acquirerEnvironmentCode": "NF/SFJ",
       "targetEnvironmentCode": "SFP/SFJ",
       "ecs": 88.2,
@@ -885,6 +972,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Trust (\u2212NF/SFJ vs \u2212SFP/SFJ \u2014 both suppress)"
     },
     {
+      "sourceRow": 15,
       "acquirerEnvironmentCode": "NF/SFJ",
       "targetEnvironmentCode": "SFJ/SFP",
       "ecs": 38.2,
@@ -896,6 +984,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Trust (\u2212NF/SFJ vs +SFJ/SFP), Energy (\u2212NF/SFJ vs +SFJ/SFP), Connections (~NF/SFJ vs +SFJ/SFP)"
     },
     {
+      "sourceRow": 16,
       "acquirerEnvironmentCode": "NF/SFJ",
       "targetEnvironmentCode": "STJ/STP",
       "ecs": 38.2,
@@ -907,6 +996,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Trust (\u2212NF/SFJ vs \u2212STJ/STP \u2014 both suppress)"
     },
     {
+      "sourceRow": 17,
       "acquirerEnvironmentCode": "NF/SFJ",
       "targetEnvironmentCode": "NF/SFP",
       "ecs": 29.4,
@@ -918,6 +1008,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Energy (\u2212NF/SFJ vs +NF/SFP), Trust (\u2212NF/SFJ vs +NF/SFP), Creativity (\u2212NF/SFJ vs +NF/SFP)"
     },
     {
+      "sourceRow": 18,
       "acquirerEnvironmentCode": "NF/SFJ",
       "targetEnvironmentCode": "NT/STP",
       "ecs": 23.5,
@@ -929,6 +1020,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Energy (\u2212NF/SFJ vs +NT/STP), Information (\u2212NF/SFJ vs +NT/STP), Creativity (\u2212NF/SFJ vs +NT/STP), Knowledge (\u2212NF/SFJ vs +NT/STP)"
     },
     {
+      "sourceRow": 19,
       "acquirerEnvironmentCode": "NF/SFJ",
       "targetEnvironmentCode": "NF/NT",
       "ecs": 17.6,
@@ -940,6 +1032,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Energy (-NF/SFJ vs +NF/NT), Information (-NF/SFJ vs +NF/NT), Trust (-NF/SFJ vs +NF/NT), Knowledge (-NF/SFJ vs +NF/NT)"
     },
     {
+      "sourceRow": 20,
       "acquirerEnvironmentCode": "NF/SFJ",
       "targetEnvironmentCode": "NT/STJ",
       "ecs": 14.7,
@@ -951,6 +1044,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Information (\u2212NF/SFJ vs +NT/STJ), Energy (\u2212NF/SFJ vs +NT/STJ), Knowledge (\u2212NF/SFJ vs +NT/STJ)"
     },
     {
+      "sourceRow": 22,
       "acquirerEnvironmentCode": "NF/SFP",
       "targetEnvironmentCode": "NF/NT",
       "ecs": 82.4,
@@ -962,6 +1056,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Organisation/System (~NF/SFP vs ~NF/NT), Will/Discipline (~NF/SFP vs +NF/NT)"
     },
     {
+      "sourceRow": 23,
       "acquirerEnvironmentCode": "NF/SFP",
       "targetEnvironmentCode": "SFJ/SFP",
       "ecs": 79.4,
@@ -973,6 +1068,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Creativity (+NF/SFP vs -SFJ/SFP), Organisation/System (-NF/SFP vs -SFJ/SFP \u2014 compound suppression)"
     },
     {
+      "sourceRow": 24,
       "acquirerEnvironmentCode": "NF/SFP",
       "targetEnvironmentCode": "NT/STP",
       "ecs": 76.5,
@@ -984,6 +1080,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Decisiveness (~NF/SFP vs +NT/STP), Will/Discipline (~NF/SFP vs +NT/STP)"
     },
     {
+      "sourceRow": 25,
       "acquirerEnvironmentCode": "NF/SFP",
       "targetEnvironmentCode": "NT/STJ",
       "ecs": 67.6,
@@ -995,6 +1092,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Organisation/System (-NF/SFP vs +NT/STJ), Decisiveness (~NF/SFP vs +NT/STJ), Knowledge (~NF/SFP vs +NT/STJ)"
     },
     {
+      "sourceRow": 26,
       "acquirerEnvironmentCode": "NF/SFP",
       "targetEnvironmentCode": "STJ/STP",
       "ecs": 61.8,
@@ -1006,6 +1104,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Trust (+NF/SFP vs -STJ/STP), Health (+NF/SFP vs ~STJ/STP), Creativity (+NF/SFP vs ~STJ/STP)"
     },
     {
+      "sourceRow": 27,
       "acquirerEnvironmentCode": "NF/SFP",
       "targetEnvironmentCode": "NF/SFJ",
       "ecs": 29.4,
@@ -1017,6 +1116,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Energy (+NF/SFP vs -NF/SFJ), Trust (+NF/SFP vs -NF/SFJ), Creativity (+NF/SFP vs -NF/SFJ)"
     },
     {
+      "sourceRow": 28,
       "acquirerEnvironmentCode": "NF/SFP",
       "targetEnvironmentCode": "SFP/SFJ",
       "ecs": 23.5,
@@ -1028,6 +1128,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Health (+NF/SFP vs -SFP/SFJ), Trust (+NF/SFP vs -SFP/SFJ), Energy (+NF/SFP vs ~SFP/SFJ)"
     },
     {
+      "sourceRow": 30,
       "acquirerEnvironmentCode": "NT/STJ",
       "targetEnvironmentCode": "NT/STP",
       "ecs": 91.2,
@@ -1039,6 +1140,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Organisation/System (+NT/STJ vs ~NT/STP), Time (+NT/STJ vs ~NT/STP)"
     },
     {
+      "sourceRow": 31,
       "acquirerEnvironmentCode": "NT/STJ",
       "targetEnvironmentCode": "NF/NT",
       "ecs": 85.3,
@@ -1050,6 +1152,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Knowledge (+NF/NT vs +NT/STJ \u2014 but different logic: shared vs competitive), Trust (+NF/NT vs ~NT/STJ), Creativity (+NF/NT vs +NT/STJ \u2014 but commodified)"
     },
     {
+      "sourceRow": 32,
       "acquirerEnvironmentCode": "NT/STJ",
       "targetEnvironmentCode": "STJ/STP",
       "ecs": 76.5,
@@ -1061,6 +1164,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Trust (~NT/STJ vs \u2212STJ/STP), Knowledge (+NT/STJ vs \u2212STJ/STP), Information (+NT/STJ vs ~STJ/STP)"
     },
     {
+      "sourceRow": 33,
       "acquirerEnvironmentCode": "NT/STJ",
       "targetEnvironmentCode": "NF/SFP",
       "ecs": 67.6,
@@ -1072,6 +1176,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Organisation/System (+NT/STJ vs \u2212NF/SFP), Money (+NT/STJ vs ~NF/SFP), Will/Discipline (+NT/STJ vs ~NF/SFP), Decisiveness (+NT/STJ vs ~NF/SFP)"
     },
     {
+      "sourceRow": 34,
       "acquirerEnvironmentCode": "NT/STJ",
       "targetEnvironmentCode": "SFJ/SFP",
       "ecs": 58.8,
@@ -1083,6 +1188,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Knowledge (+NT/STJ vs \u2212SFJ/SFP), Decisiveness (+NT/STJ vs \u2212SFJ/SFP), Organisation/System (+NT/STJ vs \u2212SFJ/SFP), Creativity (+NT/STJ vs \u2212SFJ/SFP)"
     },
     {
+      "sourceRow": 35,
       "acquirerEnvironmentCode": "NT/STJ",
       "targetEnvironmentCode": "NF/SFJ",
       "ecs": 14.7,
@@ -1094,6 +1200,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Knowledge (+NT/STJ vs \u2212NF/SFJ), Information (+NT/STJ vs \u2212NF/SFJ), Trust (~NT/STJ vs \u2212NF/SFJ), Energy (+NT/STJ vs \u2212NF/SFJ)"
     },
     {
+      "sourceRow": 36,
       "acquirerEnvironmentCode": "NT/STJ",
       "targetEnvironmentCode": "SFP/SFJ",
       "ecs": 14.7,
@@ -1105,6 +1212,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Trust (~NT/STJ vs \u2212SFP/SFJ), Knowledge (+NT/STJ vs \u2212SFP/SFJ), Attention (+NT/STJ vs \u2212SFP/SFJ), Connections (~NT/STJ vs \u2212SFP/SFJ)"
     },
     {
+      "sourceRow": 38,
       "acquirerEnvironmentCode": "NT/STP",
       "targetEnvironmentCode": "NT/STJ",
       "ecs": 91.2,
@@ -1116,6 +1224,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Organisation/System (~NT/STP vs +NT/STJ), Time (~NT/STP vs +NT/STJ)"
     },
     {
+      "sourceRow": 39,
       "acquirerEnvironmentCode": "NT/STP",
       "targetEnvironmentCode": "NF/NT",
       "ecs": 88.2,
@@ -1127,6 +1236,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Knowledge (+NF/NT vs +NT/STP \u2014 same effect but different logic: truth vs application), Organisation/System (~NF/NT vs ~NT/STP \u2014 both low but for different reasons)"
     },
     {
+      "sourceRow": 40,
       "acquirerEnvironmentCode": "NT/STP",
       "targetEnvironmentCode": "NF/SFP",
       "ecs": 76.5,
@@ -1138,6 +1248,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Organisation/System (~NT/STP vs \u2212NF/SFP), Decisiveness (+NT/STP vs ~NF/SFP), Will/Discipline (+NT/STP vs ~NF/SFP), Money (~NT/STP vs ~NF/SFP)"
     },
     {
+      "sourceRow": 41,
       "acquirerEnvironmentCode": "NT/STP",
       "targetEnvironmentCode": "STJ/STP",
       "ecs": 73.5,
@@ -1149,6 +1260,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Knowledge (+NT/STP vs \u2212STJ/STP), Trust (~NT/STP vs \u2212STJ/STP), Information (+NT/STP vs ~STJ/STP)"
     },
     {
+      "sourceRow": 42,
       "acquirerEnvironmentCode": "NT/STP",
       "targetEnvironmentCode": "SFJ/SFP",
       "ecs": 55.9,
@@ -1160,6 +1272,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Organisation/System (~NT/STP vs \u2212SFJ/SFP), Knowledge (+NT/STP vs \u2212SFJ/SFP), Decisiveness (+NT/STP vs \u2212SFJ/SFP), Creativity (+NT/STP vs \u2212SFJ/SFP)"
     },
     {
+      "sourceRow": 43,
       "acquirerEnvironmentCode": "NT/STP",
       "targetEnvironmentCode": "NF/SFJ",
       "ecs": 23.5,
@@ -1171,6 +1284,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Information (+NT/STP vs \u2212NF/SFJ), Knowledge (+NT/STP vs \u2212NF/SFJ), Energy (+NT/STP vs \u2212NF/SFJ)"
     },
     {
+      "sourceRow": 44,
       "acquirerEnvironmentCode": "NT/STP",
       "targetEnvironmentCode": "SFP/SFJ",
       "ecs": 23.5,
@@ -1182,6 +1296,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Trust (~NT/STP vs \u2212SFP/SFJ), Knowledge (+NT/STP vs \u2212SFP/SFJ), Information (+NT/STP vs \u2212SFP/SFJ), Health (~NT/STP vs \u2212SFP/SFJ)"
     },
     {
+      "sourceRow": 46,
       "acquirerEnvironmentCode": "SFJ/SFP",
       "targetEnvironmentCode": "NF/SFP",
       "ecs": 79.4,
@@ -1193,6 +1308,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Creativity (-SFJ/SFP vs +NF/SFP), Decisiveness (-SFJ/SFP vs ~NF/SFP)"
     },
     {
+      "sourceRow": 47,
       "acquirerEnvironmentCode": "SFJ/SFP",
       "targetEnvironmentCode": "NF/NT",
       "ecs": 67.6,
@@ -1204,6 +1320,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Knowledge (\u2212SFJ/SFP vs +NF/NT), Information (~SFJ/SFP vs +NF/NT), Will/Discipline (\u2212SFJ/SFP vs +NF/NT)"
     },
     {
+      "sourceRow": 48,
       "acquirerEnvironmentCode": "SFJ/SFP",
       "targetEnvironmentCode": "NT/STJ",
       "ecs": 58.8,
@@ -1215,6 +1332,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Knowledge (\u2212SFJ/SFP vs +NT/STJ), Decisiveness (\u2212SFJ/SFP vs +NT/STJ), Organisation/System (\u2212SFJ/SFP vs +NT/STJ)"
     },
     {
+      "sourceRow": 49,
       "acquirerEnvironmentCode": "SFJ/SFP",
       "targetEnvironmentCode": "STJ/STP",
       "ecs": 58.8,
@@ -1226,6 +1344,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Trust (+SFJ/SFP vs \u2212STJ/STP), Knowledge (\u2212SFJ/SFP vs \u2212STJ/STP), Energy (+SFJ/SFP vs +STJ/STP)"
     },
     {
+      "sourceRow": 50,
       "acquirerEnvironmentCode": "SFJ/SFP",
       "targetEnvironmentCode": "NT/STP",
       "ecs": 55.9,
@@ -1237,6 +1356,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Knowledge (\u2212SFJ/SFP vs +NT/STP), Decisiveness (\u2212SFJ/SFP vs +NT/STP), Creativity (\u2212SFJ/SFP vs +NT/STP), Organisation/System (\u2212SFJ/SFP vs ~NT/STP)"
     },
     {
+      "sourceRow": 51,
       "acquirerEnvironmentCode": "SFJ/SFP",
       "targetEnvironmentCode": "NF/SFJ",
       "ecs": 38.2,
@@ -1248,6 +1368,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Trust (+SFJ/SFP vs -NF/SFJ), Energy (+SFJ/SFP vs -NF/SFJ)"
     },
     {
+      "sourceRow": 52,
       "acquirerEnvironmentCode": "SFJ/SFP",
       "targetEnvironmentCode": "SFP/SFJ",
       "ecs": 32.4,
@@ -1259,6 +1380,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Trust (+SFJ/SFP vs -SFP/SFJ), Health (+SFJ/SFP vs -SFP/SFJ), Connections (+SFJ/SFP vs -SFP/SFJ)"
     },
     {
+      "sourceRow": 54,
       "acquirerEnvironmentCode": "SFP/SFJ",
       "targetEnvironmentCode": "NF/SFJ",
       "ecs": 88.2,
@@ -1270,6 +1392,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Trust (\u2212SFP/SFJ vs \u2212NF/SFJ \u2014 both suppress, same direction), Energy (~SFP/SFJ vs \u2212NF/SFJ)"
     },
     {
+      "sourceRow": 55,
       "acquirerEnvironmentCode": "SFP/SFJ",
       "targetEnvironmentCode": "STJ/STP",
       "ecs": 38.2,
@@ -1281,6 +1404,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Trust (\u2212SFP/SFJ vs \u2212STJ/STP \u2014 both suppress), Reputation (\u2212SFP/SFJ vs +STJ/STP)"
     },
     {
+      "sourceRow": 56,
       "acquirerEnvironmentCode": "SFP/SFJ",
       "targetEnvironmentCode": "SFJ/SFP",
       "ecs": 32.4,
@@ -1292,6 +1416,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Trust (\u2212SFP/SFJ vs +SFJ/SFP), Connections (\u2212SFP/SFJ vs +SFJ/SFP), Health (\u2212SFP/SFJ vs +SFJ/SFP)"
     },
     {
+      "sourceRow": 57,
       "acquirerEnvironmentCode": "SFP/SFJ",
       "targetEnvironmentCode": "NF/SFP",
       "ecs": 23.5,
@@ -1303,6 +1428,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Trust (\u2212SFP/SFJ vs +NF/SFP), Health (\u2212SFP/SFJ vs +NF/SFP), Energy (~SFP/SFJ vs +NF/SFP)"
     },
     {
+      "sourceRow": 58,
       "acquirerEnvironmentCode": "SFP/SFJ",
       "targetEnvironmentCode": "NT/STP",
       "ecs": 23.5,
@@ -1314,6 +1440,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Knowledge (-SFP/SFJ vs +NT/STP), Trust (-SFP/SFJ vs ~NT/STP), Decisiveness (-SFP/SFJ vs +NT/STP)"
     },
     {
+      "sourceRow": 59,
       "acquirerEnvironmentCode": "SFP/SFJ",
       "targetEnvironmentCode": "NF/NT",
       "ecs": 17.6,
@@ -1325,6 +1452,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Trust (\u2212SFP/SFJ vs +NF/NT), Knowledge (\u2212SFP/SFJ vs +NF/NT), Energy (~SFP/SFJ vs +NF/NT)"
     },
     {
+      "sourceRow": 60,
       "acquirerEnvironmentCode": "SFP/SFJ",
       "targetEnvironmentCode": "NT/STJ",
       "ecs": 14.7,
@@ -1336,6 +1464,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Knowledge (\u2212SFP/SFJ vs +NT/STJ), Trust (\u2212SFP/SFJ vs ~NT/STJ), Information (\u2212SFP/SFJ vs +NT/STJ), Attention (\u2212SFP/SFJ vs +NT/STJ)"
     },
     {
+      "sourceRow": 62,
       "acquirerEnvironmentCode": "STJ/STP",
       "targetEnvironmentCode": "NT/STJ",
       "ecs": 76.5,
@@ -1347,6 +1476,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Trust (\u2212STJ/STP vs ~NT/STJ), Knowledge (\u2212STJ/STP vs +NT/STJ), Connections (~STJ/STP vs ~NT/STJ)"
     },
     {
+      "sourceRow": 63,
       "acquirerEnvironmentCode": "STJ/STP",
       "targetEnvironmentCode": "NT/STP",
       "ecs": 73.5,
@@ -1358,6 +1488,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Knowledge (\u2212STJ/STP vs +NT/STP), Trust (\u2212STJ/STP vs ~NT/STP), Creativity (~STJ/STP vs +NT/STP)"
     },
     {
+      "sourceRow": 64,
       "acquirerEnvironmentCode": "STJ/STP",
       "targetEnvironmentCode": "NF/NT",
       "ecs": 61.8,
@@ -1369,6 +1500,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Trust (\u2212STJ/STP vs +NF/NT), Knowledge (\u2212STJ/STP vs +NF/NT), Creativity (~STJ/STP vs +NF/NT), Energy (+STJ/STP vs +NF/NT)"
     },
     {
+      "sourceRow": 65,
       "acquirerEnvironmentCode": "STJ/STP",
       "targetEnvironmentCode": "NF/SFP",
       "ecs": 61.8,
@@ -1380,6 +1512,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Trust (-STJ/STP vs +NF/SFP), Health (~STJ/STP vs +NF/SFP), Creativity (~STJ/STP vs +NF/SFP)"
     },
     {
+      "sourceRow": 66,
       "acquirerEnvironmentCode": "STJ/STP",
       "targetEnvironmentCode": "SFJ/SFP",
       "ecs": 58.8,
@@ -1391,6 +1524,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Trust (+SFJ/SFP vs \u2212STJ/STP), Health (+SFJ/SFP vs ~STJ/STP), Connections (+SFJ/SFP vs ~STJ/STP)"
     },
     {
+      "sourceRow": 67,
       "acquirerEnvironmentCode": "STJ/STP",
       "targetEnvironmentCode": "NF/SFJ",
       "ecs": 38.2,
@@ -1402,6 +1536,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
       "primaryConflictedResources": "Trust (-STJ/STP vs -NF/SFJ \u2014 both suppress), Energy (+STJ/STP vs -NF/SFJ)"
     },
     {
+      "sourceRow": 68,
       "acquirerEnvironmentCode": "STJ/STP",
       "targetEnvironmentCode": "SFP/SFJ",
       "ecs": 38.2,
@@ -1432,7 +1567,7 @@ export const FINAL_DELIVERABLE_DATA = Object.freeze({
     "sealedCaveat": "This is a structural-level forecast, not an individual-verified prediction. The three anchor lines describe what is most likely to emerge given the environment pair, but the timing and intensity for specific leaders cannot be confirmed without type-level data on the individuals involved. Type-level confirmation is delivered in the paid Integration Risk Report (Step 7)."
   },
   "clientJourney": {
-    "step3": "Both instruments (and optionally Step 2-C) produce simultaneous output, reconciled here.\n\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\nINPUT SOURCES\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\nFrom Step 2-A (Acquirer Module \u2014 Track 1):\n  \u2022 Acquirer environment flag  (e.g. NT/STJ \u2605\u2605 Confirmed)\n  \u2022 Signal strength: \u2605\u2605\u2605 strong / \u2605\u2605 confirmed / \u2605 weak\n\nFrom Step 2-B (Target Diagnostic \u2014 Track 1):\n  \u2022 Primary target environment + signal strength\n  \u2022 Co-presence flag: if secondary environment within 2 pts\n\nFrom Step 2-C (Target Self-Assessment \u2014 Track 2, if submitted):\n  \u2022 Target self-identified environment flag\n  \u2022 Reconciliation delta vs. Step 2-B (acquirer view of target)\n\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\nOUTCOME A \u2014 BOTH CONFIRMED  (\u2605\u2605 or \u2605\u2605\u2605)\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\nCondition: Acquirer \u2605\u2605+ AND Target \u2605\u2605+\nReport issued:\n  \u2022 ECS pair locked (acquirer env \u00d7 target env)\n  \u2022 Preliminary ECS score range displayed (\u00b15 pts)\n  \u2022 Top 3 aligned resources listed\n  \u2022 Top 3 conflict resources listed\n  \u2022 Recommended integration protocol flagged (Ring-Fence / Selective / RHQA)\n  \u2022 30-day prediction anchor sealed and timestamped\nNext step: proceed directly to Step 5 (ECS full calculation).\n\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\nOUTCOME B \u2014 ACQUIRER PARTIAL  (\u2605 weak)\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\nCondition: Acquirer \u2605 only (top two environments within 2 pts)\nReport issued:\n  \u2022 Two candidate acquirer environments displayed\n  \u2022 Preliminary ECS range shown for BOTH pairings\n  \u2022 Delta between the two ECS outcomes highlighted\n  \u2022 Bias risk flags raised (idealisation / authority self-exemption)\nNext step: re-administer Step 2-A with broader senior respondent group (CFO + 2 direct reports minimum).\n\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\nOUTCOME C \u2014 TARGET PARTIAL or CO-PRESENCE\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\nCondition: Target \u2605 weak, OR secondary environment within 2 pts of primary\nReport issued:\n  \u2022 Primary and secondary candidate environments named\n  \u2022 ECS range displayed for both pairings\n  \u2022 Co-presence interpretation note: which resource axes drive the ambiguity\n  \u2022 If Step 2-C submitted: reconciliation table (acquirer view vs. target self-view)\nNext step: run 35-question verification diagnostic for 1\u20132 candidate environments (Step 4).\n\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\nOUTCOME D \u2014 EITHER MIXED\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\nCondition: Scoring pattern contradictory across axes; no reliable environment flag\nReport issued:\n  \u2022 Mixed signal diagnostic summary (which axes contradict)\n  \u2022 Most likely environmental cause flagged (transition state / hybrid org / survey contamination)\n  \u2022 No ECS estimate issued \u2014 insufficient data\nNext step: practitioner review required before Step 5. Client advised to contact ST directly.\n\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n\u25b6  OUTCOME B \u2014 SUB-PATH: B-SINGLE \u2192 B-RESOLVED\n    [ADDED April 2026 \u2014 dual-respondent axis comparison]\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n\nB-SINGLE (n = 1, \u2605 WEAK):\n  Step B-1 \u2014 SCREEN_1 displayed:\n    \u2022 Block A: two candidate environments with dual ECS range and delta callout\n    \u2022 Block B: R1 axis breakdown \u2014 all 10 questions mapped to environment signals;\n               CLEAR / AMBIGUOUS / HIGH RISK flag per axis; \u2605\u2605 badge on pair-resolvers\n    \u2022 Block C: invite panel \u2014 CFO (Axis 1 + Axis 5), CHRO (Axis 6 + Axis 3),\n               Deal Lead (Axis 4); 72-hour invite tokens issued; no account required\n\n  Step B-2 \u2014 R2 completes Step 2-A via invite token:\n    \u2022 R2 sees standard Step 2-A instrument \u2014 no session data visible\n    \u2022 On submission: AXIS_COMPARISON_ENGINE runs on R1 + R2 answer blocks\n    \u2022 10-axis comparison: AGREE / DIVERGE per question + weight per active pair\n    \u2022 Divergence pattern classified: CONVERGENT / PARTIAL CONVERGENCE /\n      ROLE-LEVEL SPLIT / IRRESOLVABLE\n          + DIVERGENCE_CLASSIFICATION\n\n  Step B-3 \u2014 SCREEN_2 and SCREEN_3 rendered:\n    \u2022 SCREEN_2: side-by-side axis comparison table + divergence state banner\n    \u2022 SCREEN_3 output conditional on divergence state:\n        CONVERGENT \u2192 \u2605\u2605\u2605 STRONG \u2192 ECS pair locked \u2192 proceed to Step 5\n        PARTIAL CONVERGENCE \u2192 \u2605\u2605 CONFIRMED \u2192 ECS pair locked \u2192 proceed to Step 5\n        ROLE-LEVEL SPLIT \u2192 \u2605 WEAK + acknowledgement gate \u2192 ECS on governance env\n        IRRESOLVABLE \u2192 BLOCKED \u2192 practitioner required \u2192 no Step 5\n",
+    "step3": "Both instruments (and optionally Step 2-C) produce simultaneous output, reconciled here.\n\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\nINPUT SOURCES\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\nFrom Step 2-A (Acquirer Module \u2014 Track 1):\n  \u2022 Acquirer environment flag  (e.g. NT/STJ \u2605\u2605 Confirmed)\n  \u2022 Signal strength: \u2605\u2605\u2605 strong / \u2605\u2605 confirmed / \u2605 weak\n\nFrom Step 2-B (Target Diagnostic \u2014 Track 1):\n  \u2022 Primary target environment + signal strength\n  \u2022 Co-presence flag: if secondary environment within 2 pts\n\nFrom Step 2-C (Target Self-Assessment \u2014 Track 2, if submitted):\n  \u2022 Target self-identified environment flag\n  \u2022 Reconciliation delta vs. Step 2-B (acquirer view of target)\n\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\nOUTCOME A \u2014 BOTH CONFIRMED  (\u2605\u2605 or \u2605\u2605\u2605)\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\nCondition: Acquirer \u2605\u2605+ AND Target \u2605\u2605+\nReport issued:\n  \u2022 ECS pair locked (acquirer env \u00d7 target env)\n  \u2022 Preliminary ECS score range displayed (\u00b15 pts)\n  \u2022 Top 3 aligned resources listed\n  \u2022 Top 3 conflict resources listed\n  \u2022 Recommended integration protocol flagged (Ring-Fence / Selective / RHQA)\n  \u2022 30-day prediction anchor sealed and timestamped\nNext step: proceed directly to Step 5 (ECS full calculation).\n\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\nOUTCOME B \u2014 ACQUIRER PARTIAL  (\u2605 weak)\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\nCondition: Acquirer \u2605 only (top two environments within 2 pts)\nReport issued:\n  \u2022 Two candidate acquirer environments displayed\n  \u2022 Preliminary ECS range shown for BOTH pairings\n  \u2022 Delta between the two ECS outcomes highlighted\n  \u2022 Bias risk flags raised (idealisation / authority self-exemption)\nNext step: re-administer Step 2-A with broader senior respondent group (CFO + 2 direct reports minimum).\n\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\nOUTCOME C \u2014 TARGET PARTIAL or CO-PRESENCE\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\nCondition: Target \u2605 weak, OR secondary environment within 2 pts of primary\nReport issued:\n  \u2022 Primary and secondary candidate environments named\n  \u2022 ECS range displayed for both pairings\n  \u2022 Co-presence interpretation note: which resource axes drive the ambiguity\n  \u2022 If Step 2-C submitted: reconciliation table (acquirer view vs. target self-view)\nNext step: run 35-question verification diagnostic for 1\u20132 candidate environments (Step 4).\n\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\nOUTCOME D \u2014 EITHER MIXED\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\nCondition: Scoring pattern contradictory across axes; no reliable environment flag\nReport issued:\n  \u2022 Mixed signal diagnostic summary (which axes contradict)\n  \u2022 Most likely environmental cause flagged (transition state / hybrid org / survey contamination)\n  \u2022 No ECS estimate issued \u2014 insufficient data\nNext step: practitioner review required before Step 5. Client advised to contact ST directly.\n\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n\u25b6  OUTCOME B \u2014 SUB-PATH: B-SINGLE \u2192 B-RESOLVED\n    [ADDED April 2026 \u2014 dual-respondent axis comparison]\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n\nB-SINGLE (n = 1, \u2605 WEAK):\n  Step B-1 \u2014 SCREEN_1 displayed:\n    \u2022 Block A: two candidate environments with dual ECS range and delta callout\n    \u2022 Block B: R1 axis breakdown \u2014 all 10 questions mapped to environment signals;\n               CLEAR / AMBIGUOUS / HIGH RISK flag per axis; \u2605\u2605 badge on pair-resolvers\n    \u2022 Block C: invite panel \u2014 CFO (Axis 1 + Axis 5), CHRO (Axis 6 + Axis 3),\n               Deal Lead (Axis 4); 72-hour invite tokens issued; no account required\n  Source: ST_B_Single_Output_Template_v1.xlsx \u2192 SCREEN_1_WEAK_RESULT\n\n  Step B-2 \u2014 R2 completes Step 2-A via invite token:\n    \u2022 R2 sees standard Step 2-A instrument \u2014 no session data visible\n    \u2022 On submission: AXIS_COMPARISON_ENGINE runs on R1 + R2 answer blocks\n    \u2022 10-axis comparison: AGREE / DIVERGE per question + weight per active pair\n    \u2022 Divergence pattern classified: CONVERGENT / PARTIAL CONVERGENCE /\n      ROLE-LEVEL SPLIT / IRRESOLVABLE\n  Source: ST_Dual_Respondent_Axis_Comparison_v1.xlsx \u2192 AXIS_COMPARISON_ENGINE\n          + DIVERGENCE_CLASSIFICATION\n\n  Step B-3 \u2014 SCREEN_2 and SCREEN_3 rendered:\n    \u2022 SCREEN_2: side-by-side axis comparison table + divergence state banner\n    \u2022 SCREEN_3 output conditional on divergence state:\n        CONVERGENT \u2192 \u2605\u2605\u2605 STRONG \u2192 ECS pair locked \u2192 proceed to Step 5\n        PARTIAL CONVERGENCE \u2192 \u2605\u2605 CONFIRMED \u2192 ECS pair locked \u2192 proceed to Step 5\n        ROLE-LEVEL SPLIT \u2192 \u2605 WEAK + acknowledgement gate \u2192 ECS on governance env\n        IRRESOLVABLE \u2192 BLOCKED \u2192 practitioner required \u2192 no Step 5\n  Source: ST_B_Single_Output_Template_v1.xlsx \u2192 SCREEN_2 + SCREEN_3\n\nCross-reference: ST_Triage_Framework.xlsx \u2192 ACCURACY_CHECK \u2192 CHECK 4 (amended April 2026)\nFile authority: ST_Dual_Respondent_Axis_Comparison_v1.xlsx is the logic engine;\n                ST_B_Single_Output_Template_v1.xlsx is the display specification.",
     "outcomes": {
       "A": {
         "section": "OUTCOME A \u2014 BOTH CONFIRMED  (\u2605\u2605 or \u2605\u2605\u2605)\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\nCondition: Acquirer \u2605\u2605+ AND Target \u2605\u2605+\nReport issued:\n  \u2022 ECS pair locked (acquirer env \u00d7 target env)\n  \u2022 Preliminary ECS score range displayed (\u00b15 pts)\n  \u2022 Top 3 aligned resources listed\n  \u2022 Top 3 conflict resources listed\n  \u2022 Recommended integration protocol flagged (Ring-Fence / Selective / RHQA)\n  \u2022 30-day prediction anchor sealed and timestamped\nNext step: proceed directly to Step 5 (ECS full calculation).",

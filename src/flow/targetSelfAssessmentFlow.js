@@ -16,7 +16,9 @@ export const TARGET_SELF_ENVIRONMENT_CODES = Object.freeze([
 
 export function isTargetSelfAssessmentSourceLoaded(data = TARGET_SELF_ASSESSMENT_DATA) {
   return Boolean(
-    data?.targetSelfAssessment?.questionCount >= 11
+    data?.targetSelfAssessment?.source === "ST_Target_Self_Assessment_Module.xlsx"
+      && data?.targetSelfAssessment?.worksheet === "3_Screening"
+      && data.targetSelfAssessment.questionCount >= 11
       && data.targetSelfAssessment.questions.length === data.targetSelfAssessment.questionCount
       && data.targetSelfAssessment.questions.every((question) => question.options.length >= 4),
   );

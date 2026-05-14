@@ -665,7 +665,11 @@ export function buildPaidOffer(variant = "heterogeneous", options = {}) {
 
 export function isFinalDeliverableSourceLoaded(data = FINAL_DELIVERABLE_DATA) {
   return Boolean(
-    data?.narratives.length === 72
+    data?.sources?.includes("ST_Free_Tier_Output_Narratives_updated.xlsx")
+      && data?.sources?.includes("ST_Friction_Point_Lookup_updated.xlsx")
+      && data?.sources?.includes("ST_UI_Track_Coder_Agent_Specification_v1.xlsx")
+      && data?.sources?.includes("ST_Investment_Memorandum_final.docx")
+      && data.narratives.length === 72
       && data.frictionPoints.length === 56
       && data.screenCopy.screen11Header
       && data.screenCopy.screen11Body

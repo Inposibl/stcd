@@ -113,7 +113,8 @@ export function attachEmailCapture(session, input, options = {}) {
 export function isEmailCaptureSourceLoaded(data = FINAL_DELIVERABLE_DATA) {
   const copy = buildEmailCaptureCopy(data);
   return Boolean(
-    copy.header === "Where should we send your report?"
+    data?.sources?.includes("ST_UI_Track_Coder_Agent_Specification_v1.xlsx")
+      && copy.header === "Where should we send your report?"
       && copy.fields.some((field) => field.id === "email")
       && copy.fields.some((field) => field.id === "firstName")
       && copy.cta === "\u2192 Send report",

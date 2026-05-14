@@ -33,7 +33,11 @@ function routeIndex(route) {
   return SCREEN_REGISTRY.findIndex((screen) => screen.route === route);
 }
 
-assert.equal("sources" in ACQUIRER_TRACK_DATA, false);
+assert.deepEqual(ACQUIRER_TRACK_DATA.sources, [
+  "ST_Acquirer_Environment_Module.xlsx",
+  "ST_Form_Binding_Prompt.xlsx",
+  "ST_Consulting_Pages_v2.xlsx",
+]);
 assert.equal(ACQUISITION_MOTIVE_OPTIONS.length, 4);
 assert.deepEqual(ACQUISITION_MOTIVE_OPTIONS.map((option) => option.value), [
   "management_buyout",
@@ -68,8 +72,7 @@ assert.ok(RESPONDENT_ROLE_OPTIONS.length >= 19);
 assert.ok(RESPONDENT_SENIORITY_OPTIONS.length >= 7);
 assert.ok(RESPONDENT_FUNCTION_OPTIONS.length >= 12);
 assert.ok(RESPONDENT_ACCESS_LEVEL_OPTIONS.length >= 5);
-assert.equal("source" in ACQUIRER_TRACK_DATA.acquirerModule, false);
-assert.equal("worksheet" in ACQUIRER_TRACK_DATA.acquirerModule, false);
+assert.equal(ACQUIRER_TRACK_DATA.acquirerModule.worksheet, "3_Screening");
 assert.equal(ACQUIRER_TRACK_DATA.acquirerModule.questionCount, 11);
 assert.equal(ACQUIRER_TRACK_DATA.acquirerModule.questions.length, 11);
 assert.equal(isAcquirerModuleSourceLoaded(), true);

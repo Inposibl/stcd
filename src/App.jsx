@@ -2607,7 +2607,7 @@ function TargetObserverDiagnosticSurvey({ baseSession, onComplete }) {
       <section className="target-survey-panel question-screen">
         <p className="eyebrow">Target Observer Diagnostic - {phase === "level1" ? "Level 1" : "Level 2"} - Q{activeIndex + 1} of {questions.length} - {publicText(question.group)}</p>
         <h1>{publicText(question.text)}</h1>
-        <p className="source-note">{data.questionCount} {phase === "level1" ? "Level 1" : "Level 2"} questions in this diagnostic block.</p>
+        <p className="source-note">Source: {data.source} / {data.questionCount} {phase === "level1" ? "Level 1" : "Level 2"} questions</p>
         <form className="question-form" onSubmit={submit}>
           <DirectObservationGatePanel
             question={question}
@@ -2945,7 +2945,7 @@ function Step2BLevel1Screen({ session, setSession }) {
     <main className="screen-shell flow-screen question-screen">
       <p className="eyebrow">Step 2-B Level 1 - Q{activeIndex + 1} of {questions.length} - {publicText(question.group)}</p>
       <h1>{publicText(question.text)}</h1>
-      <p className="source-note">{TARGET_DIAGNOSTIC_DATA.level1.questionCount} Level 1 questions in this diagnostic block.</p>
+      <p className="source-note">Source: {TARGET_DIAGNOSTIC_DATA.level1.source} / {TARGET_DIAGNOSTIC_DATA.level1.questionCount} Level 1 questions</p>
       <form className="question-form" onSubmit={nextQuestion}>
         <DirectObservationGatePanel
           question={question}
@@ -3106,7 +3106,7 @@ function Step2BLevel2Screen({ session, setSession }) {
     <main className="screen-shell flow-screen question-screen">
       <p className="eyebrow">Step 2-B Level 2 - Q{activeIndex + 1} of {questions.length} - {publicText(question.group)}</p>
       <h1>{publicText(question.text)}</h1>
-      <p className="source-note">{TARGET_DIAGNOSTIC_DATA.level2.questionCount} Level 2 questions in this diagnostic block.</p>
+      <p className="source-note">Source: {TARGET_DIAGNOSTIC_DATA.level2.source} / {TARGET_DIAGNOSTIC_DATA.level2.questionCount} Level 2 questions</p>
       <form className="question-form" onSubmit={nextQuestion}>
         <DirectObservationGatePanel
           question={question}

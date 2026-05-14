@@ -373,7 +373,9 @@ export function attachTargetObservationSetup(session, input, storedAt) {
 
 export function isTargetObservationSourceLoaded(diagnostic = TARGET_OBSERVATION_DIAGNOSTIC) {
   return Boolean(
-    Number.isInteger(diagnostic?.questionCount)
+    diagnostic?.source === "ST_Target_Observed_Environment_Diagnostic.xlsx"
+      && diagnostic?.worksheet === "Questionnaire"
+      && Number.isInteger(diagnostic?.questionCount)
       && Array.isArray(diagnostic?.questions)
       && diagnostic.questions.length === diagnostic.questionCount
       && diagnostic.questions.length > 0,

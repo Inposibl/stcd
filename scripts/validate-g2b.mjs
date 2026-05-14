@@ -22,14 +22,14 @@ function routeIndex(route) {
   return SCREEN_REGISTRY.findIndex((screen) => screen.route === route);
 }
 
-assert.equal("source" in TARGET_OBSERVATION_DIAGNOSTIC, false);
-assert.equal("worksheet" in TARGET_OBSERVATION_DIAGNOSTIC, false);
+assert.equal(TARGET_OBSERVATION_DIAGNOSTIC.source, "ST_Target_Observed_Environment_Diagnostic.xlsx");
+assert.equal(TARGET_OBSERVATION_DIAGNOSTIC.worksheet, "Questionnaire");
 assert.equal(TARGET_OBSERVATION_DIAGNOSTIC.questionCount, 23);
 assert.equal(TARGET_OBSERVATION_DIAGNOSTIC.questions.length, 23);
 assert.equal(TARGET_OBSERVATION_DIAGNOSTIC.questions.at(-1).id, "TED Q19");
 assert.equal(TARGET_OBSERVATION_DIAGNOSTIC.questions.filter((question) => question.id.startsWith("TED ")).every((question) => Boolean(question.directObservationGate)), true);
 assert.equal(TARGET_OBSERVATION_DIAGNOSTIC.questions.filter((question) => question.id.startsWith("TED ")).every((question) => question.options.some((option) => option.value === "E")), true);
-assert.equal(isTargetObservationSourceLoaded(), true, "Target Observation questionnaire data must be loaded");
+assert.equal(isTargetObservationSourceLoaded(), true, "Target Observation source workbook data must be loaded");
 assert.equal(TARGET_OBSERVATION_SETUP_FIELDS.length, 3);
 assert.equal(TARGET_OBSERVATION_SETUP_FIELDS[1].type, "structured-context");
 assert.deepEqual(TARGET_OBSERVATION_SETUP_FIELDS.find((field) => field.id === "integrationTimeline").options, [

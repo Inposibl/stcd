@@ -48,9 +48,11 @@ function completeTrack1Session() {
 }
 
 assert.equal(isTargetSelfAssessmentSourceLoaded(), true);
-assert.equal("sources" in TARGET_SELF_ASSESSMENT_DATA, false);
-assert.equal("source" in TARGET_SELF_ASSESSMENT_DATA.targetSelfAssessment, false);
-assert.equal("worksheet" in TARGET_SELF_ASSESSMENT_DATA.targetSelfAssessment, false);
+assert.deepEqual(TARGET_SELF_ASSESSMENT_DATA.sources, [
+  "ST_Target_Self_Assessment_Module.xlsx",
+  "ST_Form_Binding_Prompt.xlsx",
+]);
+assert.equal(TARGET_SELF_ASSESSMENT_DATA.targetSelfAssessment.worksheet, "3_Screening");
 assert.equal(TARGET_SELF_ASSESSMENT_DATA.targetSelfAssessment.questionCount, 11);
 assert.equal(TARGET_SELF_ASSESSMENT_DATA.targetSelfAssessment.questions.length, 11);
 assert.equal(TARGET_SELF_ASSESSMENT_DATA.targetSelfAssessment.questions.every((question) => question.options.length >= 5), true);
