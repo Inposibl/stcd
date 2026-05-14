@@ -11,7 +11,6 @@
     "validate:g2b": "node scripts/validate-g2b.mjs",
     "validate:track1": "node scripts/validate-track1.mjs",
     "validate:step2b": "node scripts/validate-step2b.mjs",
-    "validate:evidence-state": "node scripts/validate-evidence-state-transitions.mjs",
     "validate:g4b": "node scripts/validate-g4b.mjs",
     "validate:g4c": "node scripts/validate-g4c.mjs",
     "validate:questionnaire-bindings": "node scripts/validate-questionnaire-bindings.mjs",

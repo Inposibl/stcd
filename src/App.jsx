@@ -477,45 +477,12 @@ const HOME_COPY = Object.freeze({
   closing: "Run the diagnostic in less than one hour. No account. No card.",
 });
 
-const METHODOLOGY_OVERVIEW_SECTIONS = Object.freeze([
-  Object.freeze({
-    number: "1",
-    title: "Purpose",
-    body: "Post-Deal Behavior Forecast is a framework for predicting behavioural outcomes in defined interaction environments. Its primary commercial application is human capital due diligence in mergers and acquisitions: forecasting integration success or failure before deal close, at the resolution of the specific resources that will come into conflict, the specific populations that will be at risk, and the timeline on which that risk will become visible.",
-  }),
-  Object.freeze({
-    number: "2",
-    title: "Evidence base",
-    body: "The framework rests on three categories of evidence. First, structured-respondent observational data gathered through validated diagnostic instruments administered to defined populations within an organisation. Second, documented case reconstructions of completed M&A transactions across multiple industries, each traced from environment composition through integration mechanism to observable outcome. Third, sealed forward predictions, recorded before close and verified at fixed post-close horizons.",
-  }),
-  Object.freeze({
-    number: "3",
-    title: "The analyst gate",
-    body: "Respondent answers are treated as observational evidence subject to analyst review, not as classification outputs. A trained analyst interprets the response pattern in context, applies the framework's internal contradiction and triage rules, and arrives at a conclusion that the respondent alone cannot determine. This design choice distinguishes Post-Deal Behavior Forecast from self-administered personality instruments and from fully automated typing systems. The diagnostic input is data; the analytical conclusion is professional judgement, recorded with its evidentiary basis.",
-  }),
-  Object.freeze({
-    number: "4",
-    title: "Environment Compatibility Score, conceptually",
-    body: "The Environment Compatibility Score (ECS) is a 0-100 metric that quantifies the predicted compatibility between two interaction environments. It is computed pairwise, at the environment level, from documented resource profiles, and calibrated against the actual outcomes of completed transactions. The ECS is a specification, not a verdict: it identifies where structural friction will arise, at what intensity, and on what timeline. Whether that friction is fatal or manageable depends on the integration protocol selected. Two recorded transactions of nearly identical numerical compatibility have produced opposite outcomes for exactly this reason.",
-  }),
-  Object.freeze({
-    number: "5",
-    title: "Calibration",
-    body: "The framework is calibrated through two mechanisms. First, retroactive application to ten completed M&A transactions across nine industries, each documented in full with the environment reading, the resource-level conflict mechanism, and the observable outcome. The AECOM-URS transaction (2014), for example, is recorded as a structural failure of the legacy construction business, with the divestiture in 2020 confirming the prediction at the level of mechanism, not merely direction. Second, the mathematical architecture underlying the score is the subject of an independent quantitative audit - formula-level review, edge-case testing, and version-controlled correction - conducted outside the development team. Calibration is a continuing process, not a one-time validation.",
-  }),
-  Object.freeze({
-    number: "6",
-    title: "Access",
-    body: "This overview describes the framework's epistemic position, its evidence categories, and the meaning of its principal output. It is not a methodological disclosure. The diagnostic instruments, the resource architecture, the full case portfolio, the integration protocols, and the operational ECS computation are released under non-disclosure agreement to qualified counterparties. The Investment Memorandum and pilot terms are available on request.",
-  }),
-]);
-
 const ECS_SCORE_BANDS = Object.freeze([
-  Object.freeze({ range: "80–100", title: "HIGH COMPATIBILITY", ev: "EV 0% – 2%", synergy: "Synergy 85% – 100%", flight: "Talent flight risk: LOW", tone: "blue" }),
-  Object.freeze({ range: "65–79", title: "MODERATE-HIGH", ev: "EV 2% – 7%", synergy: "Synergy 65% – 84%", flight: "Talent flight risk: LOW-MED", tone: "green" }),
-  Object.freeze({ range: "50–64", title: "MODERATE", ev: "EV 7% – 15%", synergy: "Synergy 40% – 64%", flight: "Talent flight risk: MEDIUM", tone: "yellow" }),
-  Object.freeze({ range: "35–49", title: "MODERATE-LOW", ev: "EV 15% – 25%", synergy: "Synergy 15% – 39%", flight: "Talent flight risk: HIGH", tone: "orange" }),
-  Object.freeze({ range: "0–34", title: "HIGH RISK", ev: "EV 35% – 60%+", synergy: "Synergy 0% – 14%", flight: "Talent flight risk: EXTREME", tone: "red" }),
+  Object.freeze({ range: "80–100", title: "HIGH COMPATIBILITY", ev: "EV 0% – 2%", synergy: "Synergy 85% – 100%", flight: "Flight LOW", tone: "blue" }),
+  Object.freeze({ range: "65–79", title: "MODERATE-HIGH", ev: "EV 2% – 7%", synergy: "Synergy 65% – 84%", flight: "Flight LOW-MED", tone: "green" }),
+  Object.freeze({ range: "50–64", title: "MODERATE", ev: "EV 7% – 15%", synergy: "Synergy 40% – 64%", flight: "Flight MEDIUM", tone: "yellow" }),
+  Object.freeze({ range: "35–49", title: "MODERATE-LOW", ev: "EV 15% – 25%", synergy: "Synergy 15% – 39%", flight: "Flight HIGH", tone: "orange" }),
+  Object.freeze({ range: "0–34", title: "HIGH RISK", ev: "EV 35% – 60%+", synergy: "Synergy 0% – 14%", flight: "Flight EXTREME", tone: "red" }),
 ]);
 
 const ENVIRONMENT_DETAIL_ROWS = Object.freeze([
@@ -546,7 +513,7 @@ const ORDERED_ENVIRONMENTS = Object.freeze(
 
 function routeSection(route) {
   if (route === "/" || route === "/home") return "home";
-  if (route === "/about-methodology" || route.startsWith("/about-methodology/")) return "methodology";
+  if (route === "/about-methodology") return "methodology";
   if (route === "/case-studies" || route.startsWith("/case-studies/")) return "case-studies";
   if (route === "/start-diagnostic" || route.startsWith("/start-diagnostic/")) return "diagnostic";
   if (route === "/environments" || route.startsWith("/environments/")) return "environments";
@@ -615,11 +582,6 @@ function AboutMethodologyScreen() {
           <p>
             Structural Typology is a 15-year developed behavioural intelligence framework that synthesises Jung, Myers-Briggs, Piaget, and Vygotsky to predict organisational compatibility with numerical precision. The diagnostic unit is the interaction environment, not the individual.
           </p>
-          <div className="framework-hero-actions">
-            <a className="methodology-overview-link" href="/about-methodology/overview" onClick={handleRouteClick("/about-methodology/overview")}>
-              Read public methodology overview
-            </a>
-          </div>
         </header>
 
         <section className="framework-section">
@@ -667,39 +629,6 @@ function AboutMethodologyScreen() {
             The ECS matrix is grounded in 816 verified behavioural records covering all 16 MBTI types across 3 behavioural states: Norm, Stress, Neurosis. It is built from environment interactions, resource scoring across 17 resources, and the Structural Typology source archive, including Jung, Myers-Briggs, Keirsey, Piaget, Vygotsky, and Meyer's cultural map.
           </p>
         </section>
-      </section>
-    </main>
-  );
-}
-
-function MethodologyOverviewScreen() {
-  return (
-    <main className="marketing-screen methodology-overview-screen">
-      <section className="page-shell methodology-overview-shell">
-        <header className="framework-hero compact methodology-overview-hero">
-          <p className="eyebrow">Public methodology note</p>
-          <h1>Post-Deal Behavior Forecast</h1>
-          <p className="methodology-overview-subtitle">Methodology Overview</p>
-        </header>
-
-        <article className="methodology-document" aria-label="Post-Deal Behavior Forecast methodology overview">
-          {METHODOLOGY_OVERVIEW_SECTIONS.map((section) => (
-            <section className="methodology-document-section" key={section.number}>
-              <span className="methodology-section-number" aria-hidden="true">{section.number}</span>
-              <div>
-                <h2>{section.title}</h2>
-                <p>{section.body}</p>
-              </div>
-            </section>
-          ))}
-        </article>
-
-        <footer className="methodology-overview-footer">
-          <p>
-            This page is an overview only. Operational diagnostics, instruments, protocols, case portfolio, and ECS computation are released under NDA to qualified counterparties.
-          </p>
-          <a className="methodology-back-link" href="/about-methodology" onClick={handleRouteClick("/about-methodology")}>Back to About Methodology</a>
-        </footer>
       </section>
     </main>
   );
@@ -1525,38 +1454,6 @@ function EvidenceClassificationPanel({ answer, onChange, showDirectObservation =
   );
 }
 
-function updateQuestionnaireSelectedAnswer(answers, question, value) {
-  return {
-    ...answers,
-    [question.id]: updateEvidenceAnswer(answers[question.id], selectedOptionPatch(question, value)),
-  };
-}
-
-function evidenceClassificationMessage(validation) {
-  if (!validation || validation.valid) return "";
-  if (validation.missing.includes("answer option")) return "Select one answer to continue.";
-
-  const parts = [];
-  if (validation.missing.length > 0) {
-    parts.push(`Complete: ${validation.missing.join(", ")}.`);
-  }
-  if (validation.consistencyIssues.length > 0) {
-    parts.push(`Resolve: ${validation.consistencyIssues.join(" ")}`);
-  }
-  return parts.join(" ");
-}
-
-function QuestionnaireBlockingMessage({ validation }) {
-  const message = evidenceClassificationMessage(validation);
-  if (!message) return null;
-
-  return (
-    <p className="question-blocking-message" role="status" aria-live="polite">
-      {message}
-    </p>
-  );
-}
-
 function AcquirerModuleScreen({ session, setSession }) {
   const existingAnswers = session.acquirer2A?.answers ?? {};
   const [answers, setAnswers] = useState(existingAnswers);
@@ -1580,7 +1477,10 @@ function AcquirerModuleScreen({ session, setSession }) {
   }
 
   function updateAnswer(value) {
-    setAnswers((current) => updateQuestionnaireSelectedAnswer(current, question, value));
+    setAnswers((current) => ({
+      ...current,
+      [question.id]: updateEvidenceAnswer(current[question.id], selectedOptionPatch(question, value)),
+    }));
     setError("");
   }
 
@@ -1649,7 +1549,6 @@ function AcquirerModuleScreen({ session, setSession }) {
           />
         ) : null}
         {error ? <p className="form-error">{error}</p> : null}
-        <QuestionnaireBlockingMessage validation={currentAnswerValidation} />
         <div className="button-row">
           <button className="primary-flow-action" disabled={!canSubmitQuestion} type="submit">
             {activeIndex === questions.length - 1 ? "Submit" : "Next"}
@@ -1828,7 +1727,10 @@ function AcquirerVerificationQuestionnaire({ onComplete }) {
   const canSubmitQuestion = currentAnswerValidation.valid;
 
   function updateAnswer(value) {
-    setAnswers((current) => updateQuestionnaireSelectedAnswer(current, question, value));
+    setAnswers((current) => ({
+      ...current,
+      [question.id]: updateEvidenceAnswer(current[question.id], selectedOptionPatch(question, value)),
+    }));
     setError("");
   }
 
@@ -1894,7 +1796,6 @@ function AcquirerVerificationQuestionnaire({ onComplete }) {
           />
         ) : null}
         {error ? <p className="form-error">{error}</p> : null}
-        <QuestionnaireBlockingMessage validation={currentAnswerValidation} />
         <div className="button-row">
           <button className="primary-flow-action" disabled={!canSubmitQuestion} type="submit">
             {activeIndex === questions.length - 1 ? "Submit acquirer verification" : "Next"}
@@ -2169,13 +2070,6 @@ function TargetObservationSetupIntroScreen({ session, setSession }) {
     <main className="screen-shell flow-screen compact-flow">
       <p className="eyebrow">Screen 6a / Target Observation Setup</p>
       <h1>Who will provide the Target Observation setup?</h1>
-      {authorizedSurveyComplete ? (
-        <section className="result-panel" role="status" aria-live="polite">
-          <strong>Authorized Target Observer response received.</strong>
-          <span>The original assessment tab has been updated and the next step is unlocked.</span>
-          <span>Continue to the Target Self-Assessment gate when you are ready.</span>
-        </section>
-      ) : null}
       <section className="invite-panel">
         <h2>Who should answer this survey</h2>
         <p>The Target Observer survey must be answered by the person who has direct evidence of how the target actually operates. High-quality answers require observed facts, not assumptions, public information, or the acquisition thesis.</p>
@@ -2236,9 +2130,9 @@ function TargetObservationSetupIntroScreen({ session, setSession }) {
               </label>
             </div>
             {!authorizedSurveyComplete ? (
-              <p className="source-note">Direct entry is locked for this survey. This tab checks for completion while it is open and unlocks the next step after the respondent submits the full Target Observer block.</p>
+              <p className="source-note">Direct entry is locked for this survey. The completed authorized survey will unlock after the respondent verifies the code and submits the full Target Observer block.</p>
             ) : (
-              <p className="source-note">Authorized survey completed. You can review the selected answers in read-only mode or continue to the next step.</p>
+              <p className="source-note">Authorized survey completed. Open it to review the selected answers in read-only mode before continuing.</p>
             )}
             <div className="button-row">
               <button type="button" onClick={() => setEmailState("Prepared for email sending: authorized respondent link and code are ready.")}>Enter e-mail for sending</button>
@@ -2334,9 +2228,7 @@ function TargetObservationSetupReceiptScreen() {
       <section className="receipt-panel">
         <p className="eyebrow">Screen 6b / Target Observation</p>
         <h1>Thank you. Your Target Observer answers have been received.</h1>
-        <p>The original assessment tab will unlock the next step automatically if it is still open.</p>
-        <p>If the original tab does not change, the sender can return to Target Observation Setup and the app will check for the completed response.</p>
-        <strong>You can close this window.</strong>
+        <p>You can close this window.</p>
       </section>
     </main>
   );
@@ -2353,7 +2245,10 @@ function TargetObservationQuestionnaire({ answers, setAnswers, setup, onComplete
   const canSubmitQuestion = currentAnswerValidation.valid;
 
   function updateAnswer(value) {
-    setAnswers((current) => updateQuestionnaireSelectedAnswer(current, question, value));
+    setAnswers((current) => ({
+      ...current,
+      [question.id]: updateEvidenceAnswer(current[question.id], selectedOptionPatch(question, value)),
+    }));
     setError("");
   }
 
@@ -2436,7 +2331,6 @@ function TargetObservationQuestionnaire({ answers, setAnswers, setup, onComplete
           />
         ) : null}
         {error ? <p className="form-error">{error}</p> : null}
-        <QuestionnaireBlockingMessage validation={currentAnswerValidation} />
         <div className="button-row">
           <button className="primary-flow-action" disabled={!canSubmitQuestion} type="submit">
             {activeIndex === questions.length - 1 ? "Submit Target Observation" : "Next"}
@@ -2536,7 +2430,10 @@ function TargetObserverDiagnosticSurvey({ baseSession, onComplete }) {
   const canSubmitQuestion = currentAnswerValidation.valid;
 
   function updateAnswer(value) {
-    setAnswers((current) => updateQuestionnaireSelectedAnswer(current, question, value));
+    setAnswers((current) => ({
+      ...current,
+      [question.id]: updateEvidenceAnswer(current[question.id], selectedOptionPatch(question, value)),
+    }));
     setError("");
   }
 
@@ -2636,7 +2533,6 @@ function TargetObserverDiagnosticSurvey({ baseSession, onComplete }) {
             />
           ) : null}
           {error ? <p className="form-error">{error}</p> : null}
-          <QuestionnaireBlockingMessage validation={currentAnswerValidation} />
           <div className="button-row">
             <button className="primary-flow-action" disabled={!canSubmitQuestion} type="submit">
               {activeIndex === questions.length - 1 ? `Submit ${phase === "level1" ? "Level 1" : "Level 2"}` : "Next"}
@@ -2900,7 +2796,10 @@ function Step2BLevel1Screen({ session, setSession }) {
   }
 
   function updateAnswer(value) {
-    setAnswers((current) => updateQuestionnaireSelectedAnswer(current, question, value));
+    setAnswers((current) => ({
+      ...current,
+      [question.id]: updateEvidenceAnswer(current[question.id], selectedOptionPatch(question, value)),
+    }));
     setError("");
   }
 
@@ -2974,7 +2873,6 @@ function Step2BLevel1Screen({ session, setSession }) {
           />
         ) : null}
         {error ? <p className="form-error">{error}</p> : null}
-        <QuestionnaireBlockingMessage validation={currentAnswerValidation} />
         <div className="button-row">
           <button className="primary-flow-action" disabled={!canSubmitQuestion} type="submit">
             {activeIndex === questions.length - 1 ? "Submit Level 1" : "Next"}
@@ -3060,7 +2958,10 @@ function Step2BLevel2Screen({ session, setSession }) {
   }
 
   function updateAnswer(value) {
-    setAnswers((current) => updateQuestionnaireSelectedAnswer(current, question, value));
+    setAnswers((current) => ({
+      ...current,
+      [question.id]: updateEvidenceAnswer(current[question.id], selectedOptionPatch(question, value)),
+    }));
     setError("");
   }
 
@@ -3135,7 +3036,6 @@ function Step2BLevel2Screen({ session, setSession }) {
           />
         ) : null}
         {error ? <p className="form-error">{error}</p> : null}
-        <QuestionnaireBlockingMessage validation={currentAnswerValidation} />
         {result ? (
           <section className="result-panel">
             <strong>Target environment: {aliasFor(result.primaryEnvironmentCode)} - {result.signalBadge}</strong>
@@ -3159,16 +3059,13 @@ function targetSelfFieldLabel(fieldId) {
   return TARGET_SELF_ASSESSMENT_DATA.positioningFields.find((field) => field.id === fieldId)?.label ?? fieldId;
 }
 
-function TargetReceiptScreen({ invited = false }) {
+function TargetReceiptScreen() {
   return (
     <main className="target-only-screen">
       <section className="receipt-panel">
         <p className="eyebrow">Target Self-Assessment</p>
         <h1>{TARGET_SELF_ASSESSMENT_DATA.receipt.title}</h1>
         <p>{TARGET_SELF_ASSESSMENT_DATA.receipt.body}</p>
-        {invited ? (
-          <p>The original assessment tab will update automatically if it is still open. If it does not change, the sender can return to the Preliminary Assessment page.</p>
-        ) : null}
         <strong>{TARGET_SELF_ASSESSMENT_DATA.receipt.close}</strong>
       </section>
     </main>
@@ -3188,7 +3085,7 @@ function TargetSelfAssessmentSurvey({ session, setSession, invite = null }) {
   const currentAnswerValidation = validateEvidenceClassifiedAnswer(answers[question.id]);
   const canSubmitQuestion = currentAnswerValidation.valid;
 
-  if (receipt || invite?.completed || (!invite && session.targetSelfAssessment?.completed)) return <TargetReceiptScreen invited={Boolean(invite)} />;
+  if (receipt || invite?.completed || (!invite && session.targetSelfAssessment?.completed)) return <TargetReceiptScreen />;
 
   function updatePositioning(fieldId, value) {
     setPositioning((current) => ({ ...current, [fieldId]: value }));
@@ -3196,7 +3093,10 @@ function TargetSelfAssessmentSurvey({ session, setSession, invite = null }) {
   }
 
   function updateAnswer(value) {
-    setAnswers((current) => updateQuestionnaireSelectedAnswer(current, question, value));
+    setAnswers((current) => ({
+      ...current,
+      [question.id]: updateEvidenceAnswer(current[question.id], selectedOptionPatch(question, value)),
+    }));
     setError("");
   }
 
@@ -3319,7 +3219,6 @@ function TargetSelfAssessmentSurvey({ session, setSession, invite = null }) {
             />
           ) : null}
           {error ? <p className="form-error">{error}</p> : null}
-          <QuestionnaireBlockingMessage validation={currentAnswerValidation} />
           <div className="button-row">
             <button className="primary-flow-action" disabled={!canSubmitQuestion} type="submit">
               {activeIndex === questions.length - 1 ? "Submit Target Self-Assessment" : "Next"}
@@ -3391,7 +3290,7 @@ function TargetCodeEntryScreen({ session, setSession, targetSessionId }) {
     );
   }
 
-  if (invite.completed) return <TargetReceiptScreen invited />;
+  if (invite.completed) return <TargetReceiptScreen />;
   if (verified) return <TargetSelfAssessmentSurvey invite={invite} session={session} setSession={setSession} />;
 
   function submit(event) {
@@ -4560,9 +4459,9 @@ function PreliminaryTargetGateScreen({ session, setSession }) {
       ) : null}
 
       {targetSelfComplete ? (
-        <section className="result-panel" role="status" aria-live="polite">
+        <section className="result-panel">
           <strong>Target self-assessment received.</strong>
-          <span>The original assessment tab has been updated with the target respondent's self-description.</span>
+          <span>The Preliminary Assessment can now be reconciled against the target respondent's self-description.</span>
           <span>Final deliverables are unlocked for the Acquirer.</span>
         </section>
       ) : null}
@@ -5923,7 +5822,6 @@ export default function App() {
   function renderScreen() {
     if (screen.id === "home") return <HomeScreen />;
     if (screen.id === "about-methodology") return <AboutMethodologyScreen />;
-    if (screen.id === "methodology-overview") return <MethodologyOverviewScreen />;
     if (screen.id === "case-studies") return <CaseStudiesScreen />;
     if (screen.id === "case-study-detail") return <CaseStudyDetailScreen caseId={screen.caseId} />;
     if (screen.id === "interaction-environments") {
