@@ -466,7 +466,7 @@ const SIDEBAR_NAV_ITEMS = Object.freeze([
 ]);
 
 const HOME_COPY = Object.freeze({
-  title: "Structural Typology Diagnostic",
+  title: "Post-Deal Behavior Forecast",
   lead: "70% of M&A integrations that destroy value fail for the same reason.",
   paragraphs: Object.freeze([
     "M&A deals are pursued for different reasons: to acquire a team, enter a new market, hit strategic KPIs, or remove a competitor. But integration value is lost for the same reason: the organizations cannot operate together in reality.",

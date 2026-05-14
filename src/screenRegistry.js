@@ -24,7 +24,7 @@ export const SCREEN_REGISTRY = Object.freeze([
 
 export function screenByRoute(route) {
   if (route === "/" || route === "/home") {
-    return { id: "home", title: "Structural Typology Diagnostic", route };
+    return { id: "home", title: "Post-Deal Behavior Forecast", route };
   }
   if (route === "/about-methodology") {
     return { id: "about-methodology", title: "The ST Framework", route };
