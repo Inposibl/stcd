@@ -9,11 +9,21 @@ type NodeRequest = {
 
 type NodeResponse = {
   statusCode: number;
+  json?: (body: unknown) => void;
+  status?: (statusCode: number) => NodeResponse;
   setHeader: (name: string, value: string) => void;
   end: (body: string) => void;
 };
 
 function sendJson(response: NodeResponse, statusCode: number, body: unknown) {
+  const setStatus = response.status;
+  const sendBody = response.json;
+  if (typeof setStatus === "function" && typeof sendBody === "function") {
+    const statusResponse = setStatus.call(response, statusCode);
+    sendBody.call(statusResponse ?? response, body);
+    return;
+  }
+
   response.statusCode = statusCode;
   response.setHeader("content-type", "application/json; charset=utf-8");
   response.end(JSON.stringify(body));
