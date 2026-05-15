@@ -1,6 +1,53 @@
-import { methodNotAllowed, parseJsonBody, jsonResponse } from "./_response.js";
-
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+type NodeRequest = {
+  method?: string;
+  url?: string;
+  on?: (event: "data" | "end" | "error", callback: (chunk?: any) => void) => void;
+};
+
+type NodeResponse = {
+  statusCode: number;
+  setHeader: (name: string, value: string) => void;
+  end: (body: string) => void;
+};
+
+function sendJson(response: NodeResponse, statusCode: number, body: unknown) {
+  response.statusCode = statusCode;
+  response.setHeader("content-type", "application/json; charset=utf-8");
+  response.end(JSON.stringify(body));
+}
+
+function sendMethodNotAllowed(response: NodeResponse, method: string | undefined, allowed: string[]) {
+  sendJson(response, 405, {
+    status: "method-not-allowed",
+    method: method ?? "UNKNOWN",
+    allowed,
+  });
+}
+
+async function parseBody(request: NodeRequest) {
+  return new Promise<any>((resolve) => {
+    let raw = "";
+
+    if (typeof request.on !== "function") {
+      resolve(null);
+      return;
+    }
+
+    request.on("data", (chunk) => {
+      raw += chunk?.toString() ?? "";
+    });
+    request.on("error", () => resolve(null));
+    request.on("end", () => {
+      try {
+        resolve(raw ? JSON.parse(raw) : null);
+      } catch {
+        resolve(null);
+      }
+    });
+  });
+}
 
 function normalizeEmail(value: unknown) {
   return String(value ?? "").trim().toLowerCase();
@@ -31,31 +78,34 @@ function validateAuthorizedSurveyLink(value: string) {
   }
 }
 
-async function sendAuthorizedLink(request: Request) {
+async function sendAuthorizedLink(request: NodeRequest, response: NodeResponse) {
   if (request.method !== "POST") {
-    return methodNotAllowed(request.method, ["POST"]);
+    sendMethodNotAllowed(response, request.method, ["POST"]);
+    return;
   }
 
-  const body = await parseJsonBody(request);
+  const body = await parseBody(request);
   const recipientEmail = normalizeEmail(body?.recipientEmail);
   const surveyLink = cleanString(body?.surveyLink);
   const digitalCode = cleanString(body?.digitalCode);
   const expiresAt = cleanString(body?.expiresAt);
 
   if (!EMAIL_PATTERN.test(recipientEmail)) {
-    return jsonResponse(400, {
+    sendJson(response, 400, {
       endpoint: "/api/final-report?action=send-authorized-link",
       status: "invalid-recipient-email",
       error: "A valid recipientEmail is required",
     });
+    return;
   }
 
   if (!validateAuthorizedSurveyLink(surveyLink) || !/^\d{6}$/.test(digitalCode) || !expiresAt) {
-    return jsonResponse(400, {
+    sendJson(response, 400, {
       endpoint: "/api/final-report?action=send-authorized-link",
       status: "invalid-authorized-link",
       error: "A valid authorized surveyLink, 6-digit digitalCode, and expiresAt are required",
     });
+    return;
   }
 
   const apiKey = process.env.RESEND_API_KEY;
@@ -64,11 +114,12 @@ async function sendAuthorizedLink(request: Request) {
     ?? process.env.REPORT_COPY_FROM;
 
   if (!apiKey || !from) {
-    return jsonResponse(503, {
+    sendJson(response, 503, {
       endpoint: "/api/final-report?action=send-authorized-link",
       status: "email-service-not-configured",
       error: "RESEND_API_KEY and sender e-mail environment variables are required",
     });
+    return;
   }
 
   const subject = "Authorized Target Observer survey link";
@@ -103,15 +154,16 @@ async function sendAuthorizedLink(request: Request) {
 
   const providerBody = await providerResponse.json().catch(() => null);
   if (!providerResponse.ok) {
-    return jsonResponse(502, {
+    sendJson(response, 502, {
       endpoint: "/api/final-report?action=send-authorized-link",
       status: "email-provider-error",
       providerStatus: providerResponse.status,
       error: providerBody?.message ?? "Resend rejected the e-mail request",
     });
+    return;
   }
 
-  return jsonResponse(200, {
+  sendJson(response, 200, {
     endpoint: "/api/final-report?action=send-authorized-link",
     status: "sent",
     to: recipientEmail,
@@ -120,13 +172,14 @@ async function sendAuthorizedLink(request: Request) {
   });
 }
 
-export default async function handler(request: Request) {
-  const requestUrl = new URL(request.url, "https://st.local");
+export default async function handler(request: NodeRequest, response: NodeResponse) {
+  const requestUrl = new URL(request.url ?? "/api/final-report", "https://st.local");
   if (requestUrl.searchParams.get("action") === "send-authorized-link") {
-    return sendAuthorizedLink(request);
+    await sendAuthorizedLink(request, response);
+    return;
   }
 
-  return jsonResponse(501, {
+  sendJson(response, 501, {
     endpoint: "/api/final-report",
     status: "contract-stub",
     message: "Returns final report only after Acquirer and verified Target completion.",
