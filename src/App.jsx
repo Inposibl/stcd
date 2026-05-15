@@ -1727,7 +1727,7 @@ function AcquirerSubmitScreen({ session, setSession }) {
           <h2>Optional precision upgrade</h2>
           {verificationComplete ? (
             <>
-              <p>Acquirer verification received. The Preliminary Assessment will use the merged acquirer signal, so the acquirer environment type and its relationship with the Target environment are calculated from both acquirer responses.</p>
+              <p>Authorized acquirer response received. Continue to Target Observation Setup when ready. The Preliminary Assessment will use the merged acquirer signal, so the acquirer environment type and its relationship with the Target environment are calculated from both acquirer responses.</p>
               <div className="range-table">
                 <div className="range-row">
                   <span>Original acquirer signal</span>
@@ -1765,7 +1765,7 @@ function AcquirerSubmitScreen({ session, setSession }) {
                       <input readOnly value={invite.expiresAt} />
                     </label>
                   </div>
-                  <p className="source-note">You can continue now. If the authorized acquirer survey is completed before the final report is generated, it will be merged with the original acquirer response and improve precision.</p>
+                  <p className="source-note">Keep this tab open if you want it to update automatically when the authorized acquirer response is received. You can continue now; if that response arrives before the final report is generated, it will be merged with the original acquirer response and improve precision.</p>
                   <div className="button-row">
                     <button type="button" onClick={() => setEmailState("Prepared for email sending: Acquirer verification link and code are ready.")}>Enter e-mail for sending</button>
                     <button type="button" onClick={() => window.open(fullLink, "_blank", "noopener,noreferrer")}>Open Acquirer verification survey</button>
@@ -1796,6 +1796,8 @@ function AcquirerVerificationReceiptScreen() {
         <p className="eyebrow">Acquirer verification</p>
         <h1>Thank you. The second acquirer response has been received.</h1>
         <p>The Preliminary Assessment will use the merged acquirer signal when the main assessment continues.</p>
+        <p className="source-note">When the original assessment tab is still open in this browser, it is notified automatically. If that tab does not update, return to it and continue from the next available action.</p>
+        <strong>You can close this window.</strong>
       </section>
     </main>
   );
@@ -2214,9 +2216,9 @@ function TargetObservationSetupIntroScreen({ session, setSession }) {
               </label>
             </div>
             {!authorizedSurveyComplete ? (
-              <p className="source-note">Direct entry is locked for this survey. The completed authorized survey will unlock after the respondent verifies the code and submits the full Target Observer block.</p>
+              <p className="source-note">Keep this tab open; it will update automatically when the authorized respondent submits the full Target Observer block. Direct entry is locked for this survey until then.</p>
             ) : (
-              <p className="source-note">Authorized survey completed. Open it to review the selected answers in read-only mode before continuing.</p>
+              <p className="source-note">Authorized response received. Open it to review the selected answers in read-only mode before continuing to Preliminary Assessment.</p>
             )}
             <div className="button-row">
               <button type="button" onClick={() => setEmailState("Prepared for email sending: authorized respondent link and code are ready.")}>Enter e-mail for sending</button>
@@ -2233,7 +2235,7 @@ function TargetObservationSetupIntroScreen({ session, setSession }) {
                   type="button"
                   onClick={() => navigate("/screen-9a-target-code-gate")}
                 >
-                  Next step
+                  Continue to Preliminary Assessment
                 </button>
               ) : null}
             </div>
@@ -2312,7 +2314,8 @@ function TargetObservationSetupReceiptScreen() {
       <section className="receipt-panel">
         <p className="eyebrow">Screen 6b / Target Observation</p>
         <h1>Thank you. Your Target Observer answers have been received.</h1>
-        <p>You can close this window.</p>
+        <p>The original assessment tab is notified automatically when it is still open in this browser. If that tab does not update, return to it and open the authorized survey review.</p>
+        <strong>You can close this window.</strong>
       </section>
     </main>
   );
@@ -3135,13 +3138,14 @@ function targetSelfFieldLabel(fieldId) {
   return TARGET_SELF_ASSESSMENT_DATA.positioningFields.find((field) => field.id === fieldId)?.label ?? fieldId;
 }
 
-function TargetReceiptScreen() {
+function TargetReceiptScreen({ invited = false }) {
   return (
     <main className="target-only-screen">
       <section className="receipt-panel">
         <p className="eyebrow">Target Self-Assessment</p>
         <h1>{TARGET_SELF_ASSESSMENT_DATA.receipt.title}</h1>
         <p>{TARGET_SELF_ASSESSMENT_DATA.receipt.body}</p>
+        {invited ? <p className="source-note">When the original assessment tab is still open in this browser, it is notified automatically. If that tab does not update, return to it and open Final Deliverables.</p> : null}
         <strong>{TARGET_SELF_ASSESSMENT_DATA.receipt.close}</strong>
       </section>
     </main>
@@ -3161,7 +3165,7 @@ function TargetSelfAssessmentSurvey({ session, setSession, invite = null }) {
   const currentAnswerValidation = validateEvidenceClassifiedAnswer(answers[question.id]);
   const canSubmitQuestion = currentAnswerValidation.valid;
 
-  if (receipt || invite?.completed || (!invite && session.targetSelfAssessment?.completed)) return <TargetReceiptScreen />;
+  if (receipt || invite?.completed || (!invite && session.targetSelfAssessment?.completed)) return <TargetReceiptScreen invited={Boolean(invite)} />;
 
   function updatePositioning(fieldId, value) {
     setPositioning((current) => ({ ...current, [fieldId]: value }));
@@ -3364,7 +3368,7 @@ function TargetCodeEntryScreen({ session, setSession, targetSessionId }) {
     );
   }
 
-  if (invite.completed) return <TargetReceiptScreen />;
+  if (invite.completed) return <TargetReceiptScreen invited />;
   if (verified) return <TargetSelfAssessmentSurvey invite={invite} session={session} setSession={setSession} />;
 
   function submit(event) {
@@ -4509,7 +4513,7 @@ function PreliminaryTargetGateScreen({ session, setSession }) {
       {preliminary?.completed && invite && !targetSelfComplete ? (
         <section className="invite-panel">
           <h2>Target Self-Assessment link and digital code</h2>
-          <p>The Preliminary Assessment remains provisional until the target respondent completes this survey.</p>
+          <p>Keep this tab open; it will update automatically when the target respondent submits this survey. The Preliminary Assessment remains provisional until then.</p>
           <div className="invite-grid">
             <label>
               <span>Survey link - active for 72 hours</span>
@@ -4536,7 +4540,7 @@ function PreliminaryTargetGateScreen({ session, setSession }) {
         <section className="result-panel">
           <strong>Target self-assessment received.</strong>
           <span>The Preliminary Assessment can now be reconciled against the target respondent's self-description.</span>
-          <span>Final deliverables are unlocked for the Acquirer.</span>
+          <span>Final deliverables are unlocked for the Acquirer. Use Open Final Deliverables to continue.</span>
         </section>
       ) : null}
 
