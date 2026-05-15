@@ -2171,7 +2171,7 @@ function TargetObservationSetupIntroScreen({ session, setSession }) {
     setEmailState("Sending authorized respondent e-mail...");
 
     try {
-      const response = await fetch("/api/send-authorized-link", {
+      const response = await fetch("/api/final-report?action=send-authorized-link", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
