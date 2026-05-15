@@ -2069,6 +2069,8 @@ function TargetObservationSetupForm({ existingSetup = {}, submitLabel = "Continu
 
 function TargetObservationSetupIntroScreen({ session, setSession }) {
   const [emailState, setEmailState] = useState("");
+  const [showAuthorizedEmail, setShowAuthorizedEmail] = useState(false);
+  const [authorizedRecipientEmail, setAuthorizedRecipientEmail] = useState("");
   const invite = session.targetObservationSetupInvite;
   const authorizedRouteLocked = Boolean(invite);
   const authorizedSurveyComplete = Boolean(invite?.completed && invite?.targetObservation?.completed && invite?.target2B?.completed);
@@ -2148,9 +2150,33 @@ function TargetObservationSetupIntroScreen({ session, setSession }) {
     const result = createObservationSetupInvite(session);
     setSession(result.session);
     setEmailState("");
+    setShowAuthorizedEmail(false);
+    setAuthorizedRecipientEmail("");
   }
 
   const fullLink = invite ? `${window.location.origin}${invite.surveyLink}` : "";
+
+  function prepareAuthorizedEmail(event) {
+    event.preventDefault();
+    const recipientEmail = authorizedRecipientEmail.trim().toLowerCase();
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipientEmail)) {
+      setEmailState("Enter a valid recipient e-mail before sending.");
+      return;
+    }
+
+    const subject = encodeURIComponent("Authorized Target Observer survey link");
+    const body = encodeURIComponent([
+      "Please complete the authorized Target Observer survey.",
+      "",
+      `Survey link: ${fullLink}`,
+      `6-digit code: ${invite.digitalCode}`,
+      `Expires at: ${invite.expiresAt}`,
+    ].join("\n"));
+
+    window.location.href = `mailto:${recipientEmail}?subject=${subject}&body=${body}`;
+    setEmailState(`E-mail draft prepared for ${recipientEmail}.`);
+  }
 
   return (
     <main className="screen-shell flow-screen compact-flow">
@@ -2221,7 +2247,15 @@ function TargetObservationSetupIntroScreen({ session, setSession }) {
               <p className="source-note">Authorized response received. Open it to review the selected answers in read-only mode before continuing to Preliminary Assessment.</p>
             )}
             <div className="button-row">
-              <button type="button" onClick={() => setEmailState("Prepared for email sending: authorized respondent link and code are ready.")}>Enter e-mail for sending</button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowAuthorizedEmail(true);
+                  setEmailState("");
+                }}
+              >
+                Enter e-mail for sending
+              </button>
               <button
                 disabled={!authorizedSurveyComplete}
                 type="button"
@@ -2239,6 +2273,28 @@ function TargetObservationSetupIntroScreen({ session, setSession }) {
                 </button>
               ) : null}
             </div>
+            {showAuthorizedEmail ? (
+              <form className="invite-grid" onSubmit={prepareAuthorizedEmail}>
+                <label>
+                  <span>Recipient e-mail</span>
+                  <input
+                    autoComplete="email"
+                    onChange={(event) => {
+                      setAuthorizedRecipientEmail(event.target.value);
+                      setEmailState("");
+                    }}
+                    placeholder="name@example.com"
+                    type="email"
+                    value={authorizedRecipientEmail}
+                  />
+                </label>
+                <label>
+                  <span>Prepared message</span>
+                  <input readOnly value="Authorized Target Observer link and 6-digit code" />
+                </label>
+                <button type="submit">Open e-mail draft</button>
+              </form>
+            ) : null}
             {emailState ? <p className="source-note">{emailState}</p> : null}
         </section>
       ) : null}
