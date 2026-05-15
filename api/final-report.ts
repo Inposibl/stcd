@@ -121,7 +121,7 @@ async function sendAuthorizedLink(request: Request) {
 }
 
 export default async function handler(request: Request) {
-  const requestUrl = new URL(request.url);
+  const requestUrl = new URL(request.url, "https://st.local");
   if (requestUrl.searchParams.get("action") === "send-authorized-link") {
     return sendAuthorizedLink(request);
   }

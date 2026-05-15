@@ -6,7 +6,7 @@ export default async function handler(request: Request) {
     return methodNotAllowed(request.method, ["GET"]);
   }
 
-  const url = new URL(request.url);
+  const url = new URL(request.url, "https://st.local");
   const sessionId = url.searchParams.get("sessionId")?.trim();
   if (!sessionId) {
     return jsonResponse(400, {

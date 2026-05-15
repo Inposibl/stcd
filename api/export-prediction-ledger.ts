@@ -7,7 +7,7 @@ import {
 import { jsonResponse, methodNotAllowed } from "./_response.js";
 
 function isLocalRequest(request: Request) {
-  const url = new URL(request.url);
+  const url = new URL(request.url, "https://st.local");
   return url.hostname === "127.0.0.1" || url.hostname === "localhost";
 }
 
@@ -15,7 +15,7 @@ function isAuthorizedAuditRequest(request: Request) {
   const configuredKey = process.env.PREDICTION_LEDGER_AUDIT_KEY;
   if (!configuredKey && isLocalRequest(request)) return true;
   if (!configuredKey) return false;
-  const requestKey = request.headers.get("x-st-audit-key") ?? new URL(request.url).searchParams.get("auditKey");
+  const requestKey = request.headers.get("x-st-audit-key") ?? new URL(request.url, "https://st.local").searchParams.get("auditKey");
   return requestKey === configuredKey;
 }
 
@@ -42,7 +42,7 @@ export default async function handler(request: Request) {
   }
 
   const rows = exportSealedPredictionAuditRows();
-  const url = new URL(request.url);
+  const url = new URL(request.url, "https://st.local");
   const format = url.searchParams.get("format") ?? "json";
   if (format === "csv") {
     return new Response(toCsv(PREDICTION_LEDGER_HEADERS, rows), {
