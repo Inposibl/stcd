@@ -19,8 +19,8 @@ function sendJson(response: NodeResponse, statusCode: number, body: unknown) {
   const setStatus = response.status;
   const sendBody = response.json;
   if (typeof setStatus === "function" && typeof sendBody === "function") {
-    const statusResponse = setStatus.call(response, statusCode);
-    sendBody.call(statusResponse ?? response, body);
+    setStatus.call(response, statusCode);
+    sendBody.call(response, body);
     return;
   }
 
