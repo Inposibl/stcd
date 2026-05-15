@@ -1517,6 +1517,31 @@ function EvidenceClassificationPanel({ answer, onChange, showDirectObservation =
   );
 }
 
+function evidenceClassificationMessage(validation) {
+  if (!validation || validation.valid) return "";
+  if (validation.missing.includes("answer option")) return "Select one answer to continue.";
+
+  const parts = [];
+  if (validation.missing.length > 0) {
+    parts.push(`Complete: ${validation.missing.join(", ")}.`);
+  }
+  if (validation.consistencyIssues.length > 0) {
+    parts.push(`Resolve: ${validation.consistencyIssues.join(" ")}`);
+  }
+  return parts.join(" ");
+}
+
+function QuestionnaireBlockingMessage({ validation }) {
+  const message = evidenceClassificationMessage(validation);
+  if (!message) return null;
+
+  return (
+    <p className="form-error" role="status" aria-live="polite">
+      {message}
+    </p>
+  );
+}
+
 function AcquirerModuleScreen({ session, setSession }) {
   const existingAnswers = session.acquirer2A?.answers ?? {};
   const [answers, setAnswers] = useState(existingAnswers);
@@ -1609,6 +1634,7 @@ function AcquirerModuleScreen({ session, setSession }) {
           />
         ) : null}
         {error ? <p className="form-error">{error}</p> : null}
+        <QuestionnaireBlockingMessage validation={currentAnswerValidation} />
         <div className="button-row">
           <button className="primary-flow-action" disabled={!canSubmitQuestion} type="submit">
             {activeIndex === questions.length - 1 ? "Submit" : "Next"}
@@ -1853,6 +1879,7 @@ function AcquirerVerificationQuestionnaire({ onComplete }) {
           />
         ) : null}
         {error ? <p className="form-error">{error}</p> : null}
+        <QuestionnaireBlockingMessage validation={currentAnswerValidation} />
         <div className="button-row">
           <button className="primary-flow-action" disabled={!canSubmitQuestion} type="submit">
             {activeIndex === questions.length - 1 ? "Submit acquirer verification" : "Next"}
@@ -2385,6 +2412,7 @@ function TargetObservationQuestionnaire({ answers, setAnswers, setup, onComplete
           />
         ) : null}
         {error ? <p className="form-error">{error}</p> : null}
+        <QuestionnaireBlockingMessage validation={currentAnswerValidation} />
         <div className="button-row">
           <button className="primary-flow-action" disabled={!canSubmitQuestion} type="submit">
             {activeIndex === questions.length - 1 ? "Submit Target Observation" : "Next"}
@@ -2584,6 +2612,7 @@ function TargetObserverDiagnosticSurvey({ baseSession, onComplete }) {
             />
           ) : null}
           {error ? <p className="form-error">{error}</p> : null}
+          <QuestionnaireBlockingMessage validation={currentAnswerValidation} />
           <div className="button-row">
             <button className="primary-flow-action" disabled={!canSubmitQuestion} type="submit">
               {activeIndex === questions.length - 1 ? `Submit ${phase === "level1" ? "Level 1" : "Level 2"}` : "Next"}
@@ -2921,6 +2950,7 @@ function Step2BLevel1Screen({ session, setSession }) {
           />
         ) : null}
         {error ? <p className="form-error">{error}</p> : null}
+        <QuestionnaireBlockingMessage validation={currentAnswerValidation} />
         <div className="button-row">
           <button className="primary-flow-action" disabled={!canSubmitQuestion} type="submit">
             {activeIndex === questions.length - 1 ? "Submit Level 1" : "Next"}
@@ -3081,6 +3111,7 @@ function Step2BLevel2Screen({ session, setSession }) {
           />
         ) : null}
         {error ? <p className="form-error">{error}</p> : null}
+        <QuestionnaireBlockingMessage validation={currentAnswerValidation} />
         {result ? (
           <section className="result-panel">
             <strong>Target environment: {aliasFor(result.primaryEnvironmentCode)} - {result.signalBadge}</strong>
@@ -3261,6 +3292,7 @@ function TargetSelfAssessmentSurvey({ session, setSession, invite = null }) {
             />
           ) : null}
           {error ? <p className="form-error">{error}</p> : null}
+          <QuestionnaireBlockingMessage validation={currentAnswerValidation} />
           <div className="button-row">
             <button className="primary-flow-action" disabled={!canSubmitQuestion} type="submit">
               {activeIndex === questions.length - 1 ? "Submit Target Self-Assessment" : "Next"}
