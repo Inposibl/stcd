@@ -478,11 +478,11 @@ const HOME_COPY = Object.freeze({
 });
 
 const ECS_SCORE_BANDS = Object.freeze([
-  Object.freeze({ range: "80–100", title: "HIGH COMPATIBILITY", ev: "EV 0% – 2%", synergy: "Synergy 85% – 100%", flight: "Flight LOW", tone: "blue" }),
-  Object.freeze({ range: "65–79", title: "MODERATE-HIGH", ev: "EV 2% – 7%", synergy: "Synergy 65% – 84%", flight: "Flight LOW-MED", tone: "green" }),
-  Object.freeze({ range: "50–64", title: "MODERATE", ev: "EV 7% – 15%", synergy: "Synergy 40% – 64%", flight: "Flight MEDIUM", tone: "yellow" }),
-  Object.freeze({ range: "35–49", title: "MODERATE-LOW", ev: "EV 15% – 25%", synergy: "Synergy 15% – 39%", flight: "Flight HIGH", tone: "orange" }),
-  Object.freeze({ range: "0–34", title: "HIGH RISK", ev: "EV 35% – 60%+", synergy: "Synergy 0% – 14%", flight: "Flight EXTREME", tone: "red" }),
+  Object.freeze({ range: "80–100", title: "HIGH COMPATIBILITY", ev: "EV 0% – 2%", synergy: "Synergy 85% – 100%", flight: "Talent flight risk: LOW", tone: "blue" }),
+  Object.freeze({ range: "65–79", title: "MODERATE-HIGH", ev: "EV 2% – 7%", synergy: "Synergy 65% – 84%", flight: "Talent flight risk: LOW-MED", tone: "green" }),
+  Object.freeze({ range: "50–64", title: "MODERATE", ev: "EV 7% – 15%", synergy: "Synergy 40% – 64%", flight: "Talent flight risk: MEDIUM", tone: "yellow" }),
+  Object.freeze({ range: "35–49", title: "MODERATE-LOW", ev: "EV 15% – 25%", synergy: "Synergy 15% – 39%", flight: "Talent flight risk: HIGH", tone: "orange" }),
+  Object.freeze({ range: "0–34", title: "HIGH RISK", ev: "EV 35% – 60%+", synergy: "Synergy 0% – 14%", flight: "Talent flight risk: EXTREME", tone: "red" }),
 ]);
 
 const ENVIRONMENT_DETAIL_ROWS = Object.freeze([
