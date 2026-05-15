@@ -477,6 +477,33 @@ const HOME_COPY = Object.freeze({
   closing: "Run the diagnostic in less than one hour. No account. No card.",
 });
 
+const METHODOLOGY_OVERVIEW_SECTIONS = Object.freeze([
+  Object.freeze({
+    title: "1. Purpose",
+    body: "Structural Typology is a framework for predicting behavioural outcomes in defined interaction environments. Its primary commercial application is human capital due diligence in mergers and acquisitions: forecasting integration success or failure before deal close, at the resolution of the specific resources that will come into conflict, the specific populations that will be at risk, and the timeline on which that risk will become visible.",
+  }),
+  Object.freeze({
+    title: "2. Evidence base",
+    body: "The framework rests on three categories of evidence. First, structured-respondent observational data gathered through validated diagnostic instruments administered to defined populations within an organisation. Second, documented case reconstructions of completed M&A transactions across multiple industries, each traced from environment composition through integration mechanism to observable outcome. Third, sealed forward predictions, recorded before close and verified at fixed post-close horizons.",
+  }),
+  Object.freeze({
+    title: "3. The analyst gate",
+    body: "Respondent answers are treated as observational evidence subject to analyst review, not as classification outputs. A trained analyst interprets the response pattern in context, applies the framework’s internal contradiction and triage rules, and arrives at a conclusion that the respondent alone cannot determine. This design choice distinguishes Structural Typology from self-administered personality instruments and from fully automated typing systems. The diagnostic input is data; the analytical conclusion is professional judgement, recorded with its evidentiary basis.",
+  }),
+  Object.freeze({
+    title: "4. Environment Compatibility Score, conceptually",
+    body: "The Environment Compatibility Score (ECS) is a 0–100 metric that quantifies the predicted compatibility between two interaction environments. It is computed pairwise, at the environment level, from documented resource profiles, and calibrated against the actual outcomes of completed transactions. The ECS is a specification, not a verdict: it identifies where structural friction will arise, at what intensity, and on what timeline. Whether that friction is fatal or manageable depends on the integration protocol selected. Two recorded transactions of nearly identical numerical compatibility have produced opposite outcomes for exactly this reason.",
+  }),
+  Object.freeze({
+    title: "5. Calibration",
+    body: "The framework is calibrated through two mechanisms. First, retroactive application to ten completed M&A transactions across nine industries, each documented in full with the environment reading, the resource-level conflict mechanism, and the observable outcome. The AECOM–URS transaction (2014), for example, is recorded as a structural failure of the legacy construction business, with the divestiture in 2020 confirming the prediction at the level of mechanism, not merely direction. Second, the mathematical architecture underlying the score is the subject of an independent quantitative audit — formula-level review, edge-case testing, and version-controlled correction — conducted outside the development team. Calibration is a continuing process, not a one-time validation.",
+  }),
+  Object.freeze({
+    title: "6. Access",
+    body: "This overview describes the framework’s epistemic position, its evidence categories, and the meaning of its principal output. It is not a methodological disclosure. The diagnostic instruments, the resource architecture, the full case portfolio, the integration protocols, and the operational ECS computation are released under non-disclosure agreement to qualified counterparties. The Investment Memorandum and pilot terms are available on request.",
+  }),
+]);
+
 const ECS_SCORE_BANDS = Object.freeze([
   Object.freeze({ range: "80–100", title: "HIGH COMPATIBILITY", ev: "EV 0% – 2%", synergy: "Synergy 85% – 100%", flight: "Talent flight risk: LOW", tone: "blue" }),
   Object.freeze({ range: "65–79", title: "MODERATE-HIGH", ev: "EV 2% – 7%", synergy: "Synergy 65% – 84%", flight: "Talent flight risk: LOW-MED", tone: "green" }),
@@ -513,7 +540,7 @@ const ORDERED_ENVIRONMENTS = Object.freeze(
 
 function routeSection(route) {
   if (route === "/" || route === "/home") return "home";
-  if (route === "/about-methodology") return "methodology";
+  if (route === "/about-methodology" || route.startsWith("/about-methodology/")) return "methodology";
   if (route === "/case-studies" || route.startsWith("/case-studies/")) return "case-studies";
   if (route === "/start-diagnostic" || route.startsWith("/start-diagnostic/")) return "diagnostic";
   if (route === "/environments" || route.startsWith("/environments/")) return "environments";
@@ -582,6 +609,9 @@ function AboutMethodologyScreen() {
           <p>
             Structural Typology is a 15-year developed behavioural intelligence framework that synthesises Jung, Myers-Briggs, Piaget, and Vygotsky to predict organisational compatibility with numerical precision. The diagnostic unit is the interaction environment, not the individual.
           </p>
+          <p>
+            <a href="/about-methodology/overview" onClick={handleRouteClick("/about-methodology/overview")}>Read the methodology paper</a>
+          </p>
         </header>
 
         <section className="framework-section">
@@ -627,6 +657,32 @@ function AboutMethodologyScreen() {
           <h2>Data Foundation</h2>
           <p>
             The ECS matrix is grounded in 816 verified behavioural records covering all 16 MBTI types across 3 behavioural states: Norm, Stress, Neurosis. It is built from environment interactions, resource scoring across 17 resources, and the Structural Typology source archive, including Jung, Myers-Briggs, Keirsey, Piaget, Vygotsky, and Meyer's cultural map.
+          </p>
+        </section>
+      </section>
+    </main>
+  );
+}
+
+function MethodologyOverviewScreen() {
+  return (
+    <main className="marketing-screen">
+      <section className="page-shell">
+        <header className="framework-hero compact">
+          <p className="eyebrow">Methodology paper</p>
+          <h1>Structural Typology Methodology Overview</h1>
+        </header>
+
+        {METHODOLOGY_OVERVIEW_SECTIONS.map((section) => (
+          <section className="framework-section" key={section.title}>
+            <h2>{section.title}</h2>
+            <p>{section.body}</p>
+          </section>
+        ))}
+
+        <section className="framework-section">
+          <p>
+            <a href="/about-methodology" onClick={handleRouteClick("/about-methodology")}>Back to About Methodology</a>
           </p>
         </section>
       </section>
@@ -5822,6 +5878,7 @@ export default function App() {
   function renderScreen() {
     if (screen.id === "home") return <HomeScreen />;
     if (screen.id === "about-methodology") return <AboutMethodologyScreen />;
+    if (screen.id === "methodology-overview") return <MethodologyOverviewScreen />;
     if (screen.id === "case-studies") return <CaseStudiesScreen />;
     if (screen.id === "case-study-detail") return <CaseStudyDetailScreen caseId={screen.caseId} />;
     if (screen.id === "interaction-environments") {
