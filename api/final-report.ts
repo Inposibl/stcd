@@ -1,6 +1,7 @@
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 type NodeRequest = {
+  body?: unknown;
   method?: string;
   url?: string;
   on?: (event: "data" | "end" | "error", callback: (chunk?: any) => void) => void;
@@ -27,6 +28,18 @@ function sendMethodNotAllowed(response: NodeResponse, method: string | undefined
 }
 
 async function parseBody(request: NodeRequest) {
+  if (typeof request.body === "object" && request.body) {
+    return request.body;
+  }
+
+  if (typeof request.body === "string") {
+    try {
+      return request.body ? JSON.parse(request.body) : null;
+    } catch {
+      return null;
+    }
+  }
+
   return new Promise<any>((resolve) => {
     let raw = "";
 
