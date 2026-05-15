@@ -101,17 +101,17 @@ function validateAuthorizedSurveyLink(value: string) {
   }
 }
 
-async function sendAuthorizedLink(request: NodeRequest, response: NodeResponse) {
+async function sendAuthorizedLink(request: NodeRequest, response: NodeResponse, params: URLSearchParams) {
   if (request.method !== "POST") {
     sendMethodNotAllowed(response, request.method, ["POST"]);
     return;
   }
 
   const body = await parseBody(request);
-  const recipientEmail = normalizeEmail(body?.recipientEmail);
-  const surveyLink = cleanString(body?.surveyLink);
-  const digitalCode = cleanString(body?.digitalCode);
-  const expiresAt = cleanString(body?.expiresAt);
+  const recipientEmail = normalizeEmail(body?.recipientEmail ?? params.get("recipientEmail"));
+  const surveyLink = cleanString(body?.surveyLink ?? params.get("surveyLink"));
+  const digitalCode = cleanString(body?.digitalCode ?? params.get("digitalCode"));
+  const expiresAt = cleanString(body?.expiresAt ?? params.get("expiresAt"));
 
   if (!EMAIL_PATTERN.test(recipientEmail)) {
     sendJson(response, 400, {
@@ -198,7 +198,7 @@ async function sendAuthorizedLink(request: NodeRequest, response: NodeResponse) 
 export default async function handler(request: NodeRequest, response: NodeResponse) {
   const requestUrl = new URL(request.url ?? "/api/final-report", "https://st.local");
   if (requestUrl.searchParams.get("action") === "send-authorized-link") {
-    await sendAuthorizedLink(request, response);
+    await sendAuthorizedLink(request, response, requestUrl.searchParams);
     return;
   }
 

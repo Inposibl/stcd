@@ -2171,18 +2171,14 @@ function TargetObservationSetupIntroScreen({ session, setSession }) {
     setEmailState("Sending authorized respondent e-mail...");
 
     try {
-      const response = await fetch("/api/final-report?action=send-authorized-link", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          recipientEmail,
-          surveyLink: fullLink,
-          digitalCode: invite.digitalCode,
-          expiresAt: invite.expiresAt,
-          assessmentSessionId: invite.assessmentSessionId,
-          observationSessionId: invite.observationSessionId,
-        }),
+      const params = new URLSearchParams({
+        action: "send-authorized-link",
+        recipientEmail,
+        surveyLink: fullLink,
+        digitalCode: invite.digitalCode,
+        expiresAt: invite.expiresAt,
       });
+      const response = await fetch(`/api/final-report?${params.toString()}`, { method: "POST" });
       const result = await response.json().catch(() => null);
 
       if (!response.ok || result?.status !== "sent") {
