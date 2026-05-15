@@ -2071,6 +2071,7 @@ function TargetObservationSetupIntroScreen({ session, setSession }) {
   const [emailState, setEmailState] = useState("");
   const [showAuthorizedEmail, setShowAuthorizedEmail] = useState(false);
   const [authorizedRecipientEmail, setAuthorizedRecipientEmail] = useState("");
+  const [authorizedEmailSending, setAuthorizedEmailSending] = useState(false);
   const invite = session.targetObservationSetupInvite;
   const authorizedRouteLocked = Boolean(invite);
   const authorizedSurveyComplete = Boolean(invite?.completed && invite?.targetObservation?.completed && invite?.target2B?.completed);
@@ -2152,11 +2153,12 @@ function TargetObservationSetupIntroScreen({ session, setSession }) {
     setEmailState("");
     setShowAuthorizedEmail(false);
     setAuthorizedRecipientEmail("");
+    setAuthorizedEmailSending(false);
   }
 
   const fullLink = invite ? `${window.location.origin}${invite.surveyLink}` : "";
 
-  function prepareAuthorizedEmail(event) {
+  async function sendAuthorizedEmail(event) {
     event.preventDefault();
     const recipientEmail = authorizedRecipientEmail.trim().toLowerCase();
 
@@ -2165,17 +2167,35 @@ function TargetObservationSetupIntroScreen({ session, setSession }) {
       return;
     }
 
-    const subject = encodeURIComponent("Authorized Target Observer survey link");
-    const body = encodeURIComponent([
-      "Please complete the authorized Target Observer survey.",
-      "",
-      `Survey link: ${fullLink}`,
-      `6-digit code: ${invite.digitalCode}`,
-      `Expires at: ${invite.expiresAt}`,
-    ].join("\n"));
+    setAuthorizedEmailSending(true);
+    setEmailState("Sending authorized respondent e-mail...");
 
-    window.location.href = `mailto:${recipientEmail}?subject=${subject}&body=${body}`;
-    setEmailState(`E-mail draft prepared for ${recipientEmail}.`);
+    try {
+      const response = await fetch("/api/send-authorized-link", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          recipientEmail,
+          surveyLink: fullLink,
+          digitalCode: invite.digitalCode,
+          expiresAt: invite.expiresAt,
+          assessmentSessionId: invite.assessmentSessionId,
+          observationSessionId: invite.observationSessionId,
+        }),
+      });
+      const result = await response.json().catch(() => null);
+
+      if (!response.ok || result?.status !== "sent") {
+        setEmailState(result?.error ?? "E-mail service did not send the message.");
+        return;
+      }
+
+      setEmailState(`E-mail sent to ${recipientEmail}.`);
+    } catch {
+      setEmailState("E-mail service is unavailable. Try again later.");
+    } finally {
+      setAuthorizedEmailSending(false);
+    }
   }
 
   return (
@@ -2274,7 +2294,7 @@ function TargetObservationSetupIntroScreen({ session, setSession }) {
               ) : null}
             </div>
             {showAuthorizedEmail ? (
-              <form className="invite-grid" onSubmit={prepareAuthorizedEmail}>
+              <form className="invite-grid" onSubmit={sendAuthorizedEmail}>
                 <label>
                   <span>Recipient e-mail</span>
                   <input
@@ -2292,7 +2312,9 @@ function TargetObservationSetupIntroScreen({ session, setSession }) {
                   <span>Prepared message</span>
                   <input readOnly value="Authorized Target Observer link and 6-digit code" />
                 </label>
-                <button type="submit">Open e-mail draft</button>
+                <button disabled={authorizedEmailSending} type="submit">
+                  {authorizedEmailSending ? "Sending..." : "Send e-mail"}
+                </button>
               </form>
             ) : null}
             {emailState ? <p className="source-note">{emailState}</p> : null}
