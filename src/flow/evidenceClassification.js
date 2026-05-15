@@ -77,7 +77,7 @@ const EVIDENCE_TYPE_VALUES = new Set(EVIDENCE_TYPE_OPTIONS.map((option) => optio
 const KNOWLEDGE_LEVEL_VALUES = new Set(KNOWLEDGE_LEVEL_OPTIONS.map((option) => option.value));
 const CONFIDENCE_LEVEL_VALUES = new Set(CONFIDENCE_LEVEL_OPTIONS.map((option) => option.value));
 const RELIABILITY_FLAG_VALUES = new Set(RELIABILITY_FLAG_OPTIONS.map((option) => option.value));
-const INDIRECT_EVIDENCE_TYPES = new Set(["reported_by_others", "inference", "hypothetical", "unknown"]);
+const INDIRECT_EVIDENCE_TYPES = new Set(["document_supported", "reported_by_others", "inference", "hypothetical", "unknown"]);
 
 function normalizeString(value) {
   return typeof value === "string" ? value.trim() : "";
@@ -130,6 +130,22 @@ function withFlag(flags, flag) {
   return Object.freeze([...new Set([...flags, flag])]);
 }
 
+function withoutFlag(flags, flag) {
+  return Object.freeze(flags.filter((item) => item !== flag));
+}
+
+function clearUnknownEvidenceState(answer, keepEvidenceType = false) {
+  const reliabilityFlags = withoutFlag(answer.reliabilityFlags, "no_direct_knowledge");
+  return {
+    ...answer,
+    evidenceType: keepEvidenceType ? answer.evidenceType : "",
+    knowledgeLevel: "",
+    confidence: "",
+    reliabilityFlags,
+    reliabilityFlagsAcknowledged: reliabilityFlags.length > 0 ? answer.reliabilityFlagsAcknowledged : false,
+  };
+}
+
 export function updateEvidenceAnswer(answer, patch = {}) {
   const current = normalizeEvidenceAnswer(answer);
   let next = {
@@ -148,6 +164,21 @@ export function updateEvidenceAnswer(answer, patch = {}) {
       : current.reliabilityFlagsAcknowledged,
     source: "structured_answer",
   };
+
+  const selectedNormalOptionAfterUnknown = current.evidenceType === "unknown"
+    && patch.selectedOption !== undefined
+    && patch.evidenceType === undefined;
+  const evidenceTypeChangedFromUnknown = current.evidenceType === "unknown"
+    && patch.evidenceType !== undefined
+    && next.evidenceType !== "unknown";
+  const directGateChangedFromUnknown = current.evidenceType === "unknown"
+    && patch.directObservationGate !== undefined
+    && next.directObservationGate === "yes"
+    && patch.evidenceType === undefined;
+
+  if (selectedNormalOptionAfterUnknown || evidenceTypeChangedFromUnknown || directGateChangedFromUnknown) {
+    next = clearUnknownEvidenceState(next, evidenceTypeChangedFromUnknown);
+  }
 
   if (next.evidenceType === "unknown") {
     next = {
