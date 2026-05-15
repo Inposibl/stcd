@@ -1356,6 +1356,13 @@ function selectedOptionPatch(question, value) {
     : { selectedOption: value };
 }
 
+function updateQuestionnaireSelectedAnswer(answers, question, value) {
+  return {
+    ...answers,
+    [question.id]: updateEvidenceAnswer(answers[question.id], selectedOptionPatch(question, value)),
+  };
+}
+
 function DirectObservationGatePanel({ question, answer, onChange }) {
   const gate = question.directObservationGate;
   if (!gate) return null;
@@ -1533,10 +1540,7 @@ function AcquirerModuleScreen({ session, setSession }) {
   }
 
   function updateAnswer(value) {
-    setAnswers((current) => ({
-      ...current,
-      [question.id]: updateEvidenceAnswer(current[question.id], selectedOptionPatch(question, value)),
-    }));
+    setAnswers((current) => updateQuestionnaireSelectedAnswer(current, question, value));
     setError("");
   }
 
@@ -1783,10 +1787,7 @@ function AcquirerVerificationQuestionnaire({ onComplete }) {
   const canSubmitQuestion = currentAnswerValidation.valid;
 
   function updateAnswer(value) {
-    setAnswers((current) => ({
-      ...current,
-      [question.id]: updateEvidenceAnswer(current[question.id], selectedOptionPatch(question, value)),
-    }));
+    setAnswers((current) => updateQuestionnaireSelectedAnswer(current, question, value));
     setError("");
   }
 
@@ -2301,10 +2302,7 @@ function TargetObservationQuestionnaire({ answers, setAnswers, setup, onComplete
   const canSubmitQuestion = currentAnswerValidation.valid;
 
   function updateAnswer(value) {
-    setAnswers((current) => ({
-      ...current,
-      [question.id]: updateEvidenceAnswer(current[question.id], selectedOptionPatch(question, value)),
-    }));
+    setAnswers((current) => updateQuestionnaireSelectedAnswer(current, question, value));
     setError("");
   }
 
@@ -2486,10 +2484,7 @@ function TargetObserverDiagnosticSurvey({ baseSession, onComplete }) {
   const canSubmitQuestion = currentAnswerValidation.valid;
 
   function updateAnswer(value) {
-    setAnswers((current) => ({
-      ...current,
-      [question.id]: updateEvidenceAnswer(current[question.id], selectedOptionPatch(question, value)),
-    }));
+    setAnswers((current) => updateQuestionnaireSelectedAnswer(current, question, value));
     setError("");
   }
 
@@ -2852,10 +2847,7 @@ function Step2BLevel1Screen({ session, setSession }) {
   }
 
   function updateAnswer(value) {
-    setAnswers((current) => ({
-      ...current,
-      [question.id]: updateEvidenceAnswer(current[question.id], selectedOptionPatch(question, value)),
-    }));
+    setAnswers((current) => updateQuestionnaireSelectedAnswer(current, question, value));
     setError("");
   }
 
@@ -3014,10 +3006,7 @@ function Step2BLevel2Screen({ session, setSession }) {
   }
 
   function updateAnswer(value) {
-    setAnswers((current) => ({
-      ...current,
-      [question.id]: updateEvidenceAnswer(current[question.id], selectedOptionPatch(question, value)),
-    }));
+    setAnswers((current) => updateQuestionnaireSelectedAnswer(current, question, value));
     setError("");
   }
 
@@ -3149,10 +3138,7 @@ function TargetSelfAssessmentSurvey({ session, setSession, invite = null }) {
   }
 
   function updateAnswer(value) {
-    setAnswers((current) => ({
-      ...current,
-      [question.id]: updateEvidenceAnswer(current[question.id], selectedOptionPatch(question, value)),
-    }));
+    setAnswers((current) => updateQuestionnaireSelectedAnswer(current, question, value));
     setError("");
   }
 
