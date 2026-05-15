@@ -1,4 +1,4 @@
-import { methodNotAllowed, parseJsonBody, jsonResponse } from "./_response";
+import { methodNotAllowed, parseJsonBody, jsonResponse } from "./_response.js";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 

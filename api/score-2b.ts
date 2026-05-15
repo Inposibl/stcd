@@ -4,7 +4,7 @@ import {
   scoreTargetDiagnosticQuestions,
 } from "../src/flow/targetDiagnosticFlow.js";
 import { TARGET_DIAGNOSTIC_DATA } from "../src/data/targetDiagnosticData.js";
-import { methodNotAllowed, parseJsonBody, jsonResponse } from "./_response";
+import { methodNotAllowed, parseJsonBody, jsonResponse } from "./_response.js";
 
 export default async function handler(request: Request) {
   if (request.method !== "POST") {

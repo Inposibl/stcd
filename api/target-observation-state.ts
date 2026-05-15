@@ -1,5 +1,5 @@
-import { methodNotAllowed, jsonResponse } from "./_response";
-import { targetObservationState } from "./_sessionLedger";
+import { methodNotAllowed, jsonResponse } from "./_response.js";
+import { targetObservationState } from "./_sessionLedger.js";
 
 export default async function handler(request: Request) {
   if (request.method !== "GET") {

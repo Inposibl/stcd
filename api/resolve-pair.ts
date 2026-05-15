@@ -1,5 +1,5 @@
 import { buildPairDeliverable } from "../src/flow/finalDeliverableFlow.js";
-import { jsonResponse, methodNotAllowed, parseJsonBody } from "./_response.ts";
+import { jsonResponse, methodNotAllowed, parseJsonBody } from "./_response.js";
 
 export default async function handler(request: Request) {
   if (request.method !== "POST") {

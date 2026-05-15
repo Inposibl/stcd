@@ -1,6 +1,6 @@
 import { validateTargetObservationSetup } from "../src/flow/targetObservationFlow.js";
-import { methodNotAllowed, parseJsonBody, jsonResponse } from "./_response";
-import { saveTargetObservationSetup } from "./_sessionLedger";
+import { methodNotAllowed, parseJsonBody, jsonResponse } from "./_response.js";
+import { saveTargetObservationSetup } from "./_sessionLedger.js";
 
 export default async function handler(request: Request) {
   if (request.method !== "POST") {

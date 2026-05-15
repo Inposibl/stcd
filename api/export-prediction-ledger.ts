@@ -3,8 +3,8 @@ import {
   PREDICTION_LEDGER_SHEET,
   PREDICTION_LEDGER_WORKBOOK,
   exportSealedPredictionAuditRows,
-} from "./_predictionLedger.ts";
-import { jsonResponse, methodNotAllowed } from "./_response.ts";
+} from "./_predictionLedger.js";
+import { jsonResponse, methodNotAllowed } from "./_response.js";
 
 function isLocalRequest(request: Request) {
   const url = new URL(request.url);

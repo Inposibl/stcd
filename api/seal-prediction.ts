@@ -1,5 +1,5 @@
-import { sealPrediction } from "./_predictionLedger.ts";
-import { methodNotAllowed, parseJsonBody, jsonResponse } from "./_response.ts";
+import { sealPrediction } from "./_predictionLedger.js";
+import { methodNotAllowed, parseJsonBody, jsonResponse } from "./_response.js";
 
 export default async function handler(request: Request) {
   if (request.method !== "POST") {
