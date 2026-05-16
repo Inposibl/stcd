@@ -101,7 +101,32 @@ function validateAuthorizedSurveyLink(value: string) {
   }
 }
 
-async function sendAuthorizedLink(request: NodeRequest, response: NodeResponse, params: URLSearchParams) {
+function validateTargetSelfSurveyLink(value: string) {
+  try {
+    const parsed = new URL(value);
+    const allowedPath = parsed.pathname === "/screen-9a-target-code-gate";
+    const requiredParams = ["targetSessionId", "assessmentId", "codeHash", "createdAt", "expiresAt"];
+    const hasRequiredParams = requiredParams.every((param) => Boolean(parsed.searchParams.get(param)));
+    return allowedPath && hasRequiredParams;
+  } catch {
+    return false;
+  }
+}
+
+async function sendSurveyLink(
+  request: NodeRequest,
+  response: NodeResponse,
+  params: URLSearchParams,
+  options: {
+    endpoint: string;
+    invalidLinkStatus: string;
+    invalidLinkError: string;
+    subject: string;
+    intro: string;
+    linkText: string;
+    validateSurveyLink: (value: string) => boolean;
+  },
+) {
   if (request.method !== "POST") {
     sendMethodNotAllowed(response, request.method, ["POST"]);
     return;
@@ -115,18 +140,18 @@ async function sendAuthorizedLink(request: NodeRequest, response: NodeResponse, 
 
   if (!EMAIL_PATTERN.test(recipientEmail)) {
     sendJson(response, 400, {
-      endpoint: "/api/final-report?action=send-authorized-link",
+      endpoint: options.endpoint,
       status: "invalid-recipient-email",
       error: "A valid recipientEmail is required",
     });
     return;
   }
 
-  if (!validateAuthorizedSurveyLink(surveyLink) || !/^\d{6}$/.test(digitalCode) || !expiresAt) {
+  if (!options.validateSurveyLink(surveyLink) || !/^\d{6}$/.test(digitalCode) || !expiresAt) {
     sendJson(response, 400, {
-      endpoint: "/api/final-report?action=send-authorized-link",
-      status: "invalid-authorized-link",
-      error: "A valid authorized surveyLink, 6-digit digitalCode, and expiresAt are required",
+      endpoint: options.endpoint,
+      status: options.invalidLinkStatus,
+      error: options.invalidLinkError,
     });
     return;
   }
@@ -138,24 +163,23 @@ async function sendAuthorizedLink(request: NodeRequest, response: NodeResponse, 
 
   if (!apiKey || !from) {
     sendJson(response, 503, {
-      endpoint: "/api/final-report?action=send-authorized-link",
+      endpoint: options.endpoint,
       status: "email-service-not-configured",
       error: "RESEND_API_KEY and sender e-mail environment variables are required",
     });
     return;
   }
 
-  const subject = "Authorized Target Observer survey link";
   const text = [
-    "Please complete the authorized Target Observer survey.",
+    options.intro,
     "",
     `Survey link: ${surveyLink}`,
     `6-digit code: ${digitalCode}`,
     `Expires at: ${expiresAt}`,
   ].join("\n");
   const html = [
-    "<p>Please complete the authorized Target Observer survey.</p>",
-    `<p><a href="${escapeHtml(surveyLink)}">Open the authorized survey</a></p>`,
+    `<p>${escapeHtml(options.intro)}</p>`,
+    `<p><a href="${escapeHtml(surveyLink)}">${escapeHtml(options.linkText)}</a></p>`,
     `<p><strong>6-digit code:</strong> ${escapeHtml(digitalCode)}</p>`,
     `<p><strong>Expires at:</strong> ${escapeHtml(expiresAt)}</p>`,
   ].join("");
@@ -169,7 +193,7 @@ async function sendAuthorizedLink(request: NodeRequest, response: NodeResponse, 
     body: JSON.stringify({
       from,
       to: [recipientEmail],
-      subject,
+      subject: options.subject,
       text,
       html,
     }),
@@ -178,7 +202,7 @@ async function sendAuthorizedLink(request: NodeRequest, response: NodeResponse, 
   const providerBody = await providerResponse.json().catch(() => null);
   if (!providerResponse.ok) {
     sendJson(response, 502, {
-      endpoint: "/api/final-report?action=send-authorized-link",
+      endpoint: options.endpoint,
       status: "email-provider-error",
       providerStatus: providerResponse.status,
       error: providerBody?.message ?? "Resend rejected the e-mail request",
@@ -187,7 +211,7 @@ async function sendAuthorizedLink(request: NodeRequest, response: NodeResponse, 
   }
 
   sendJson(response, 200, {
-    endpoint: "/api/final-report?action=send-authorized-link",
+    endpoint: options.endpoint,
     status: "sent",
     to: recipientEmail,
     provider: "resend",
@@ -198,7 +222,28 @@ async function sendAuthorizedLink(request: NodeRequest, response: NodeResponse, 
 export default async function handler(request: NodeRequest, response: NodeResponse) {
   const requestUrl = new URL(request.url ?? "/api/final-report", "https://st.local");
   if (requestUrl.searchParams.get("action") === "send-authorized-link") {
-    await sendAuthorizedLink(request, response, requestUrl.searchParams);
+    await sendSurveyLink(request, response, requestUrl.searchParams, {
+      endpoint: "/api/final-report?action=send-authorized-link",
+      invalidLinkStatus: "invalid-authorized-link",
+      invalidLinkError: "A valid authorized surveyLink, 6-digit digitalCode, and expiresAt are required",
+      subject: "Authorized Target Observer survey link",
+      intro: "Please complete the authorized Target Observer survey.",
+      linkText: "Open the authorized survey",
+      validateSurveyLink: validateAuthorizedSurveyLink,
+    });
+    return;
+  }
+
+  if (requestUrl.searchParams.get("action") === "send-target-self-link") {
+    await sendSurveyLink(request, response, requestUrl.searchParams, {
+      endpoint: "/api/final-report?action=send-target-self-link",
+      invalidLinkStatus: "invalid-target-self-link",
+      invalidLinkError: "A valid Target Self-Assessment surveyLink, 6-digit digitalCode, and expiresAt are required",
+      subject: "Target Self-Assessment survey link",
+      intro: "Please complete the Target Self-Assessment survey.",
+      linkText: "Open the Target Self-Assessment",
+      validateSurveyLink: validateTargetSelfSurveyLink,
+    });
     return;
   }
 

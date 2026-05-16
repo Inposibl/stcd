@@ -4476,6 +4476,9 @@ function RiskOutputPanel({ session }) {
 
 function PreliminaryTargetGateScreen({ session, setSession }) {
   const [emailState, setEmailState] = useState("");
+  const [showTargetSelfEmail, setShowTargetSelfEmail] = useState(false);
+  const [targetSelfRecipientEmail, setTargetSelfRecipientEmail] = useState("");
+  const [targetSelfEmailSending, setTargetSelfEmailSending] = useState(false);
   const track1Ready = canCreatePreliminaryAssessment(session);
   const preliminary = session.preliminaryAssessment;
   const invite = session.targetInvite;
@@ -4495,6 +4498,10 @@ function PreliminaryTargetGateScreen({ session, setSession }) {
     const result = createTargetInvite(session);
     if (result.ok) {
       setSession(result.session);
+      setEmailState("");
+      setShowTargetSelfEmail(false);
+      setTargetSelfRecipientEmail("");
+      setTargetSelfEmailSending(false);
     }
   }
 
@@ -4555,6 +4562,42 @@ function PreliminaryTargetGateScreen({ session, setSession }) {
 
   const fullLink = invite ? `${window.location.origin}${invite.surveyLink}` : "";
 
+  async function sendTargetSelfEmail(event) {
+    event.preventDefault();
+    const recipientEmail = targetSelfRecipientEmail.trim().toLowerCase();
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipientEmail)) {
+      setEmailState("Enter a valid recipient e-mail before sending.");
+      return;
+    }
+
+    setTargetSelfEmailSending(true);
+    setEmailState("Sending Target Self-Assessment e-mail...");
+
+    try {
+      const params = new URLSearchParams({
+        action: "send-target-self-link",
+        recipientEmail,
+        surveyLink: fullLink,
+        digitalCode: invite.digitalCode,
+        expiresAt: invite.expiresAt,
+      });
+      const response = await fetch(`/api/final-report?${params.toString()}`, { method: "POST" });
+      const result = await response.json().catch(() => null);
+
+      if (!response.ok || result?.status !== "sent") {
+        setEmailState(result?.error ?? "E-mail service did not send the message.");
+        return;
+      }
+
+      setEmailState(`E-mail sent to ${recipientEmail}.`);
+    } catch {
+      setEmailState("E-mail service is unavailable. Try again later.");
+    } finally {
+      setTargetSelfEmailSending(false);
+    }
+  }
+
   return (
     <main className="screen-shell preliminary-screen">
       <p className="eyebrow">Screen 9a / Preliminary Assessment</p>
@@ -4601,9 +4644,41 @@ function PreliminaryTargetGateScreen({ session, setSession }) {
             </label>
           </div>
           <div className="button-row">
-            <button type="button" onClick={() => setEmailState("Prepared for email sending: link and code are ready.")}>Enter e-mail for sending</button>
+            <button
+              type="button"
+              onClick={() => {
+                setShowTargetSelfEmail(true);
+                setEmailState("");
+              }}
+            >
+              Enter e-mail for sending
+            </button>
             <button type="button" onClick={() => navigate(invite.surveyLink)}>Open Target Self-Assessment</button>
           </div>
+          {showTargetSelfEmail ? (
+            <form className="invite-grid" onSubmit={sendTargetSelfEmail}>
+              <label>
+                <span>Recipient e-mail</span>
+                <input
+                  autoComplete="email"
+                  onChange={(event) => {
+                    setTargetSelfRecipientEmail(event.target.value);
+                    setEmailState("");
+                  }}
+                  placeholder="name@example.com"
+                  type="email"
+                  value={targetSelfRecipientEmail}
+                />
+              </label>
+              <label>
+                <span>Prepared message</span>
+                <input readOnly value="Target Self-Assessment link and 6-digit code" />
+              </label>
+              <button disabled={targetSelfEmailSending} type="submit">
+                {targetSelfEmailSending ? "Sending..." : "Send e-mail"}
+              </button>
+            </form>
+          ) : null}
           {emailState ? <p className="source-note">{emailState}</p> : null}
         </section>
       ) : null}
