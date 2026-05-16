@@ -656,12 +656,6 @@ function AboutMethodologyScreen() {
           </div>
         </section>
 
-        <section className="framework-section">
-          <h2>Data Foundation</h2>
-          <p>
-            The ECS matrix is grounded in 816 verified behavioural records covering all 16 MBTI types across 3 behavioural states: Norm, Stress, Neurosis. It is built from environment interactions, resource scoring across 17 resources, and the Structural Typology source archive, including Jung, Myers-Briggs, Keirsey, Piaget, Vygotsky, and Meyer's cultural map.
-          </p>
-        </section>
       </section>
     </main>
   );
