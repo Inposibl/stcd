@@ -5065,20 +5065,24 @@ function normalizePdfText(value) {
     .replace(/\u2018|\u2019/g, "'")
     .replace(/\u201c|\u201d/g, "\"")
     .replace(/\u2022/g, "-")
-    .replace(/\u00d7/g, "x")
-    .replace(/\u00b7/g, "-")
     .replace(/\u2192/g, "->")
     .replace(/\u25b6/g, ">")
     .replace(/\u2605/g, "*")
     .replace(/\u2913/g, "Download")
-    .replace(/[^\x09\x0a\x0d\x20-\x7e]/g, "");
+    .replace(/[^\x09\x0a\x0d\x20-\x7e\u00b7\u00d7]/g, "");
 }
 
 function escapePdfText(value) {
-  return normalizePdfText(value)
-    .replace(/\\/g, "\\\\")
-    .replace(/\(/g, "\\(")
-    .replace(/\)/g, "\\)");
+  let escaped = "";
+  for (const char of normalizePdfText(value)) {
+    if (char === "\\") escaped += "\\\\";
+    else if (char === "(") escaped += "\\(";
+    else if (char === ")") escaped += "\\)";
+    else if (char === "\u00b7") escaped += "\\267";
+    else if (char === "\u00d7") escaped += "\\327";
+    else escaped += char;
+  }
+  return escaped;
 }
 
 function wrapPdfText(value, maxCharacters) {
@@ -5101,23 +5105,27 @@ function wrapPdfText(value, maxCharacters) {
 }
 
 const PDF_BRAND = Object.freeze({
-  navy: "1F3864",
-  blue: "2E5FA3",
-  body: "222222",
-  muted: "666666",
+  navy: "1B3A5C",
+  navyMid: "2E5F8A",
+  blue: "4A7BAF",
+  accent: "4A7BAF",
+  body: "1A1A1A",
+  muted: "6B7A8D",
   lightText: "FFFFFF",
-  tableLine: "C8D7E8",
-  tableStripe: "F6F9FC",
-  panelFill: "EEF4FB",
+  white: "FFFFFF",
+  tableLine: "CCCCCC",
+  tableStripe: "F5F7FA",
+  panelFill: "EBF3FA",
+  green: "1A6B5C",
 });
 
 function createSimplePdf(lineItems) {
   const pageWidth = 612;
   const pageHeight = 792;
-  const left = 54;
-  const right = 54;
-  const top = 742;
-  const bottom = 54;
+  const left = 72;
+  const right = 72;
+  const top = 720;
+  const bottom = 72;
   const contentWidth = pageWidth - left - right;
   const pages = [[]];
   let y = top;
@@ -5138,10 +5146,10 @@ function createSimplePdf(lineItems) {
     return `${red.toFixed(3)} ${green.toFixed(3)} ${blue.toFixed(3)}`;
   }
 
-  function rect(x, rectY, width, height, fill, stroke = "") {
+  function rect(x, rectY, width, height, fill, stroke = "", strokeWidth = 0.5) {
     const commands = [];
-    if (fill) commands.push(`${rgb(fill)} rg ${x} ${rectY} ${width} ${height} re f`);
-    if (stroke) commands.push(`${rgb(stroke)} RG ${x} ${rectY} ${width} ${height} re S`);
+    if (fill) commands.push(`q ${rgb(fill)} rg ${x} ${rectY} ${width} ${height} re f Q`);
+    if (stroke) commands.push(`q ${strokeWidth} w ${rgb(stroke)} RG ${x} ${rectY} ${width} ${height} re S Q`);
     pages[pages.length - 1].push(commands.join("\n"));
   }
 
@@ -5157,9 +5165,15 @@ function createSimplePdf(lineItems) {
 
   function addFooter() {
     pages.forEach((page, index) => {
-      const footer = `Academy of Structural Typology  -  Confidential  -  ${index + 1}`;
-      const fontSize = 8;
-      page.push(`${rgb(PDF_BRAND.muted)} rg BT /F1 ${fontSize} Tf ${textX(footer, fontSize, "center")} 30 Td (${escapePdfText(footer)}) Tj ET`);
+      if (index === 0) return;
+      const footerLeft = "structural-typology.com  \u00b7  Confidential";
+      const footerRight = `Page ${index + 1}`;
+      const fontSize = 9;
+      const ruleY = 54;
+      const textY = 38;
+      page.push(`q 0.5 w ${rgb(PDF_BRAND.accent)} RG ${left} ${ruleY} m ${pageWidth - right} ${ruleY} l S Q`);
+      page.push(`${rgb(PDF_BRAND.muted)} rg BT /F1 ${fontSize} Tf ${left} ${textY} Td (${escapePdfText(footerLeft)}) Tj ET`);
+      page.push(`${rgb(PDF_BRAND.muted)} rg BT /F1 ${fontSize} Tf ${textX(footerRight, fontSize, "right")} ${textY} Td (${escapePdfText(footerRight)}) Tj ET`);
     });
   }
 
@@ -5168,9 +5182,9 @@ function createSimplePdf(lineItems) {
   }
 
   function addTextItem(item) {
-    const fontSize = item.size ?? 10;
+    const fontSize = item.size ?? 11;
     const lineHeight = item.lineHeight ?? Math.ceil(fontSize * 1.35);
-    const maxCharacters = item.maxCharacters ?? (fontSize >= 16 ? 56 : 92);
+    const maxCharacters = item.maxCharacters ?? (fontSize >= 16 ? 46 : 78);
     const align = item.align ?? "left";
     const font = item.bold ? "F2" : "F1";
 
@@ -5187,15 +5201,16 @@ function createSimplePdf(lineItems) {
 
     if (item.fill) {
       const wrapped = wrapPdfText(item.text, maxCharacters);
-      const boxHeight = wrapped.length * lineHeight + 14;
+      const boxHeight = wrapped.length * lineHeight + (item.paddingY ?? 12) * 2;
       ensureSpace(boxHeight);
-      rect(left - 8, y - boxHeight + 5, contentWidth + 16, boxHeight, item.fill, item.stroke ?? PDF_BRAND.tableLine);
-      y -= 7;
+      rect(left, y - boxHeight + 5, contentWidth, boxHeight, item.fill, item.stroke === undefined ? PDF_BRAND.tableLine : item.stroke, item.strokeWidth ?? 0.5);
+      y -= item.paddingY ?? 12;
     }
 
     for (const line of wrapPdfText(item.text, maxCharacters)) {
       if (y < bottom) newPage();
-      pages[pages.length - 1].push(`${rgb(item.color ?? PDF_BRAND.body)} rg BT /${font} ${fontSize} Tf ${textX(line, fontSize, align)} ${y} Td (${escapePdfText(line)}) Tj ET`);
+      const x = align === "left" ? left + (item.indent ?? 0) : textX(line, fontSize, align);
+      pages[pages.length - 1].push(`${rgb(item.color ?? PDF_BRAND.body)} rg BT /${font} ${fontSize} Tf ${x} ${y} Td (${escapePdfText(line)}) Tj ET`);
       y -= lineHeight;
     }
     y -= item.after ?? 0;
@@ -5204,7 +5219,7 @@ function createSimplePdf(lineItems) {
   function addRule(item) {
     ensureSpace(16);
     y -= item.before ?? 4;
-    pages[pages.length - 1].push(`${rgb(item.color ?? PDF_BRAND.tableLine)} RG ${left} ${y} m ${pageWidth - right} ${y} l S`);
+    pages[pages.length - 1].push(`q ${item.width ?? 0.75} w ${rgb(item.color ?? PDF_BRAND.tableLine)} RG ${left} ${y} m ${pageWidth - right} ${y} l S Q`);
     y -= item.after ?? 10;
   }
 
@@ -5219,10 +5234,11 @@ function createSimplePdf(lineItems) {
     if (rows.length === 0) return;
     const columns = item.columns ?? rows[0].map(() => (contentWidth / rows[0].length));
     const tableWidth = columns.reduce((sum, width) => sum + width, 0);
-    const padding = item.padding ?? 6;
-    const fontSize = item.size ?? 8.5;
-    const headerSize = item.headerSize ?? 8.5;
-    const lineHeight = item.lineHeight ?? 11;
+    const paddingX = item.paddingX ?? 7;
+    const paddingY = item.paddingY ?? 5;
+    const fontSize = item.size ?? 9.5;
+    const headerSize = item.headerSize ?? 9.5;
+    const lineHeight = item.lineHeight ?? 12;
     const maxCellCharacters = item.maxCellCharacters ?? 280;
 
     y -= item.before ?? 4;
@@ -5232,24 +5248,25 @@ function createSimplePdf(lineItems) {
       const activeFontSize = isHeader ? headerSize : fontSize;
       const cellLines = row.map((cell, cellIndex) => {
         const width = columns[cellIndex] ?? (contentWidth / row.length);
-        const maxCharacters = Math.max(10, Math.floor((width - padding * 2) / (activeFontSize * 0.46)));
+        const maxCharacters = Math.max(10, Math.floor((width - paddingX * 2) / (activeFontSize * 0.46)));
         return wrapPdfText(tableCellText(cell, maxCellCharacters), maxCharacters);
       });
-      const rowHeight = Math.max(...cellLines.map((lines) => lines.length)) * lineHeight + padding * 2;
+      const rowHeight = Math.max(...cellLines.map((lines) => lines.length)) * lineHeight + paddingY * 2;
       ensureSpace(rowHeight + 4);
       const rowY = y - rowHeight;
-      const fill = isHeader ? PDF_BRAND.navy : rowIndex % 2 === 0 ? PDF_BRAND.tableStripe : "FFFFFF";
-      rect(left, rowY, tableWidth, rowHeight, fill, PDF_BRAND.tableLine);
+      const fill = isHeader ? PDF_BRAND.navy : (rowIndex - 1) % 2 === 0 ? PDF_BRAND.tableStripe : PDF_BRAND.white;
+      const border = isHeader ? PDF_BRAND.navy : PDF_BRAND.tableLine;
+      rect(left, rowY, tableWidth, rowHeight, fill, border, isHeader ? 0.5 : 0.25);
 
       let x = left;
       row.forEach((_, cellIndex) => {
         const width = columns[cellIndex] ?? (contentWidth / row.length);
-        pages[pages.length - 1].push(`${rgb(PDF_BRAND.tableLine)} RG ${x} ${rowY} ${width} ${rowHeight} re S`);
+        pages[pages.length - 1].push(`q ${isHeader ? 0.5 : 0.25} w ${rgb(border)} RG ${x} ${rowY} ${width} ${rowHeight} re S Q`);
         const textColor = isHeader ? PDF_BRAND.lightText : PDF_BRAND.body;
         const font = isHeader ? "F2" : "F1";
-        let textY = y - padding - activeFontSize;
+        let textY = y - paddingY - activeFontSize;
         for (const line of cellLines[cellIndex]) {
-          pages[pages.length - 1].push(`${rgb(textColor)} rg BT /${font} ${activeFontSize} Tf ${x + padding} ${textY} Td (${escapePdfText(line)}) Tj ET`);
+          pages[pages.length - 1].push(`${rgb(textColor)} rg BT /${font} ${activeFontSize} Tf ${x + paddingX} ${textY} Td (${escapePdfText(line)}) Tj ET`);
           textY -= lineHeight;
         }
         x += width;
@@ -5479,14 +5496,26 @@ function listPublicResourceNames(rows) {
 }
 
 function addCaseStudyPdfSection(items, number, title) {
-  items.push({ type: "rule", color: PDF_BRAND.tableLine, before: 4, after: 10 });
   items.push({
     text: `${number}. ${title}`,
-    size: 14,
+    size: 16,
     bold: true,
     color: PDF_BRAND.navy,
+    before: 18,
     after: 8,
-    maxCharacters: 68,
+    maxCharacters: 58,
+  });
+}
+
+function addCaseStudyPdfSubsection(items, title) {
+  items.push({
+    text: title,
+    size: 13,
+    bold: true,
+    color: PDF_BRAND.navyMid,
+    before: 8,
+    after: 5,
+    maxCharacters: 64,
   });
 }
 
@@ -5494,27 +5523,31 @@ function addCaseStudyPdfParagraph(items, text, options = {}) {
   if (!text) return;
   items.push({
     text,
-    size: options.size ?? 10,
+    size: options.size ?? 11,
     color: options.color ?? PDF_BRAND.body,
     bold: options.bold ?? false,
+    before: options.before,
     after: options.after ?? 7,
-    maxCharacters: options.maxCharacters ?? 92,
+    maxCharacters: options.maxCharacters ?? 78,
     fill: options.fill,
     stroke: options.stroke,
+    strokeWidth: options.strokeWidth,
+    paddingY: options.paddingY,
+    indent: options.indent,
   });
 }
 
 function addCaseStudyPdfBulletList(items, bullets) {
   for (const bullet of bullets.filter(Boolean)) {
-    addCaseStudyPdfParagraph(items, `- ${bullet}`, { after: 4 });
+    addCaseStudyPdfParagraph(items, `- ${bullet}`, { after: 4, indent: 10 });
   }
 }
 
 function buildFinalDeliverablesReportLines(deliverable, session) {
   if (!deliverable?.ready) {
     return [
-      { text: "ACADEMY OF STRUCTURAL TYPOLOGY", size: 11, bold: true, align: "center", color: PDF_BRAND.navy, after: 8 },
-      { text: "M&A INTEGRATION RISK DUE DILIGENCE", size: 17, bold: true, align: "center", color: PDF_BRAND.navy, after: 10 },
+      { text: "ACADEMY OF STRUCTURAL TYPOLOGY", size: 9, bold: true, align: "center", color: PDF_BRAND.accent, after: 20, maxCharacters: 90 },
+      { text: "M&A INTEGRATION RISK DUE DILIGENCE", size: 23, bold: true, align: "center", color: PDF_BRAND.navy, after: 12, maxCharacters: 48 },
       { text: "The report is not ready for this session.", size: 11, align: "center", color: PDF_BRAND.muted },
     ];
   }
@@ -5533,49 +5566,66 @@ function buildFinalDeliverablesReportLines(deliverable, session) {
     month: "long",
     day: "numeric",
   });
+  const reportPairTitle = `${deliverable.acquirerAlias} \u00d7 ${deliverable.targetAlias}`;
 
   const items = [
-    { text: "ACADEMY OF STRUCTURAL TYPOLOGY", size: 11, bold: true, align: "center", color: PDF_BRAND.navy, after: 8, maxCharacters: 80 },
-    { text: "M&A INTEGRATION RISK DUE DILIGENCE", size: 17, bold: true, align: "center", color: PDF_BRAND.navy, after: 8, maxCharacters: 80 },
+    { text: "ACADEMY OF STRUCTURAL TYPOLOGY", size: 9, bold: true, align: "center", color: PDF_BRAND.accent, after: 22, maxCharacters: 90 },
     {
-      text: `${deliverable.acquirerAlias} - ${deliverable.targetAlias}: Structural Typology Final Report`,
-      size: 12,
+      text: reportPairTitle,
+      size: 23,
+      bold: true,
       align: "center",
-      color: PDF_BRAND.blue,
-      after: 7,
-      maxCharacters: 82,
+      color: PDF_BRAND.navy,
+      after: 12,
+      maxCharacters: 46,
+    },
+    {
+      text: "Structural Typology Final Report",
+      size: 11,
+      align: "center",
+      color: PDF_BRAND.muted,
+      after: 8,
+      maxCharacters: 78,
     },
     {
       text: "Preliminary Assessment Report, Final Deliverables Report, Analyst Findings, and Final Risk Outputs",
+      size: 11,
+      align: "center",
+      color: PDF_BRAND.muted,
+      after: 18,
+      maxCharacters: 78,
+    },
+    {
+      type: "rule",
+      color: PDF_BRAND.accent,
+      width: 0.75,
+      before: 8,
+      after: 22,
+    },
+    {
+      text: `M&A Integration Risk Due Diligence Series  \u00b7  ${generatedDate}`,
       size: 10,
       align: "center",
-      color: "444444",
-      after: 7,
-      maxCharacters: 88,
+      color: PDF_BRAND.muted,
+      after: 6,
+      maxCharacters: 78,
     },
     {
-      text: `M&A Integration Risk Due Diligence Series  -  ${generatedDate}`,
-      size: 9,
+      text: "structural-typology.com  \u00b7  info@structural-typology.academy",
+      size: 10,
       align: "center",
-      color: PDF_BRAND.muted,
-      after: 5,
-      maxCharacters: 90,
+      color: PDF_BRAND.accent,
+      after: 0,
+      maxCharacters: 78,
     },
-    {
-      text: "structural-typology.com  -  info@structural-typology.academy",
-      size: 9,
-      align: "center",
-      color: PDF_BRAND.muted,
-      after: 16,
-      maxCharacters: 90,
-    },
+    { type: "pageBreak" },
   ];
 
   addCaseStudyPdfSection(items, 1, "Executive Summary");
   addCaseStudyPdfParagraph(
     items,
     deliverable.narrative?.headline ?? deliverable.headline,
-    { size: 11, bold: true, color: PDF_BRAND.navy, fill: PDF_BRAND.panelFill, stroke: PDF_BRAND.tableLine, after: 10 },
+    { size: 11, bold: true, color: PDF_BRAND.body, fill: PDF_BRAND.panelFill, stroke: "", paddingY: 12, after: 10 },
   );
   addCaseStudyPdfParagraph(
     items,
@@ -5589,7 +5639,7 @@ function buildFinalDeliverablesReportLines(deliverable, session) {
 
   items.push({
     type: "table",
-    columns: [170, 334],
+    columns: [156, 312],
     rows: [
       ["Report Field", "Data"],
       ["Compatibility range", deliverable.compatibilityRange],
@@ -5604,7 +5654,7 @@ function buildFinalDeliverablesReportLines(deliverable, session) {
   addCaseStudyPdfSection(items, 2, "Deal Context");
   items.push({
     type: "table",
-    columns: [170, 334],
+    columns: [156, 312],
     rows: [
       ["Transaction Detail", "Data"],
       ["Acquirer", dealContext.acquirerName ?? "Acquirer pending"],
@@ -5629,7 +5679,7 @@ function buildFinalDeliverablesReportLines(deliverable, session) {
   );
   items.push({
     type: "table",
-    columns: [170, 334],
+    columns: [156, 312],
     rows: [
       ["Coverage Item", "Status"],
       ["Evidence captured", `${evidenceCoverage.totalCount} item(s)`],
@@ -5643,7 +5693,7 @@ function buildFinalDeliverablesReportLines(deliverable, session) {
   if (evidenceItems.length > 0) {
     items.push({
       type: "table",
-      columns: [150, 94, 260],
+      columns: [140, 88, 240],
       rows: [
         ["Evidence Item", "Status", "Analyst Extract"],
         ...evidenceItems.map((item) => [
@@ -5659,7 +5709,7 @@ function buildFinalDeliverablesReportLines(deliverable, session) {
   addCaseStudyPdfSection(items, 4, "Contradiction Review and Triage");
   items.push({
     type: "table",
-    columns: [150, 94, 260],
+    columns: [140, 88, 240],
     rows: [
       ["Finding", "Severity", "Diagnostic Meaning"],
       ...contradictionFindings.map((finding) => [
@@ -5672,7 +5722,7 @@ function buildFinalDeliverablesReportLines(deliverable, session) {
   });
   items.push({
     type: "table",
-    columns: [170, 334],
+    columns: [156, 312],
     rows: [
       ["Triage Item", "Data"],
       ["Effective tier", triageTierLabel(triageReport.effectiveTier)],
@@ -5687,7 +5737,7 @@ function buildFinalDeliverablesReportLines(deliverable, session) {
   addCaseStudyPdfSection(items, 5, "Formal Risk Output Records");
   items.push({
     type: "table",
-    columns: [144, 74, 62, 224],
+    columns: [132, 68, 58, 210],
     rows: [
       ["Risk Category", "Severity", "Score", "Analyst Interpretation"],
       ...riskOutputReport.rankedOutputs.map((risk) => [
@@ -5708,7 +5758,7 @@ function buildFinalDeliverablesReportLines(deliverable, session) {
   if (deliverable.protocol?.dealInsights?.length) {
     items.push({
       type: "table",
-      columns: [170, 334],
+      columns: [156, 312],
       rows: [
         ["Control Area", "Recommendation"],
         ...deliverable.protocol.dealInsights.map((insight) => [insight.title, insight.text]),
@@ -5718,14 +5768,14 @@ function buildFinalDeliverablesReportLines(deliverable, session) {
   }
 
   if (resourceRows.length > 0) {
-    addCaseStudyPdfParagraph(items, "Primary resource-risk cluster", { size: 11, bold: true, color: PDF_BRAND.blue, after: 4 });
+    addCaseStudyPdfSubsection(items, "Primary resource-risk cluster");
     addCaseStudyPdfBulletList(items, resourceRows.map((row) => `${row.resource}: ${row.potentialRisk}`));
   }
 
   if (deliverable.anchors?.length) {
     items.push({
       type: "table",
-      columns: [150, 354],
+      columns: [140, 328],
       rows: [
         ["Prediction Anchor", "Friction Outlook"],
         ...deliverable.anchors.map((anchor) => [anchor.label, anchor.text]),
@@ -5738,7 +5788,7 @@ function buildFinalDeliverablesReportLines(deliverable, session) {
   addCaseStudyPdfParagraph(
     items,
     "Use this report as the deal-level integration hypothesis. Confirm individual leadership fit before final sequencing decisions, and open a practitioner consultation when the transaction moves into integration planning.",
-    { fill: PDF_BRAND.panelFill, stroke: PDF_BRAND.tableLine },
+    { after: 8 },
   );
   addCaseStudyPdfBulletList(
     items,
@@ -5748,7 +5798,7 @@ function buildFinalDeliverablesReportLines(deliverable, session) {
   addCaseStudyPdfSection(items, 8, "Final Report Structure");
   items.push({
     type: "table",
-    columns: [42, 170, 292],
+    columns: [38, 158, 272],
     rows: [
       ["No.", "Section", "Purpose"],
       ...finalReport.sections.map((section, index) => [
@@ -5760,34 +5810,34 @@ function buildFinalDeliverablesReportLines(deliverable, session) {
     maxCellCharacters: 260,
   });
 
-  items.push({ type: "rule", color: PDF_BRAND.tableLine, before: 8, after: 10 });
   addCaseStudyPdfParagraph(items, "ABOUT STRUCTURAL TYPOLOGY", {
-    size: 10,
+    size: 11,
     bold: true,
     color: PDF_BRAND.navy,
-    after: 4,
-    maxCharacters: 90,
+    before: 12,
+    after: 5,
+    maxCharacters: 78,
   });
   addCaseStudyPdfParagraph(
     items,
     "Structural Typology is a predictive model of organisational behaviour applied here to M&A integration risk. Its final diagnostic output distinguishes what respondents said, what evidence supports, what evidence contradicts, what remains unknown, and where analyst interpretation is required.",
-    { size: 9, color: "444444", after: 8 },
+    { size: 11, color: PDF_BRAND.body, after: 8 },
   );
   items.push({
-    text: "structural-typology.com  -  info@structural-typology.academy",
-    size: 9,
+    text: "structural-typology.com  \u00b7  info@structural-typology.academy",
+    size: 10,
     align: "center",
-    color: PDF_BRAND.blue,
+    color: PDF_BRAND.accent,
     after: 4,
-    maxCharacters: 90,
+    maxCharacters: 78,
   });
   items.push({
-    text: `Academy of Structural Typology  -  ${generatedDate}  -  Confidential`,
+    text: `Academy of Structural Typology  \u00b7  ${generatedDate}  \u00b7  Confidential`,
     size: 9,
     align: "center",
-    color: "888888",
+    color: PDF_BRAND.muted,
     after: 4,
-    maxCharacters: 90,
+    maxCharacters: 78,
   });
 
   return items;
