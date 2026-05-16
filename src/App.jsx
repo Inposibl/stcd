@@ -966,6 +966,7 @@ function AcquisitionMotiveScreen({ session, setSession }) {
   const existingContext = session.dealContext?.data ?? {};
   const [dealIdentity, setDealIdentity] = useState(() => initialDealIdentity(existingContext));
   const [error, setError] = useState("");
+  const finalDeliverable = buildFinalDeliverable(session);
   const respondentRoleOptions = roleOptionsForSide(dealIdentity.respondentSide);
   const respondentRoleValid = respondentRoleOptions.some((option) => option.value === dealIdentity.respondentRole);
   const dealIdentityComplete = Object.values(dealIdentity).every(Boolean) && respondentRoleValid;
@@ -1127,6 +1128,9 @@ function AcquisitionMotiveScreen({ session, setSession }) {
 
         {error ? <p className="form-error">{error}</p> : null}
         <div className="button-row">
+          {finalDeliverable.ready ? (
+            <button type="button" onClick={() => navigate(finalDeliverable.route)}>Go to final report page</button>
+          ) : null}
           <button className="primary-flow-action" disabled={!canContinue} type="submit">{submitLabel}</button>
         </div>
       </form>

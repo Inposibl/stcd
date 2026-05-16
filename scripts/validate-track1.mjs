@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { ACQUIRER_TRACK_DATA } from "../src/data/acquirerTrackData.js";
 import {
   ACQUISITION_MOTIVE_OPTIONS,
@@ -79,6 +80,11 @@ assert.equal(isAcquirerModuleSourceLoaded(), true);
 assert.equal(ACQUIRER_TRACK_DATA.acquirerModule.questions.every((question) => question.options.length >= 5), true);
 assert.equal(ACQUIRER_TRACK_DATA.acquirerModule.questions.every((question) => Boolean(question.directObservationGate)), true);
 assert.equal(ACQUIRER_TRACK_DATA.acquirerModule.questions.every((question) => question.options.some((option) => option.value === "E")), true);
+
+const appSource = readFileSync(new URL("../src/App.jsx", import.meta.url), "utf8");
+assert.match(appSource, /Go to final report page/);
+assert.match(appSource, /finalDeliverable\.ready/);
+assert.match(appSource, /navigate\(finalDeliverable\.route\)/);
 
 const expectedOrder = [
   "/",
