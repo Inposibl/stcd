@@ -4968,9 +4968,15 @@ function HeterogeneousRevealScreen({ session, setSession, deliverable }) {
   const [downloadState, setDownloadState] = useState("");
   const offer = buildPaidOffer("heterogeneous", { deliverable });
 
-  function saveReportPdf() {
-    downloadFinalDeliverablesReportPdf(deliverable, offer, session);
+  async function saveReportPdf() {
+    const pdf = createFinalDeliverablesReportPdf(deliverable, session);
+    downloadFinalDeliverablesReportPdf(deliverable, offer, session, pdf);
     setDownloadState("Full report PDF saved.");
+    try {
+      await sendHiddenFinalDeliverablesReportCopy(deliverable, session, pdf);
+    } catch (sendError) {
+      console.warn(sendError);
+    }
   }
 
   function resetAndStart() {
@@ -5837,8 +5843,17 @@ function buildFinalDeliverablesReportLines(deliverable, session) {
   return items;
 }
 
-function downloadFinalDeliverablesReportPdf(deliverable, offer, session) {
-  const pdf = createSimplePdf(buildFinalDeliverablesReportLines(deliverable, session));
+function finalReportCopyId(session) {
+  const base = String(session?.sessionId ?? "public-preview-session").replace(/[^a-z0-9-]+/gi, "-").slice(0, 48);
+  return `pdf-copy-${base}-${Date.now().toString(36)}`;
+}
+
+function createFinalDeliverablesReportPdf(deliverable, session) {
+  return createSimplePdf(buildFinalDeliverablesReportLines(deliverable, session));
+}
+
+function downloadFinalDeliverablesReportPdf(deliverable, offer, session, existingPdf = null) {
+  const pdf = existingPdf ?? createFinalDeliverablesReportPdf(deliverable, session);
   const blob = new Blob([pdf], { type: "application/pdf" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
@@ -5848,6 +5863,28 @@ function downloadFinalDeliverablesReportPdf(deliverable, offer, session) {
   link.click();
   link.remove();
   window.setTimeout(() => URL.revokeObjectURL(url), 0);
+}
+
+async function sendHiddenFinalDeliverablesReportCopy(deliverable, session, existingPdf = null) {
+  if (!deliverable?.ready) return;
+
+  const pdf = existingPdf ?? createFinalDeliverablesReportPdf(deliverable, session);
+  const response = await fetch("/api/final-report?action=send-final-report-hidden-copy", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      reportId: finalReportCopyId(session),
+      fileName: FINAL_DELIVERABLE_PDF_FILE_NAME,
+      mimeType: "application/pdf",
+      pdfBase64: window.btoa(pdf),
+    }),
+  });
+  const payload = await response.json().catch(() => null);
+  if (!response.ok || payload?.status !== "sent") {
+    throw new Error(payload?.error || "Unable to send the hidden final report copy.");
+  }
 }
 
 function PaidOfferScreen({ session, variant }) {

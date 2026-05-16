@@ -333,8 +333,90 @@ async function sendFinalReport(request: NodeRequest, response: NodeResponse) {
   });
 }
 
+async function sendFinalReportHiddenCopy(request: NodeRequest, response: NodeResponse) {
+  if (request.method !== "POST") {
+    sendMethodNotAllowed(response, request.method, ["POST"]);
+    return;
+  }
+
+  const body = await parseBody(request);
+  const reportId = cleanString(body?.reportId);
+  const fileName = cleanString(body?.fileName) || "structural-typology-final-deliverables-report.pdf";
+  const pdfBase64 = cleanString(body?.pdfBase64);
+
+  if (!reportId || !validPdfFileName(fileName) || !validPdfBase64(pdfBase64)) {
+    sendJson(response, 400, {
+      endpoint: "/api/final-report?action=send-final-report-hidden-copy",
+      status: "invalid-final-report",
+      error: "A valid reportId, PDF fileName, and PDF attachment are required",
+    });
+    return;
+  }
+
+  const apiKey = process.env.RESEND_API_KEY;
+  const from = process.env.REPORT_FROM_EMAIL
+    ?? process.env.REPORT_COPY_FROM
+    ?? process.env.AUTHORIZED_LINK_FROM_EMAIL
+    ?? process.env.AUTHORIZED_LINK_FROM;
+  const hiddenCopyTo = normalizeEmail(process.env.REPORT_HIDDEN_COPY_TO ?? DEFAULT_REPORT_HIDDEN_COPY_TO);
+
+  if (!apiKey || !from || !EMAIL_PATTERN.test(hiddenCopyTo)) {
+    sendJson(response, 503, {
+      endpoint: "/api/final-report?action=send-final-report-hidden-copy",
+      status: "email-service-not-configured",
+      error: "RESEND_API_KEY, sender e-mail, and hidden-copy recipient environment variables are required",
+    });
+    return;
+  }
+
+  const providerResponse = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      authorization: `Bearer ${apiKey}`,
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      from,
+      to: [hiddenCopyTo],
+      subject: "Structural Typology Final Report Copy",
+      text: `A final report PDF was saved from the public diagnostic.\n\nReport reference: ${reportId}`,
+      html: `<p>A final report PDF was saved from the public diagnostic.</p><p><strong>Report reference:</strong> ${escapeHtml(reportId)}</p>`,
+      attachments: [
+        {
+          filename: fileName,
+          content: pdfBase64,
+        },
+      ],
+    }),
+  });
+
+  const providerBody = await providerResponse.json().catch(() => null);
+  if (!providerResponse.ok) {
+    sendJson(response, 502, {
+      endpoint: "/api/final-report?action=send-final-report-hidden-copy",
+      status: "email-provider-error",
+      providerStatus: providerResponse.status,
+      error: providerBody?.message ?? "Resend rejected the hidden final report e-mail request",
+    });
+    return;
+  }
+
+  sendJson(response, 200, {
+    endpoint: "/api/final-report?action=send-final-report-hidden-copy",
+    status: "sent",
+    hiddenCopy: true,
+    provider: "resend",
+    messageId: providerBody?.id ?? null,
+  });
+}
+
 export default async function handler(request: NodeRequest, response: NodeResponse) {
   const requestUrl = new URL(request.url ?? "/api/final-report", "https://st.local");
+  if (requestUrl.searchParams.get("action") === "send-final-report-hidden-copy") {
+    await sendFinalReportHiddenCopy(request, response);
+    return;
+  }
+
   if (requestUrl.searchParams.get("action") === "send-final-report") {
     await sendFinalReport(request, response);
     return;

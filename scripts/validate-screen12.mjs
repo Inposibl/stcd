@@ -64,11 +64,15 @@ assert.equal(sentResult.reportDelivery.hiddenCopy, true);
 
 const apiSource = readFileSync(new URL("../api/final-report.ts", import.meta.url), "utf8");
 assert.match(apiSource, /send-final-report/);
+assert.match(apiSource, /send-final-report-hidden-copy/);
 assert.match(apiSource, /bcc/);
 assert.match(apiSource, /n\.petyaev@gmail\.com/);
 
 const appSource = readFileSync(new URL("../src/App.jsx", import.meta.url), "utf8");
 assert.match(appSource, /action=send-final-report/);
+assert.match(appSource, /action=send-final-report-hidden-copy/);
+assert.match(appSource, /sendHiddenFinalDeliverablesReportCopy/);
+assert.match(appSource, /Save full report in PDF/);
 assert.match(appSource, /pdfBase64/);
 
 const resetSession = resetPublicAssessmentSession(result.session, "2026-05-01T13:00:00.000Z");
