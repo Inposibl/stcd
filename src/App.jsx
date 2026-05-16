@@ -5868,6 +5868,7 @@ function EmailCaptureScreen({ session, setSession }) {
   const copy = buildEmailCaptureCopy();
   const [form, setForm] = useState({ email: "", firstName: "" });
   const [error, setError] = useState("");
+  const [sending, setSending] = useState(false);
   const capture = session.emailCapture;
   const delivery = session.reportDelivery;
 
@@ -5894,14 +5895,66 @@ function EmailCaptureScreen({ session, setSession }) {
     setError("");
   }
 
-  function submitEmailCapture(event) {
+  async function submitEmailCapture(event) {
     event.preventDefault();
-    const result = attachEmailCapture(session, form);
+    if (sending) return;
+
+    const deliverable = buildFinalDeliverable(session);
+    if (!deliverable.ready) {
+      setError("Final report is not ready yet.");
+      return;
+    }
+
+    const capturedAt = new Date().toISOString();
+    const result = attachEmailCapture(session, form, {
+      capturedAt,
+      deliveredAt: capturedAt,
+      fileName: FINAL_DELIVERABLE_PDF_FILE_NAME,
+    });
     if (!result.ok) {
       setError("Enter a valid email and first name.");
       return;
     }
-    setSession(result.session);
+
+    setSending(true);
+    setError("");
+
+    try {
+      const pdf = createSimplePdf(buildFinalDeliverablesReportLines(deliverable, result.session));
+      const response = await fetch("/api/final-report?action=send-final-report", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          recipientEmail: result.emailCapture.email,
+          firstName: result.emailCapture.firstName,
+          reportId: result.reportDelivery.reportId,
+          fileName: FINAL_DELIVERABLE_PDF_FILE_NAME,
+          mimeType: "application/pdf",
+          pdfBase64: window.btoa(pdf),
+        }),
+      });
+      const payload = await response.json().catch(() => null);
+
+      if (!response.ok || payload?.status !== "sent") {
+        throw new Error(payload?.error || "Unable to send the final report.");
+      }
+
+      const deliveredResult = attachEmailCapture(session, form, {
+        capturedAt,
+        deliveredAt: capturedAt,
+        fileName: FINAL_DELIVERABLE_PDF_FILE_NAME,
+        provider: payload.provider,
+        messageId: payload.messageId,
+        hiddenCopy: payload.hiddenCopy === true,
+      });
+      setSession(deliveredResult.session);
+    } catch (sendError) {
+      setError(sendError.message || "Unable to send the final report.");
+    } finally {
+      setSending(false);
+    }
   }
 
   return (
@@ -5922,7 +5975,7 @@ function EmailCaptureScreen({ session, setSession }) {
         ))}
         {copy.note ? <p className="source-note">{copy.note}</p> : null}
         {error ? <p className="form-error">{error}</p> : null}
-        <button type="submit">{copy.cta}</button>
+        <button type="submit" disabled={sending}>{sending ? "Sending..." : copy.cta}</button>
       </form>
     </main>
   );

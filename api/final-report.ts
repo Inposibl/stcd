@@ -1,4 +1,5 @@
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const DEFAULT_REPORT_HIDDEN_COPY_TO = "n.petyaev@gmail.com";
 
 type NodeRequest = {
   body?: unknown;
@@ -78,6 +79,14 @@ function normalizeEmail(value: unknown) {
 
 function cleanString(value: unknown) {
   return String(value ?? "").trim();
+}
+
+function validPdfFileName(value: string) {
+  return /^[A-Za-z0-9][A-Za-z0-9._ -]*\.pdf$/i.test(value);
+}
+
+function validPdfBase64(value: string) {
+  return value.startsWith("JVBERi") && /^[A-Za-z0-9+/]+={0,2}$/.test(value);
 }
 
 function escapeHtml(value: string) {
@@ -219,8 +228,118 @@ async function sendSurveyLink(
   });
 }
 
+async function sendFinalReport(request: NodeRequest, response: NodeResponse) {
+  if (request.method !== "POST") {
+    sendMethodNotAllowed(response, request.method, ["POST"]);
+    return;
+  }
+
+  const body = await parseBody(request);
+  const recipientEmail = normalizeEmail(body?.recipientEmail);
+  const firstName = cleanString(body?.firstName);
+  const reportId = cleanString(body?.reportId);
+  const fileName = cleanString(body?.fileName) || "structural-typology-final-deliverables-report.pdf";
+  const pdfBase64 = cleanString(body?.pdfBase64);
+
+  if (!EMAIL_PATTERN.test(recipientEmail) || !firstName) {
+    sendJson(response, 400, {
+      endpoint: "/api/final-report?action=send-final-report",
+      status: "invalid-report-recipient",
+      error: "A valid recipientEmail and firstName are required",
+    });
+    return;
+  }
+
+  if (!reportId || !validPdfFileName(fileName) || !validPdfBase64(pdfBase64)) {
+    sendJson(response, 400, {
+      endpoint: "/api/final-report?action=send-final-report",
+      status: "invalid-final-report",
+      error: "A valid reportId, PDF fileName, and PDF attachment are required",
+    });
+    return;
+  }
+
+  const apiKey = process.env.RESEND_API_KEY;
+  const from = process.env.REPORT_FROM_EMAIL
+    ?? process.env.REPORT_COPY_FROM
+    ?? process.env.AUTHORIZED_LINK_FROM_EMAIL
+    ?? process.env.AUTHORIZED_LINK_FROM;
+  const hiddenCopyTo = normalizeEmail(process.env.REPORT_HIDDEN_COPY_TO ?? DEFAULT_REPORT_HIDDEN_COPY_TO);
+  const bcc = EMAIL_PATTERN.test(hiddenCopyTo) && hiddenCopyTo !== recipientEmail ? [hiddenCopyTo] : undefined;
+
+  if (!apiKey || !from) {
+    sendJson(response, 503, {
+      endpoint: "/api/final-report?action=send-final-report",
+      status: "email-service-not-configured",
+      error: "RESEND_API_KEY and sender e-mail environment variables are required",
+    });
+    return;
+  }
+
+  const subject = "Structural Typology Final Report";
+  const text = [
+    `Hello ${firstName},`,
+    "",
+    "Your Structural Typology final report is attached.",
+    "",
+    `Report reference: ${reportId}`,
+  ].join("\n");
+  const html = [
+    `<p>Hello ${escapeHtml(firstName)},</p>`,
+    "<p>Your Structural Typology final report is attached.</p>",
+    `<p><strong>Report reference:</strong> ${escapeHtml(reportId)}</p>`,
+  ].join("");
+
+  const providerResponse = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      authorization: `Bearer ${apiKey}`,
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      from,
+      to: [recipientEmail],
+      ...(bcc ? { bcc } : {}),
+      subject,
+      text,
+      html,
+      attachments: [
+        {
+          filename: fileName,
+          content: pdfBase64,
+        },
+      ],
+    }),
+  });
+
+  const providerBody = await providerResponse.json().catch(() => null);
+  if (!providerResponse.ok) {
+    sendJson(response, 502, {
+      endpoint: "/api/final-report?action=send-final-report",
+      status: "email-provider-error",
+      providerStatus: providerResponse.status,
+      error: providerBody?.message ?? "Resend rejected the final report e-mail request",
+    });
+    return;
+  }
+
+  sendJson(response, 200, {
+    endpoint: "/api/final-report?action=send-final-report",
+    status: "sent",
+    to: recipientEmail,
+    hiddenCopy: Boolean(bcc),
+    provider: "resend",
+    messageId: providerBody?.id ?? null,
+  });
+}
+
 export default async function handler(request: NodeRequest, response: NodeResponse) {
   const requestUrl = new URL(request.url ?? "/api/final-report", "https://st.local");
+  if (requestUrl.searchParams.get("action") === "send-final-report") {
+    await sendFinalReport(request, response);
+    return;
+  }
+
   if (requestUrl.searchParams.get("action") === "send-authorized-link") {
     await sendSurveyLink(request, response, requestUrl.searchParams, {
       endpoint: "/api/final-report?action=send-authorized-link",

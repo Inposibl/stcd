@@ -64,16 +64,20 @@ export function validateEmailCaptureInput(input = {}) {
   });
 }
 
-export function createReportDeliveryRecord(capture, deliveredAt = new Date().toISOString()) {
+export function createReportDeliveryRecord(capture, deliveredAt = new Date().toISOString(), options = {}) {
   const reportId = `pdf-${simpleHash(`${capture.email}:${capture.capturedAt}`)}`;
   return Object.freeze({
     completed: true,
     status: "delivered",
     reportId,
-    fileName: "structural-typology-report.pdf",
+    fileName: options.fileName ?? "structural-typology-final-deliverables-report.pdf",
     mimeType: "application/pdf",
     deliveredAt,
+    generatedAt: options.generatedAt ?? deliveredAt,
     recipientEmail: capture.email,
+    provider: options.provider ?? null,
+    messageId: options.messageId ?? null,
+    hiddenCopy: Boolean(options.hiddenCopy),
   });
 }
 
@@ -96,7 +100,7 @@ export function attachEmailCapture(session, input, options = {}) {
     firstName: validation.value.firstName,
     sourceRoute: "/screen-12-email-capture",
   });
-  const reportDelivery = createReportDeliveryRecord(capture, options.deliveredAt ?? capturedAt);
+  const reportDelivery = createReportDeliveryRecord(capture, options.deliveredAt ?? capturedAt, options);
 
   return Object.freeze({
     ok: true,

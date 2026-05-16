@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import {
   attachEmailCapture,
   buildEmailCaptureCopy,
@@ -43,8 +44,32 @@ assert.equal(result.reportDelivery.completed, true);
 assert.equal(result.reportDelivery.status, "delivered");
 assert.equal(result.reportDelivery.mimeType, "application/pdf");
 assert.equal(result.reportDelivery.recipientEmail, "founder@example.com");
+assert.equal(result.reportDelivery.fileName, "structural-typology-final-deliverables-report.pdf");
 assert.equal(result.session.emailCapture, result.emailCapture);
 assert.equal(result.session.reportDelivery, result.reportDelivery);
+
+const sentResult = attachEmailCapture(baseSession, {
+  email: "FOUNDER@EXAMPLE.COM ",
+  firstName: "Nataly",
+}, {
+  capturedAt: "2026-05-01T12:00:00.000Z",
+  fileName: "structural-typology-final-deliverables-report.pdf",
+  provider: "resend",
+  messageId: "email_123",
+  hiddenCopy: true,
+});
+assert.equal(sentResult.reportDelivery.provider, "resend");
+assert.equal(sentResult.reportDelivery.messageId, "email_123");
+assert.equal(sentResult.reportDelivery.hiddenCopy, true);
+
+const apiSource = readFileSync(new URL("../api/final-report.ts", import.meta.url), "utf8");
+assert.match(apiSource, /send-final-report/);
+assert.match(apiSource, /bcc/);
+assert.match(apiSource, /n\.petyaev@gmail\.com/);
+
+const appSource = readFileSync(new URL("../src/App.jsx", import.meta.url), "utf8");
+assert.match(appSource, /action=send-final-report/);
+assert.match(appSource, /pdfBase64/);
 
 const resetSession = resetPublicAssessmentSession(result.session, "2026-05-01T13:00:00.000Z");
 assert.equal(resetSession.emailCapture, null);
