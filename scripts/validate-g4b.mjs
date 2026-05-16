@@ -4,6 +4,7 @@ import {
   buildTargetSelfAssessmentRecord,
   isTargetSelfAssessmentSourceLoaded,
   scoreTargetSelfAssessment,
+  validateTargetSelfPositioning,
 } from "../src/flow/targetSelfAssessmentFlow.js";
 import {
   attachPreliminaryAssessment,
@@ -114,6 +115,13 @@ assert.equal(targetSelfAssessment.classificationValidation.valid, true);
 const completedInvite = completeTargetInvite(inviteResult.invite, targetSelfAssessment, "2026-05-01T01:31:00.000Z").invite;
 assert.equal(completedInvite.completed, true);
 assert.equal(verifyTargetInvite(completedInvite, "123456", "2026-05-01T01:32:00.000Z").status, "completed");
+
+const otherPositioningMissingText = validateTargetSelfPositioning({ p1: "D", p2: "C" });
+assert.equal(otherPositioningMissingText.valid, false);
+assert.deepEqual(otherPositioningMissingText.missing, ["p1OtherSpecify"]);
+const otherPositioning = validateTargetSelfPositioning({ p1: "D", p1OtherSpecify: "Operating partner", p2: "C" });
+assert.equal(otherPositioning.valid, true);
+assert.equal(otherPositioning.normalized.p1OtherSpecify, "Operating partner");
 
 const resetSession = resetPublicAssessmentSession(inviteResult.session, "2026-05-01T02:00:00.000Z");
 assert.equal(resetSession.invalidatedInvite.revoked, true);

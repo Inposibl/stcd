@@ -73,6 +73,9 @@ import { buildRiskOutputReport } from "./flow/riskOutputEngine.js";
 import {
   buildTargetSelfAssessmentRecord,
   isTargetSelfAssessmentSourceLoaded,
+  targetSelfOtherSpecifyFieldId,
+  targetSelfPositioningOptionRequiresSpecify,
+  validateTargetSelfPositioning,
 } from "./flow/targetSelfAssessmentFlow.js";
 import {
   attachEmailCapture,
@@ -3207,7 +3210,21 @@ function Step2BLevel2Screen({ session, setSession }) {
 }
 
 function targetSelfFieldLabel(fieldId) {
+  if (fieldId.endsWith("OtherSpecify")) {
+    const baseFieldId = fieldId.replace(/OtherSpecify$/, "");
+    const baseField = TARGET_SELF_ASSESSMENT_DATA.positioningFields.find((field) => field.id === baseFieldId);
+    return baseField ? `${baseField.label} - please specify` : fieldId;
+  }
+
   return TARGET_SELF_ASSESSMENT_DATA.positioningFields.find((field) => field.id === fieldId)?.label ?? fieldId;
+}
+
+function targetSelfPositioningOptionText(option) {
+  if (targetSelfPositioningOptionRequiresSpecify(option)) {
+    return "Other - please specify below";
+  }
+
+  return publicText(option.text);
 }
 
 function TargetReceiptScreen({ invited = false }) {
@@ -3239,8 +3256,19 @@ function TargetSelfAssessmentSurvey({ session, setSession, invite = null }) {
 
   if (receipt || invite?.completed || (!invite && session.targetSelfAssessment?.completed)) return <TargetReceiptScreen invited={Boolean(invite)} />;
 
-  function updatePositioning(fieldId, value) {
-    setPositioning((current) => ({ ...current, [fieldId]: value }));
+  function updatePositioning(field, value) {
+    const specifyFieldId = targetSelfOtherSpecifyFieldId(field.id);
+    const selectedOption = field.options.find((option) => option.value === value);
+    setPositioning((current) => ({
+      ...current,
+      [field.id]: value,
+      ...(targetSelfPositioningOptionRequiresSpecify(selectedOption) ? {} : { [specifyFieldId]: "" }),
+    }));
+    setError("");
+  }
+
+  function updatePositioningSpecify(fieldId, value) {
+    setPositioning((current) => ({ ...current, [targetSelfOtherSpecifyFieldId(fieldId)]: value }));
     setError("");
   }
 
@@ -3270,6 +3298,14 @@ function TargetSelfAssessmentSurvey({ session, setSession, invite = null }) {
     }
 
     const normalizedAnswers = { ...answers, [question.id]: answerValidation.normalized };
+
+    if (activeIndex === 0) {
+      const positioningValidation = validateTargetSelfPositioning(positioning);
+      if (!positioningValidation.valid) {
+        setError(`Required: ${positioningValidation.missing.map(targetSelfFieldLabel).join(", ")}`);
+        return;
+      }
+    }
 
     if (activeIndex < questions.length - 1) {
       setAnswers(normalizedAnswers);
@@ -3330,12 +3366,20 @@ function TargetSelfAssessmentSurvey({ session, setSession, invite = null }) {
             {TARGET_SELF_ASSESSMENT_DATA.positioningFields.map((field) => (
               <label className="field-block" key={field.id}>
                 <span>{field.label}</span>
-                <select value={positioning[field.id] ?? ""} onChange={(event) => updatePositioning(field.id, event.target.value)}>
+                <select value={positioning[field.id] ?? ""} onChange={(event) => updatePositioning(field, event.target.value)}>
                   <option value="">Select</option>
                   {field.options.map((option) => (
-                    <option key={option.value} value={option.value}>{publicText(option.text)}</option>
+                    <option key={option.value} value={option.value}>{targetSelfPositioningOptionText(option)}</option>
                   ))}
                 </select>
+                {targetSelfPositioningOptionRequiresSpecify(field.options.find((option) => option.value === positioning[field.id])) ? (
+                  <input
+                    onChange={(event) => updatePositioningSpecify(field.id, event.target.value)}
+                    placeholder="Please specify"
+                    type="text"
+                    value={positioning[targetSelfOtherSpecifyFieldId(field.id)] ?? ""}
+                  />
+                ) : null}
               </label>
             ))}
           </section>

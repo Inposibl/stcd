@@ -24,6 +24,14 @@ export function isTargetSelfAssessmentSourceLoaded(data = TARGET_SELF_ASSESSMENT
   );
 }
 
+export function targetSelfOtherSpecifyFieldId(fieldId) {
+  return `${fieldId}OtherSpecify`;
+}
+
+export function targetSelfPositioningOptionRequiresSpecify(option) {
+  return /other/i.test(String(option?.text ?? "")) && /specify/i.test(String(option?.text ?? ""));
+}
+
 export function validateTargetSelfPositioning(input = {}) {
   const normalized = {};
   const missing = [];
@@ -35,6 +43,17 @@ export function validateTargetSelfPositioning(input = {}) {
       continue;
     }
     normalized[field.id] = value;
+
+    const selectedOption = field.options.find((option) => option.value === value);
+    if (targetSelfPositioningOptionRequiresSpecify(selectedOption)) {
+      const specifyFieldId = targetSelfOtherSpecifyFieldId(field.id);
+      const specifiedValue = typeof input[specifyFieldId] === "string" ? input[specifyFieldId].trim() : "";
+      if (!specifiedValue) {
+        missing.push(specifyFieldId);
+        continue;
+      }
+      normalized[specifyFieldId] = specifiedValue;
+    }
   }
 
   return Object.freeze({
