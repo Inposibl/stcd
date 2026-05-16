@@ -483,7 +483,7 @@ const HOME_COPY = Object.freeze({
 const METHODOLOGY_OVERVIEW_SECTIONS = Object.freeze([
   Object.freeze({
     title: "1. Purpose",
-    body: "Structural Typology is a framework for predicting behavioural outcomes in defined interaction environments. Its primary commercial application is human capital due diligence in mergers and acquisitions: forecasting integration success or failure before deal close, at the resolution of the specific resources that will come into conflict, the specific populations that will be at risk, and the timeline on which that risk will become visible.",
+    body: "Post-Deal Behavior Forecast is a framework for predicting behavioural outcomes in defined interaction environments. Its primary commercial application is human capital due diligence in mergers and acquisitions: forecasting integration success or failure before deal close, at the resolution of the specific resources that will come into conflict, the specific populations that will be at risk, and the timeline on which that risk will become visible.",
   }),
   Object.freeze({
     title: "2. Evidence base",
@@ -491,7 +491,7 @@ const METHODOLOGY_OVERVIEW_SECTIONS = Object.freeze([
   }),
   Object.freeze({
     title: "3. The analyst gate",
-    body: "Respondent answers are treated as observational evidence subject to analyst review, not as classification outputs. A trained analyst interprets the response pattern in context, applies the framework’s internal contradiction and triage rules, and arrives at a conclusion that the respondent alone cannot determine. This design choice distinguishes Structural Typology from self-administered personality instruments and from fully automated typing systems. The diagnostic input is data; the analytical conclusion is professional judgement, recorded with its evidentiary basis.",
+    body: "Respondent answers are treated as observational evidence subject to analyst review, not as classification outputs. A trained analyst interprets the response pattern in context, applies the framework’s internal contradiction and triage rules, and arrives at a conclusion that the respondent alone cannot determine. This design choice distinguishes Post-Deal Behavior Forecast from self-administered personality instruments and from fully automated typing systems. The diagnostic input is data; the analytical conclusion is professional judgement, recorded with its evidentiary basis.",
   }),
   Object.freeze({
     title: "4. Environment Compatibility Score, conceptually",
@@ -673,7 +673,7 @@ function MethodologyOverviewScreen() {
       <section className="page-shell">
         <header className="framework-hero compact">
           <p className="eyebrow">Methodology paper</p>
-          <h1>Structural Typology Methodology Overview</h1>
+          <h1>Post-Deal Behavior Forecast Methodology Overview</h1>
         </header>
 
         {METHODOLOGY_OVERVIEW_SECTIONS.map((section) => (

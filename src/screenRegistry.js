@@ -30,7 +30,7 @@ export function screenByRoute(route) {
     return { id: "about-methodology", title: "The ST Framework", route };
   }
   if (route === "/about-methodology/overview") {
-    return { id: "methodology-overview", title: "Structural Typology Methodology Overview", route };
+    return { id: "methodology-overview", title: "Post-Deal Behavior Forecast Methodology Overview", route };
   }
   if (route === "/case-studies") {
     return { id: "case-studies", title: "Case Studies", route };
