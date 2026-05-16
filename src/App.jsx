@@ -1996,6 +1996,7 @@ function TargetObservationSetupForm({ existingSetup = {}, submitLabel = "Continu
 
   function updateField(fieldId, value) {
     setForm((current) => ({ ...current, [fieldId]: value }));
+    setError("");
   }
 
   async function submit(event) {
@@ -2841,24 +2842,21 @@ function AuthorizedTargetObservationSetupScreen({ setSession }) {
         <h1>Confirm observation context</h1>
         <TargetObservationSetupForm
           submitLabel="Submit setup answers"
-          onValidSubmit={async (normalized) => {
+          onValidSubmit={(normalized) => {
             const setup = buildTargetObservationSetupRecord(normalized);
             if (!setup.completed) return { error: "Target Observation setup is incomplete." };
 
-            try {
-              await fetch("/api/save-target-observation-setup", {
-                method: "POST",
-                headers: { "content-type": "application/json" },
-                body: JSON.stringify({
-                  sessionId: invite.assessmentSessionId,
-                  setup: normalized,
-                }),
-              });
-            } catch {
-              // The local preview server may not expose API routes; the receipt still confirms the submitted survey.
-            }
-
             setSetupRecord(setup);
+            fetch("/api/save-target-observation-setup", {
+              method: "POST",
+              headers: { "content-type": "application/json" },
+              body: JSON.stringify({
+                sessionId: invite.assessmentSessionId,
+                setup: normalized,
+              }),
+            }).catch(() => {
+              // The survey can continue without this intermediate server save; final submission persists completion.
+            });
             return null;
           }}
         />
