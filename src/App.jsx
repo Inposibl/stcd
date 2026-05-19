@@ -5748,7 +5748,6 @@ async function sendHiddenFinalDeliverablesReportCopy(deliverable, session, exist
 
 function PaidOfferScreen({ session, variant }) {
   const deliverable = buildFinalDeliverable(session);
-  const [downloadState, setDownloadState] = useState("");
   const isHomogeneous = variant === "homogeneous";
   const offer = buildPaidOffer(variant, {
     alias: isHomogeneous && deliverable.ready && deliverable.screen === "screen-10b" ? deliverable.acquirerAlias : undefined,
@@ -5757,15 +5756,6 @@ function PaidOfferScreen({ session, variant }) {
   const pairLabel = deliverable.ready
     ? `${deliverable.acquirerAlias} acquiring ${deliverable.targetAlias}`
     : "Pair context pending";
-
-  function downloadReport() {
-    if (!deliverable.ready) {
-      setDownloadState("Final Deliverables are not ready for download.");
-      return;
-    }
-    downloadFinalDeliverablesReportPdf(deliverable, offer, session);
-    setDownloadState("Final Deliverables report PDF downloaded.");
-  }
 
   return (
     <main className="screen-shell paid-offer-screen">
@@ -5797,10 +5787,6 @@ function PaidOfferScreen({ session, variant }) {
             <button type="button" className="primary-offer-cta" onClick={() => navigate("/screen-12-consultation-request")}>
               {publicText(offer.ctas.primary)}
             </button>
-            <button type="button" className="secondary-offer-cta" disabled={!deliverable.ready} onClick={downloadReport}>
-              {publicText(offer.ctas.secondary)}
-            </button>
-            {downloadState ? <p className="source-note">{downloadState}</p> : null}
           </div>
         </section>
       </div>

@@ -544,14 +544,12 @@ const CHECKS = [
       for (const variant of ["heterogeneous", "homogeneous"]) {
         const offer = buildPaidOffer(variant, { alias: "The Research Commons" });
         assertCheck(offer.ctas.primary.includes("Book a 30-minute scoping call"), `${variant} primary CTA missing`);
-        assertCheck(offer.ctas.secondary.includes("Download full Final Deliverables report PDF"), `${variant} secondary CTA missing`);
       }
       const app = readFileSync(APP_FILE, "utf8");
       assertCheck(app.includes("primary-offer-cta"), "primary CTA class missing");
-      assertCheck(app.includes("secondary-offer-cta"), "secondary CTA class missing");
-      assertCheck(app.includes("downloadFinalDeliverablesReportPdf"), "secondary CTA must download the PDF directly");
-      assertCheck(!app.includes('className="secondary-offer-cta" onClick={() => navigate("/screen-12-email-capture")}'), "secondary CTA must not route to email capture");
-      return "both offer variants expose primary and secondary CTAs";
+      assertCheck(!app.includes("secondary-offer-cta"), "paid offer page must hide the secondary PDF download CTA");
+      assertCheck(!app.includes("Final Deliverables report PDF downloaded."), "paid offer page must not run direct PDF download state");
+      return "both offer variants expose only the primary paid-offer CTA";
     },
   },
   {
