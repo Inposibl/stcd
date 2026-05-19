@@ -176,7 +176,7 @@ export const RESPONDENT_SIDE_NEXT_ROUTES = Object.freeze({
 export const TRANSACTION_DETAIL_SECTIONS = Object.freeze([
   Object.freeze({
     id: "transactionRole",
-    label: "YOUR ROLE ON THIS TRANSACTION",
+    label: "TRANSACTION RESPONSIBILITY LEVEL",
     options: Object.freeze([
       Object.freeze({ title: "Partner or MD", value: "partner_md" }),
       Object.freeze({ title: "Manager or Director", value: "manager_director" }),
@@ -194,7 +194,7 @@ export const TRANSACTION_DETAIL_SECTIONS = Object.freeze([
   }),
   Object.freeze({
     id: "integrationTimeline",
-    label: "INTEGRATION TIMELINE",
+    label: "PLANNED INTEGRATION PACE",
     options: Object.freeze([
       Object.freeze({ title: "Accelerated", description: "0-90 days to full integration", value: "accelerated" }),
       Object.freeze({ title: "Standard", description: "90-180 days", value: "standard" }),

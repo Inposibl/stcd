@@ -1,6 +1,6 @@
 export const SCREEN_REGISTRY = Object.freeze([
   { id: "deal-context-acquisition-motive", title: "Deal Context / Acquisition Motive", route: "/start-diagnostic/deal-context" },
-  { id: "deal-context-transaction-details", title: "Tell us about this transaction", route: "/start-diagnostic/deal-context/details" },
+  { id: "deal-context-transaction-details", title: "Acquirer Transaction Context", route: "/start-diagnostic/deal-context/details" },
   { id: "screen-4-promise", title: "Promise and time anchor", route: "/screen-4-promise" },
   { id: "screen-5-acquirer-module", title: "Acquirer module", route: "/screen-5-acquirer-module" },
   { id: "screen-6-acquirer-submit", title: "Acquirer module submit", route: "/screen-6-acquirer-submit" },

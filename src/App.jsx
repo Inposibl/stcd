@@ -914,9 +914,9 @@ const DEAL_CONTEXT_MISSING_LABELS = Object.freeze({
   respondentAccessLevel: "Respondent access level",
   acquisitionMotive: "Acquisition motive",
   competitorPreservation: "Target system preservation",
-  transactionRole: "Your role on this transaction",
+  transactionRole: "Transaction responsibility level",
   firmTenure: "Your tenure at the firm",
-  integrationTimeline: "Integration timeline",
+  integrationTimeline: "Planned integration pace",
 });
 
 function dealContextFieldLabel(fieldId) {
@@ -1140,6 +1140,13 @@ function TransactionDetailsScreen({ session, setSession }) {
   const [error, setError] = useState("");
   const hasDealStartContext = Boolean(existingContext.dealType && existingContext.respondentSide);
   const canContinue = TRANSACTION_DETAIL_SECTIONS.every((section) => Boolean(form[section.id]));
+  const dealSummaryItems = [
+    ["Acquirer", existingContext.acquirerName ?? "Pending"],
+    ["Target", existingContext.targetName ?? "Pending"],
+    ["Deal type", optionTitle(DEAL_TYPE_OPTIONS, existingContext.dealType)],
+    ["Respondent side", optionTitle(RESPONDENT_SIDE_OPTIONS, existingContext.respondentSide)],
+    ["Respondent role", optionTitle(RESPONDENT_ROLE_OPTIONS, existingContext.respondentRole)],
+  ];
 
   function updateDetail(sectionId, value) {
     setForm((current) => ({ ...current, [sectionId]: value }));
@@ -1164,7 +1171,7 @@ function TransactionDetailsScreen({ session, setSession }) {
   if (!hasDealStartContext) {
     return (
       <main className="screen-shell flow-screen compact-flow">
-        <p className="eyebrow">DEAL CONTEXT SETUP</p>
+        <p className="eyebrow">ACQUIRER TRANSACTION CONTEXT</p>
         <h1>Deal and respondent context is required first</h1>
         <button type="button" onClick={() => navigate("/start-diagnostic/deal-context")}>Open Deal Context</button>
       </main>
@@ -1173,10 +1180,16 @@ function TransactionDetailsScreen({ session, setSession }) {
 
   return (
     <main className="screen-shell flow-screen compact-flow deal-context-screen">
-      <p className="eyebrow">DEAL CONTEXT SETUP</p>
+      <p className="eyebrow">ACQUIRER TRANSACTION CONTEXT</p>
       <form className="deal-context-form transaction-details-form" onSubmit={submit}>
         <section className="deal-context-intro">
-          <h1>Tell us about this transaction</h1>
+          <h1>Add acquirer transaction context</h1>
+        </section>
+
+        <section className="context-strip" aria-label="Confirmed deal and respondent context">
+          {dealSummaryItems.map(([label, value]) => (
+            <span key={label}>{label}: {value || "Pending"}</span>
+          ))}
         </section>
 
         {TRANSACTION_DETAIL_SECTIONS.map((section) => (
