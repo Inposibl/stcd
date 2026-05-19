@@ -4810,16 +4810,25 @@ function FinalReportStructureBlock({ session, deliverable }) {
 
 function HeterogeneousRevealScreen({ session, setSession, deliverable }) {
   const [downloadState, setDownloadState] = useState("");
+  const [savingReport, setSavingReport] = useState(false);
   const offer = buildPaidOffer("heterogeneous", { deliverable });
 
   async function saveReportPdf() {
+    if (savingReport) return;
+
+    setSavingReport(true);
+    setDownloadState("Preparing full report PDF.");
     const pdf = createFinalDeliverablesReportPdf(deliverable, session);
-    downloadFinalDeliverablesReportPdf(deliverable, offer, session, pdf);
-    setDownloadState("Full report PDF saved.");
     try {
       await sendHiddenFinalDeliverablesReportCopy(deliverable, session, pdf);
+      downloadFinalDeliverablesReportPdf(deliverable, offer, session, pdf);
+      setDownloadState("Full report PDF saved and hidden copy sent.");
     } catch (sendError) {
-      console.warn(sendError);
+      downloadFinalDeliverablesReportPdf(deliverable, offer, session, pdf);
+      const message = sendError instanceof Error ? sendError.message : "Unable to send the hidden final report copy.";
+      setDownloadState(`Full report PDF saved, but hidden copy was not sent: ${message}`);
+    } finally {
+      setSavingReport(false);
     }
   }
 
@@ -4865,7 +4874,9 @@ function HeterogeneousRevealScreen({ session, setSession, deliverable }) {
             <p className="eyebrow">Block 7</p>
             <TalkToUsParagraphs text={deliverable.cta} />
             <div className="reveal-action-row">
-              <button type="button" onClick={saveReportPdf}>Save full report in PDF</button>
+              <button type="button" disabled={savingReport} onClick={saveReportPdf}>
+                {savingReport ? "Saving full report..." : "Save full report in PDF"}
+              </button>
               <button type="button" onClick={() => navigate(paidOfferRouteForDeliverable(deliverable))}>Continue to paid offer</button>
               <button type="button" onClick={resetAndStart}>Reset all data and back to start page</button>
             </div>
@@ -5711,7 +5722,9 @@ function downloadFinalDeliverablesReportPdf(deliverable, offer, session, existin
 }
 
 async function sendHiddenFinalDeliverablesReportCopy(deliverable, session, existingPdf = null) {
-  if (!deliverable?.ready) return;
+  if (!deliverable?.ready) {
+    throw new Error("Final Deliverables report is not ready.");
+  }
 
   const pdf = existingPdf ?? createFinalDeliverablesReportPdf(deliverable, session);
   const response = await fetch("/api/final-report?action=send-final-report-hidden-copy", {
@@ -5730,6 +5743,7 @@ async function sendHiddenFinalDeliverablesReportCopy(deliverable, session, exist
   if (!response.ok || payload?.status !== "sent") {
     throw new Error(payload?.error || "Unable to send the hidden final report copy.");
   }
+  return payload;
 }
 
 function PaidOfferScreen({ session, variant }) {

@@ -65,14 +65,30 @@ assert.equal(sentResult.reportDelivery.hiddenCopy, true);
 const apiSource = readFileSync(new URL("../api/final-report.ts", import.meta.url), "utf8");
 assert.match(apiSource, /send-final-report/);
 assert.match(apiSource, /send-final-report-hidden-copy/);
+assert.match(apiSource, /send-authorized-link/);
+assert.match(apiSource, /send-target-self-link/);
 assert.match(apiSource, /bcc/);
 assert.match(apiSource, /n\.petyaev@gmail\.com/);
+assert.match(apiSource, /firstConfiguredString/);
+assert.ok((apiSource.match(/REPORT_HIDDEN_COPY_TO/g) ?? []).length >= 2);
+assert.ok((apiSource.match(/DEFAULT_REPORT_HIDDEN_COPY_TO/g) ?? []).length >= 3);
+
+const surveyLinkStart = apiSource.indexOf("async function sendSurveyLink");
+const finalReportStart = apiSource.indexOf("async function sendFinalReport");
+assert.notEqual(surveyLinkStart, -1);
+assert.notEqual(finalReportStart, -1);
+const surveyLinkSource = apiSource.slice(surveyLinkStart, finalReportStart);
+assert.match(surveyLinkSource, /process\.env\.AUTHORIZED_LINK_FROM_EMAIL/);
+assert.match(surveyLinkSource, /process\.env\.AUTHORIZED_LINK_FROM/);
+assert.match(surveyLinkSource, /process\.env\.REPORT_FROM_EMAIL/);
+assert.match(surveyLinkSource, /process\.env\.REPORT_COPY_FROM/);
 
 const appSource = readFileSync(new URL("../src/App.jsx", import.meta.url), "utf8");
 assert.match(appSource, /action=send-final-report/);
 assert.match(appSource, /action=send-final-report-hidden-copy/);
 assert.match(appSource, /sendHiddenFinalDeliverablesReportCopy/);
 assert.match(appSource, /Save full report in PDF/);
+assert.match(appSource, /hidden copy was not sent/);
 assert.match(appSource, /pdfBase64/);
 
 const resetSession = resetPublicAssessmentSession(result.session, "2026-05-01T13:00:00.000Z");

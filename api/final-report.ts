@@ -81,6 +81,14 @@ function cleanString(value: unknown) {
   return String(value ?? "").trim();
 }
 
+function firstConfiguredString(...values: unknown[]) {
+  for (const value of values) {
+    const cleanValue = cleanString(value);
+    if (cleanValue) return cleanValue;
+  }
+  return "";
+}
+
 function validPdfFileName(value: string) {
   return /^[A-Za-z0-9][A-Za-z0-9._ -]*\.pdf$/i.test(value);
 }
@@ -166,9 +174,12 @@ async function sendSurveyLink(
   }
 
   const apiKey = process.env.RESEND_API_KEY;
-  const from = process.env.AUTHORIZED_LINK_FROM_EMAIL
-    ?? process.env.AUTHORIZED_LINK_FROM
-    ?? process.env.REPORT_COPY_FROM;
+  const from = firstConfiguredString(
+    process.env.AUTHORIZED_LINK_FROM_EMAIL,
+    process.env.AUTHORIZED_LINK_FROM,
+    process.env.REPORT_FROM_EMAIL,
+    process.env.REPORT_COPY_FROM,
+  );
 
   if (!apiKey || !from) {
     sendJson(response, 503, {
@@ -260,11 +271,16 @@ async function sendFinalReport(request: NodeRequest, response: NodeResponse) {
   }
 
   const apiKey = process.env.RESEND_API_KEY;
-  const from = process.env.REPORT_FROM_EMAIL
-    ?? process.env.REPORT_COPY_FROM
-    ?? process.env.AUTHORIZED_LINK_FROM_EMAIL
-    ?? process.env.AUTHORIZED_LINK_FROM;
-  const hiddenCopyTo = normalizeEmail(process.env.REPORT_HIDDEN_COPY_TO ?? DEFAULT_REPORT_HIDDEN_COPY_TO);
+  const from = firstConfiguredString(
+    process.env.REPORT_FROM_EMAIL,
+    process.env.REPORT_COPY_FROM,
+    process.env.AUTHORIZED_LINK_FROM_EMAIL,
+    process.env.AUTHORIZED_LINK_FROM,
+  );
+  const hiddenCopyTo = normalizeEmail(firstConfiguredString(
+    process.env.REPORT_HIDDEN_COPY_TO,
+    DEFAULT_REPORT_HIDDEN_COPY_TO,
+  ));
   const bcc = EMAIL_PATTERN.test(hiddenCopyTo) && hiddenCopyTo !== recipientEmail ? [hiddenCopyTo] : undefined;
 
   if (!apiKey || !from) {
@@ -354,11 +370,16 @@ async function sendFinalReportHiddenCopy(request: NodeRequest, response: NodeRes
   }
 
   const apiKey = process.env.RESEND_API_KEY;
-  const from = process.env.REPORT_FROM_EMAIL
-    ?? process.env.REPORT_COPY_FROM
-    ?? process.env.AUTHORIZED_LINK_FROM_EMAIL
-    ?? process.env.AUTHORIZED_LINK_FROM;
-  const hiddenCopyTo = normalizeEmail(process.env.REPORT_HIDDEN_COPY_TO ?? DEFAULT_REPORT_HIDDEN_COPY_TO);
+  const from = firstConfiguredString(
+    process.env.REPORT_FROM_EMAIL,
+    process.env.REPORT_COPY_FROM,
+    process.env.AUTHORIZED_LINK_FROM_EMAIL,
+    process.env.AUTHORIZED_LINK_FROM,
+  );
+  const hiddenCopyTo = normalizeEmail(firstConfiguredString(
+    process.env.REPORT_HIDDEN_COPY_TO,
+    DEFAULT_REPORT_HIDDEN_COPY_TO,
+  ));
 
   if (!apiKey || !from || !EMAIL_PATTERN.test(hiddenCopyTo)) {
     sendJson(response, 503, {
