@@ -3810,177 +3810,6 @@ function PreliminaryAssessmentReport({ session }) {
 
   return (
     <section className="prelim-report" aria-label="Preliminary Assessment report">
-      <header className="prelim-report-header">
-        <p className="eyebrow">Preliminary Assessment</p>
-        <h2>Acquirer and Target Observation</h2>
-        <p>This report combines the acquirer's self-observation, the Target Observer signal, and the current target diagnostic signal.</p>
-      </header>
-
-      <div className="prelim-signal-grid">
-        <SignalCard title="Acquirer self-observation" score={acquirer?.score} answers={acquirer?.answers} count={answeredCount(acquirer, acquirerQuestionTotal)} meta={acquirerScoreBasis} />
-        <SignalCard title="Integration destination" score={acquirer?.score} answers={acquirer?.answers} count={answeredCount(acquirer, acquirerQuestionTotal)} meta={integrationTimeline} />
-        <SignalCard
-          title="Target observed by acquirer"
-          score={observation?.score}
-          answers={observation?.answers}
-          count={answeredCount(observation, 22)}
-          meta={observation?.outputContext?.observationPosition}
-        />
-        <SignalCard
-          title="Target current diagnostic L1"
-          score={target2B?.level1?.score}
-          answers={target2B?.level1?.answers}
-          count={answeredCount(target2B?.level1, 12)}
-        />
-        <SignalCard
-          title={target2B?.requiresLevel2 ? "Target current diagnostic L2" : "Target current diagnostic final"}
-          score={target2B?.requiresLevel2 ? target2B?.level2?.score : target2B?.finalScore}
-          answers={target2B?.requiresLevel2 ? target2B?.level2?.answers : target2B?.level1?.answers}
-          count={target2B?.requiresLevel2 ? answeredCount(target2B?.level2, 10) : answeredCount(target2B?.level1, 12)}
-          meta={target2B?.requiresLevel2 ? "Level 2 required by weak or co-present Level 1 signal" : "Level 2 not required"}
-        />
-        <SignalCard
-          title="Formal Target Environment Diagnostic"
-          score={targetSelf?.score}
-          answers={targetSelf?.answers}
-          count={answeredCount(targetSelf, 10)}
-          pending={!targetSelfReady}
-        />
-      </div>
-
-      <section className="prelim-section">
-        <div className="prelim-section-title">
-          <h3>Executive snapshot</h3>
-          <span>{targetSelfReady ? "Target self-assessment received" : "Target self-assessment pending"}</span>
-        </div>
-        <p><strong>Deal:</strong> {dealContext.acquirerName ?? "Acquirer pending"} acquiring {dealContext.targetName ?? "target pending"}.</p>
-        <p><strong>Deal type:</strong> {dealType}. <strong>Respondent:</strong> {respondentSide}; {respondentRole}; {respondentSeniority}; {respondentFunction}; {respondentAccessLevel}.</p>
-        <p><strong>Acquisition motive:</strong> {motive}. The preliminary read is based on the buyer's current operating environment and target-side evidence.</p>
-        <p><strong>Acquirer environment:</strong> {acquirerAlias}.</p>
-        <p><strong>Acquirer score basis:</strong> {acquirerScoreBasis}. This is the acquirer environment used in the compatibility calculation against the Target environment.</p>
-        {lowerAcquirerAccuracy ? (
-          <p><strong>Estimation accuracy:</strong> Poorer than verified because the acquirer environment is still based on a weak single-respondent signal. The final report remains usable, but the acquirer-side interpretation should be treated as preliminary until a second acquirer response is merged.</p>
-        ) : null}
-        <p><strong>Target observed environment:</strong> {observedAlias}.</p>
-        <p><strong>Target current diagnostic:</strong> {targetCurrentAlias}.</p>
-        <p><strong>Formal target environment:</strong> {formalTargetAlias}.</p>
-        <p><strong>Respondent context:</strong> {transactionRole}; {firmTenure}; {observation?.outputContext?.respondentContext ?? "Target observer context pending"}.</p>
-      </section>
-
-      <section className="prelim-section">
-        <div className="prelim-section-title">
-          <h3>Target reconciliation</h3>
-          <span>{comparisonStatus(target2B?.finalScore?.primaryEnvironmentCode, targetSelf?.score?.primaryEnvironmentCode, "Self-description pending")}</span>
-        </div>
-        <div className="prelim-reconciliation-grid">
-          <div><span>Observed target</span><strong>{observedAlias}</strong><em>{comparisonStatus(observation?.score?.topEnvironmentCode, target2B?.finalScore?.primaryEnvironmentCode)}</em></div>
-          <div><span>Target current</span><strong>{targetCurrentAlias}</strong><em>Observer diagnostic</em></div>
-          <div><span>Formal target</span><strong>{formalTargetAlias}</strong><em>{targetSelfReady ? "Target self-description" : "Awaiting response"}</em></div>
-        </div>
-      </section>
-
-      <section className="prelim-section triage-section">
-        <div className="prelim-section-title">
-          <h3>Triage routing</h3>
-          <span>{publicReportText(triageReport.routing.label)}</span>
-        </div>
-        <div className="triage-summary-grid">
-          <div>
-            <span>Effective tier</span>
-            <strong>{triageTierLabel(triageReport.effectiveTier)}</strong>
-          </div>
-          <div>
-            <span>Reliability tier</span>
-            <strong>{triageTierLabel(triageReport.reliabilityTier)}</strong>
-          </div>
-          <div>
-            <span>Contradiction tier</span>
-            <strong>{triageTierLabel(triageReport.contradictionTier)}</strong>
-          </div>
-          <div>
-            <span>Report gate</span>
-            <strong>{publicReportText(triageReport.routing.gateLabel)}</strong>
-          </div>
-        </div>
-        <p><strong>Instrument action:</strong> {publicReportText(triageReport.instrumentAction)}</p>
-        {triageTriggers.length > 0 ? (
-          <div className="triage-trigger-grid">
-            {triageTriggers.map((trigger) => (
-              <article className={`triage-trigger-card severity-${trigger.severity}`} key={trigger.id}>
-                <span>{triageTierLabel(trigger.severity)}</span>
-                <strong>{publicReportText(trigger.label)}</strong>
-                <p>{publicReportText(trigger.meaning)}</p>
-                <small>{publicReportText(trigger.action)}</small>
-              </article>
-            ))}
-          </div>
-        ) : (
-          <p>No formal triage trigger is active. The case still proceeds through analyst review because final interpretation must not be based on raw questionnaire answers alone.</p>
-        )}
-        <div className="triage-check-grid">
-          {triageChecks.map((check) => (
-            <div className={`triage-check ${check.status}`} key={check.id}>
-              <span>{triageCheckLabel(check.status)}</span>
-              <strong>{check.label}</strong>
-              <p>{publicReportText(check.result)}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="prelim-section">
-        <div className="prelim-section-title">
-          <h3>Contradiction review</h3>
-          <span>{contradictionSummary.findingCount > 0 ? contradictionSummaryLabel : "No material contradiction"}</span>
-        </div>
-        <div className="contradiction-summary-grid">
-          <div>
-            <span>Contradictions</span>
-            <strong>{contradictionSummary.contradictionCount}</strong>
-          </div>
-          <div>
-            <span>Reliability risks</span>
-            <strong>{contradictionSummary.reliabilityRiskCount}</strong>
-          </div>
-          <div>
-            <span>Evidence gaps</span>
-            <strong>{contradictionSummary.missingEvidenceCount}</strong>
-          </div>
-        </div>
-        {contradictionFindings.length > 0 ? (
-          <div className="contradiction-grid">
-            {contradictionFindings.map((finding) => {
-              const signalLine = findingSignalLine(finding);
-              const metricLine = findingMetricLine(finding);
-              return (
-                <article className={`contradiction-card severity-${finding.severity}`} key={finding.id}>
-                  <span>{contradictionSeverityLabel(finding.severity)} / {contradictionTypeLabel(finding.type)}</span>
-                  <strong>{publicReportText(finding.title)}</strong>
-                  <p>{publicReportText(finding.explanation)}</p>
-                  {signalLine ? <small>{signalLine}</small> : null}
-                  {metricLine ? <small>{metricLine}</small> : null}
-                </article>
-              );
-            })}
-          </div>
-        ) : (
-          <p>No material contradiction is detected in the submitted evidence. This does not mean there is no deal risk; it means the current role-specific evidence has not produced a visible disagreement or reliability threshold breach.</p>
-        )}
-      </section>
-
-      <section className="prelim-section">
-        <div className="prelim-section-title">
-          <h3>FinECS engine</h3>
-          <span>{deliverable.ready ? publicText(deliverable.riskBand) : "Pending"}</span>
-        </div>
-        <div className="prelim-engine-grid">
-          <div><span>Acquirer current</span><strong>{acquirerAlias}</strong></div>
-          <div><span>Target current</span><strong>{targetCurrentAlias}</strong></div>
-          <div><span>Observed target</span><strong>{observedAlias}</strong></div>
-          <div><span>Formal target</span><strong>{formalTargetAlias}</strong></div>
-        </div>
-      </section>
-
       {deliverable.ready ? (
         <section className="prelim-section prelim-ecs-output">
           <div className="prelim-section-title">
@@ -4667,9 +4496,6 @@ function PreliminaryTargetGateScreen({ session, setSession }) {
       {preliminary?.completed ? (
         <>
           <PreliminaryAssessmentReport session={session} />
-          <EvidenceCapturePanel session={session} setSession={setSession} />
-          <AnalystWorksheetPanel session={session} setSession={setSession} />
-          <RiskOutputPanel session={session} />
         </>
       ) : (
         <section className="invite-panel">
@@ -4745,18 +4571,6 @@ function PreliminaryTargetGateScreen({ session, setSession }) {
         </section>
       ) : null}
 
-      {targetSelfComplete ? (
-        <section className="result-panel">
-          <strong>Target self-assessment received.</strong>
-          <span>The Preliminary Assessment can now be reconciled against the target respondent's self-description.</span>
-          <span>Final deliverables are unlocked for the Acquirer. Use Open Final Deliverables to continue.</span>
-        </section>
-      ) : null}
-
-      <div className="button-row">
-        <button type="button" onClick={resetAssessment}>Reset All Data</button>
-        {targetSelfComplete ? <button type="button" onClick={() => navigate("/screen-10-reveal")}>Open Final Deliverables</button> : null}
-      </div>
     </main>
   );
 }
