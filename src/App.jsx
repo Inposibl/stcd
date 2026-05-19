@@ -3770,6 +3770,7 @@ function PreliminaryAssessmentReport({ session }) {
     targetSignalStrength: targetScore?.signalStrength,
     targetCoPresence: targetScore?.coPresence,
   });
+  const finalDeliverable = buildFinalDeliverable(session);
   const acquirerAlias = scoreAlias(acquirer?.score);
   const acquirerRespondentCount = acquirer?.score?.respondentCount ?? 1;
   const acquirerQuestionTotal = acquirerRespondentCount * ACQUIRER_TRACK_DATA.acquirerModule.questionCount;
@@ -3886,6 +3887,11 @@ function PreliminaryAssessmentReport({ session }) {
             <p>{publicReportText(nextStepText)}</p>
           </article>
         </div>
+        {finalDeliverable.ready ? (
+          <div className="button-row">
+            <button type="button" onClick={() => navigate(finalDeliverable.route)}>Go to final report page</button>
+          </div>
+        ) : null}
       </section>
     </section>
   );
