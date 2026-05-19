@@ -87,13 +87,14 @@ import {
   attachConsultationRequest,
 } from "./flow/consultationFlow.js";
 import {
-  CONFIDENCE_LEVEL_OPTIONS,
   DIRECT_OBSERVATION_GATE_OPTIONS,
-  EVIDENCE_TYPE_OPTIONS,
-  KNOWLEDGE_LEVEL_OPTIONS,
   RELIABILITY_FLAG_OPTIONS,
+  confidenceOptionsForClassification,
+  evidenceTypeOptionsForGate,
+  knowledgeLevelOptionsForGate,
   normalizeEvidenceAnswer,
   selectedOptionValue,
+  showReliabilityFlagsForGate,
   toggleReliabilityFlag,
   updateEvidenceAnswer,
   validateEvidenceClassifiedAnswer,
@@ -1434,6 +1435,10 @@ function EvidenceClassificationPanel({ answer, onChange, showDirectObservation =
   const unknownAnswer = normalized.evidenceType === "unknown"
     && normalized.knowledgeLevel === "not_known"
     && normalized.confidence === "cannot_determine";
+  const evidenceTypeOptions = evidenceTypeOptionsForGate(normalized.directObservationGate);
+  const knowledgeLevelOptions = knowledgeLevelOptionsForGate(normalized.directObservationGate);
+  const confidenceOptions = confidenceOptionsForClassification(normalized.directObservationGate, normalized.evidenceType);
+  const showReliabilityFlags = showReliabilityFlagsForGate(normalized.directObservationGate);
 
   if (unknownAnswer) {
     return (
@@ -1474,7 +1479,7 @@ function EvidenceClassificationPanel({ answer, onChange, showDirectObservation =
             onChange={(event) => updateField("evidenceType", event.target.value)}
           >
             <option value="">Select evidence type</option>
-            {EVIDENCE_TYPE_OPTIONS.map((option) => (
+            {evidenceTypeOptions.map((option) => (
               <option key={option.value} value={option.value}>{option.title}</option>
             ))}
           </select>
@@ -1486,7 +1491,7 @@ function EvidenceClassificationPanel({ answer, onChange, showDirectObservation =
             onChange={(event) => updateField("knowledgeLevel", event.target.value)}
           >
             <option value="">Select knowledge level</option>
-            {KNOWLEDGE_LEVEL_OPTIONS.map((option) => (
+            {knowledgeLevelOptions.map((option) => (
               <option key={option.value} value={option.value}>{option.title}</option>
             ))}
           </select>
@@ -1498,35 +1503,37 @@ function EvidenceClassificationPanel({ answer, onChange, showDirectObservation =
             onChange={(event) => updateField("confidence", event.target.value)}
           >
             <option value="">Select confidence</option>
-            {CONFIDENCE_LEVEL_OPTIONS.map((option) => (
+            {confidenceOptions.map((option) => (
               <option key={option.value} value={option.value}>{option.title}</option>
             ))}
           </select>
         </label>
       </div>
-      <fieldset className="reliability-flag-fieldset">
-        <legend>Reliability flags</legend>
-        <div className="reliability-flag-grid">
-          <label className="reliability-flag-option reliability-flag-none">
-            <input
-              checked={noFlagsSelected}
-              onChange={toggleNoFlags}
-              type="checkbox"
-            />
-            <span>No reliability flags apply</span>
-          </label>
-          {RELIABILITY_FLAG_OPTIONS.map((flag) => (
-            <label key={flag.value} className="reliability-flag-option">
+      {showReliabilityFlags ? (
+        <fieldset className="reliability-flag-fieldset">
+          <legend>Reliability flags</legend>
+          <div className="reliability-flag-grid">
+            <label className="reliability-flag-option reliability-flag-none">
               <input
-                checked={normalized.reliabilityFlags.includes(flag.value)}
-                onChange={() => toggleFlag(flag.value)}
+                checked={noFlagsSelected}
+                onChange={toggleNoFlags}
                 type="checkbox"
               />
-              <span>{flag.title}</span>
+              <span>No reliability flags apply</span>
             </label>
-          ))}
-        </div>
-      </fieldset>
+            {RELIABILITY_FLAG_OPTIONS.map((flag) => (
+              <label key={flag.value} className="reliability-flag-option">
+                <input
+                  checked={normalized.reliabilityFlags.includes(flag.value)}
+                  onChange={() => toggleFlag(flag.value)}
+                  type="checkbox"
+                />
+                <span>{flag.title}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      ) : null}
     </section>
   );
 }
