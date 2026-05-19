@@ -4758,6 +4758,10 @@ function ProtocolDealInsightsBlock({ deliverable }) {
   );
 }
 
+function paidOfferRouteForDeliverable(deliverable) {
+  return deliverable?.screen === "screen-10b" ? "/screen-11b-homogeneous-offer" : "/screen-11-paid-offer";
+}
+
 function FinalRiskOutputBlock({ session }) {
   const riskOutputReport = riskOutputReportForSession(session);
   const activeOutputs = riskOutputReport.rankedOutputs.slice(0, 10);
@@ -4862,6 +4866,7 @@ function HeterogeneousRevealScreen({ session, setSession, deliverable }) {
             <TalkToUsParagraphs text={deliverable.cta} />
             <div className="reveal-action-row">
               <button type="button" onClick={saveReportPdf}>Save full report in PDF</button>
+              <button type="button" onClick={() => navigate(paidOfferRouteForDeliverable(deliverable))}>Continue to paid offer</button>
               <button type="button" onClick={resetAndStart}>Reset all data and back to start page</button>
             </div>
             {downloadState ? <p className="source-note">{downloadState}</p> : null}
@@ -4891,7 +4896,7 @@ function HomogeneousRevealScreen({ session, deliverable }) {
       <FinalReportStructureBlock session={session} deliverable={deliverable} />
       <section className="reveal-block cta-block">
         <Paragraphs text={deliverable.cta} />
-        <button type="button" onClick={() => navigate("/screen-11b-homogeneous-offer")}>Continue</button>
+        <button type="button" onClick={() => navigate(paidOfferRouteForDeliverable(deliverable))}>Continue</button>
       </section>
     </main>
   );
@@ -5808,7 +5813,7 @@ function EmailCaptureScreen({ session, setSession }) {
           <span>Reference: {delivery.reportId}</span>
         </section>
         <div className="button-row">
-          <button type="button" onClick={() => navigate("/screen-11-paid-offer")}>Open paid offer</button>
+          <button type="button" onClick={() => navigate(paidOfferRouteForDeliverable(buildFinalDeliverable(session)))}>Open paid offer</button>
           <button type="button" onClick={() => navigate("/")}>Start new diagnostic</button>
         </div>
       </main>
