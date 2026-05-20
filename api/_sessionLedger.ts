@@ -15,6 +15,7 @@ import { TARGET_DIAGNOSTIC_DATA } from "../src/data/targetDiagnosticData.js";
 
 const TARGET_INVITE_TTL_HOURS = 72;
 const TARGET_OBSERVATION_SESSION_TTL_SECONDS = 259200;
+const REDIS_REST_TIMEOUT_MS = 4000;
 
 type SessionRecord = {
   sessionId: string;
@@ -128,6 +129,8 @@ async function redisCommand(command: unknown[], failureStatus: string) {
   const config = storageConfig();
   if (!config) return null;
 
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), REDIS_REST_TIMEOUT_MS);
   let response: Response;
   try {
     response = await fetch(config.url, {
@@ -137,12 +140,21 @@ async function redisCommand(command: unknown[], failureStatus: string) {
         "content-type": "application/json",
       },
       body: JSON.stringify(command),
+      signal: controller.signal,
     });
   } catch (error) {
+    const aborted = typeof error === "object"
+      && error !== null
+      && "name" in error
+      && (error as { name?: unknown }).name === "AbortError";
     throw new SessionLedgerStorageError(
       failureStatus,
-      error instanceof Error ? error.message : "Target Observation persistent storage request failed.",
+      aborted
+        ? `Target Observation persistent storage request timed out after ${REDIS_REST_TIMEOUT_MS} ms.`
+        : error instanceof Error ? error.message : "Target Observation persistent storage request failed.",
     );
+  } finally {
+    clearTimeout(timeout);
   }
 
   const payload = await response.json().catch(() => null);
