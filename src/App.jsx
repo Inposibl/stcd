@@ -1635,7 +1635,7 @@ function AcquirerModuleScreen({ session, setSession }) {
         />
         <div className="option-list">
           {question.options.map((option) => (
-            <label key={option.value} className="option-row">
+            <label key={`${question.id}-${option.value}`} className="option-row">
               <input
                 checked={selectedAnswer === option.value}
                 name={question.id}
@@ -1882,7 +1882,7 @@ function AcquirerVerificationQuestionnaire({ onComplete }) {
         />
         <div className="option-list">
           {question.options.map((option) => (
-            <label key={option.value} className="option-row">
+            <label key={`${question.id}-${option.value}`} className="option-row">
               <input
                 checked={selectedAnswer === option.value}
                 name={question.id}
@@ -2498,7 +2498,7 @@ function TargetObservationQuestionnaire({ answers, setAnswers, setup, onComplete
         />
         <div className="option-list">
           {question.options.map((option) => (
-            <label key={option.value} className="option-row">
+            <label key={`${question.id}-${option.value}`} className="option-row">
               <input
                 checked={selectedAnswer === option.value}
                 name={question.id}
@@ -2574,7 +2574,7 @@ function ReadOnlyTargetObservationReview({ session }) {
           {question.options.map((option) => {
             const selected = selectedAnswer === option.value;
             return (
-              <label key={option.value} className={selected ? "option-row read-only-selected" : "option-row"}>
+              <label key={`${question.id}-${option.value}`} className={selected ? "option-row read-only-selected" : "option-row"}>
                 <input
                   checked={selected}
                   disabled
@@ -2700,7 +2700,7 @@ function TargetObserverDiagnosticSurvey({ baseSession, onComplete, completionPen
           />
           <div className="option-list">
             {question.options.map((option) => (
-              <label key={option.value} className="option-row">
+              <label key={`${question.id}-${option.value}`} className="option-row">
                 <input
                   checked={selectedAnswer === option.value}
                   name={`${phase}-${question.id}`}
@@ -3046,7 +3046,7 @@ function Step2BLevel1Screen({ session, setSession }) {
         />
         <div className="option-list">
           {question.options.map((option) => (
-            <label key={option.value} className="option-row">
+            <label key={`${question.id}-${option.value}`} className="option-row">
               <input
                 checked={selectedAnswer === option.value}
                 name={question.id}
@@ -3207,7 +3207,7 @@ function Step2BLevel2Screen({ session, setSession }) {
         />
         <div className="option-list">
           {question.options.map((option) => (
-            <label key={option.value} className="option-row">
+            <label key={`${question.id}-${option.value}`} className="option-row">
               <input
                 checked={selectedAnswer === option.value}
                 name={question.id}
@@ -3430,7 +3430,7 @@ function TargetSelfAssessmentSurvey({ session, setSession, invite = null }) {
           />
           <div className="option-list">
             {question.options.map((option) => (
-              <label key={option.value} className="option-row">
+              <label key={`${question.id}-${option.value}`} className="option-row">
                 <input
                   checked={selectedAnswer === option.value}
                   name={question.id}
