@@ -89,6 +89,24 @@ function firstConfiguredString(...values: unknown[]) {
   return "";
 }
 
+function sanitizeEmailProviderError(value: unknown) {
+  let message = "";
+  if (value instanceof Error) {
+    message = value.message;
+  } else if (typeof value === "string") {
+    message = value;
+  } else if (typeof value === "object" && value) {
+    const body = value as { message?: unknown; error?: unknown; name?: unknown };
+    message = cleanString(body.message ?? body.error ?? body.name);
+  }
+
+  return (message || "E-mail provider request failed")
+    .replace(/[^\s@]+@[^\s@]+\.[^\s@]+/g, "[redacted-email]")
+    .replace(/https?:\/\/[^\s"')]+/g, "[redacted-url]")
+    .replace(/\b\d{6}\b/g, "[redacted-code]")
+    .slice(0, 300);
+}
+
 function validPdfFileName(value: string) {
   return /^[A-Za-z0-9][A-Za-z0-9._ -]*\.pdf$/i.test(value);
 }
@@ -204,28 +222,58 @@ async function sendSurveyLink(
     `<p><strong>Expires at:</strong> ${escapeHtml(expiresAt)}</p>`,
   ].join("");
 
-  const providerResponse = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      authorization: `Bearer ${apiKey}`,
-      "content-type": "application/json",
-    },
-    body: JSON.stringify({
-      from,
-      to: [recipientEmail],
-      subject: options.subject,
-      text,
-      html,
-    }),
-  });
+  const action = cleanString(params.get("action")) || cleanString(options.endpoint.split("action=").at(1));
+  let providerResponse: Response;
+  let providerBody: any;
 
-  const providerBody = await providerResponse.json().catch(() => null);
+  try {
+    providerResponse = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${apiKey}`,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        from,
+        to: [recipientEmail],
+        subject: options.subject,
+        text,
+        html,
+      }),
+    });
+    providerBody = await providerResponse.json();
+  } catch (error) {
+    const sanitizedError = sanitizeEmailProviderError(error);
+    console.error("Survey link e-mail send failed", {
+      endpoint: options.endpoint,
+      action,
+      error: sanitizedError,
+    });
+    sendJson(response, 502, {
+      endpoint: options.endpoint,
+      status: "email-send-failed",
+      action,
+      error: sanitizedError,
+    });
+    return;
+  }
+
   if (!providerResponse.ok) {
+    const sanitizedError = sanitizeEmailProviderError(
+      providerBody?.message ?? providerBody?.error ?? `Resend returned HTTP ${providerResponse.status}`,
+    );
+    console.error("Survey link e-mail provider rejected request", {
+      endpoint: options.endpoint,
+      action,
+      providerStatus: providerResponse.status,
+      error: sanitizedError,
+    });
     sendJson(response, 502, {
       endpoint: options.endpoint,
       status: "email-provider-error",
       providerStatus: providerResponse.status,
-      error: providerBody?.message ?? "Resend rejected the e-mail request",
+      action,
+      error: sanitizedError,
     });
     return;
   }
