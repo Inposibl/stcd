@@ -1,6 +1,18 @@
 import { isSessionLedgerStorageError, targetObservationState } from "./_sessionLedger.js";
 
-export default async function handler(req, res) {
+type NodeApiRequest = {
+  method: string;
+  url: string;
+  body?: unknown;
+};
+
+type NodeApiResponse = {
+  status(statusCode: number): {
+    json(body: unknown): unknown;
+  };
+};
+
+export default async function handler(req: NodeApiRequest, res: NodeApiResponse) {
   if (req.method !== "GET") {
     return res.status(405).json({
       status: "method-not-allowed",

@@ -34,7 +34,11 @@ function functionSection(source, functionName) {
 function routeHasNodeResponseContract(path) {
   const source = read(path);
   const label = path;
-  assert.match(source, /export default async function handler\(req,\s*res\)/, `${label} must use handler(req, res)`);
+  assert.match(
+    source,
+    /export default async function handler\(\s*req(?:\s*:\s*NodeApiRequest)?\s*,\s*res(?:\s*:\s*NodeApiResponse)?\s*\)/,
+    `${label} must use handler(req, res) or typed NodeApiRequest/NodeApiResponse parameters`,
+  );
   assert.match(source, /res\.status\([^)]*\)\.json\(/, `${label} must send JSON through res.status(...).json(...)`);
   assert.equal(source.includes("jsonResponse"), false, `${label} must not use jsonResponse`);
   assert.equal(source.includes("methodNotAllowed"), false, `${label} must not use methodNotAllowed`);

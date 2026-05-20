@@ -1,6 +1,18 @@
 import { isSessionLedgerStorageError, saveTargetObservationCompletion } from "./_sessionLedger.js";
 
-function parseNodeBody(req) {
+type NodeApiRequest = {
+  method: string;
+  url: string;
+  body?: unknown;
+};
+
+type NodeApiResponse = {
+  status(statusCode: number): {
+    json(body: unknown): unknown;
+  };
+};
+
+function parseNodeBody(req: NodeApiRequest) {
   if (typeof req.body === "string") {
     try {
       return JSON.parse(req.body);
@@ -12,7 +24,7 @@ function parseNodeBody(req) {
   return typeof req.body === "object" && req.body ? req.body : null;
 }
 
-export default async function handler(req, res) {
+export default async function handler(req: NodeApiRequest, res: NodeApiResponse) {
   if (req.method !== "POST") {
     return res.status(405).json({
       status: "method-not-allowed",
