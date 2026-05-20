@@ -3,7 +3,7 @@
     "id": "newlogic-2026-05-03",
     "name": "NewLogic 03.05.2026",
     "path": "NewLogic 03.05.2026",
-    "exportedAt": "2026-05-09T13:50:27.386921+00:00"
+    "exportedAt": "2026-05-20T21:49:03.717255+00:00"
   },
   "environmentAliases": {
     "NF/NT": "The Idea Lab",
@@ -20,7 +20,7 @@
     {
       "file": "ST_Acquirer_Environment_Module.xlsx",
       "sizeBytes": 42888,
-      "lastModified": "2026-05-09T12:07:54.240213+00:00",
+      "lastModified": "2026-05-06T15:25:52.499565+00:00",
       "sheets": [
         "0_Instructions",
         "1_Respondent_Metadata",
@@ -36,7 +36,7 @@
     {
       "file": "ST_Analyst_Methodology.xlsx",
       "sizeBytes": 42611,
-      "lastModified": "2026-05-09T12:07:54.240213+00:00",
+      "lastModified": "2026-05-06T15:25:52.589903+00:00",
       "sheets": [
         "0_Index",
         "1_Three_Layer_Architecture",
@@ -56,7 +56,7 @@
     {
       "file": "ST_B_Single_Output_Template_v1.xlsx",
       "sizeBytes": 63692,
-      "lastModified": "2026-05-09T12:07:54.246719+00:00",
+      "lastModified": "2026-05-06T15:25:52.609741+00:00",
       "sheets": [
         "0_Index",
         "1_Executive_Summary",
@@ -85,7 +85,7 @@
     {
       "file": "ST_Canonical_Schema.xlsx",
       "sizeBytes": 49008,
-      "lastModified": "2026-05-09T12:07:54.247421+00:00",
+      "lastModified": "2026-05-06T15:25:52.652230+00:00",
       "sheets": [
         "0_Index",
         "1_Sides",
@@ -112,7 +112,7 @@
     {
       "file": "ST_Client_Journey_v5.xlsx",
       "sizeBytes": 21070,
-      "lastModified": "2026-05-09T12:07:54.247421+00:00",
+      "lastModified": "2026-05-06T15:25:52.437147+00:00",
       "sheets": [
         "Client Journey",
         "v3_1_Build_Notes",
@@ -122,7 +122,7 @@
     {
       "file": "ST_Dual_Respondent_Axis_Comparison_v1.xlsx",
       "sizeBytes": 40817,
-      "lastModified": "2026-05-09T12:07:54.247421+00:00",
+      "lastModified": "2026-05-06T15:25:52.638464+00:00",
       "sheets": [
         "0_Index",
         "1_Answer_Env_Map",
@@ -140,7 +140,7 @@
     {
       "file": "ST_Environment_Diagnostic_v2.xlsx",
       "sizeBytes": 54609,
-      "lastModified": "2026-05-09T12:07:54.247421+00:00",
+      "lastModified": "2026-05-06T15:25:52.459894+00:00",
       "sheets": [
         "0_Instructions",
         "1_Respondent_Metadata",
@@ -157,7 +157,7 @@
     {
       "file": "ST_Form_Binding_Prompt.xlsx",
       "sizeBytes": 60478,
-      "lastModified": "2026-05-09T12:07:54.253531+00:00",
+      "lastModified": "2026-05-06T15:25:52.533347+00:00",
       "sheets": [
         "MASTER PROMPT",
         "STEP-1",
@@ -173,7 +173,7 @@
     {
       "file": "ST_Free_Tier_Output_Narratives_updated.xlsx",
       "sizeBytes": 49155,
-      "lastModified": "2026-05-09T12:07:54.254392+00:00",
+      "lastModified": "2026-05-06T15:25:52.624350+00:00",
       "sheets": [
         "Implementation_Guide",
         "All_72_Narratives",
@@ -186,7 +186,7 @@
     {
       "file": "ST_Friction_Point_Lookup_updated.xlsx",
       "sizeBytes": 49704,
-      "lastModified": "2026-05-09T12:07:54.254392+00:00",
+      "lastModified": "2026-05-06T15:25:52.575979+00:00",
       "sheets": [
         "Friction_Lookup",
         "ECS_Matrix",
@@ -198,7 +198,7 @@
     {
       "file": "ST_Prediction_Ledger_v1.xlsx",
       "sizeBytes": 33512,
-      "lastModified": "2026-05-09T12:07:54.254392+00:00",
+      "lastModified": "2026-05-06T15:25:52.666221+00:00",
       "sheets": [
         "PROVENANCE",
         "SEALED_PREDICTIONS",
@@ -214,7 +214,7 @@
     {
       "file": "ST_Step3_Output_Screens_Spec.xlsx",
       "sizeBytes": 39029,
-      "lastModified": "2026-05-09T12:07:54.254392+00:00",
+      "lastModified": "2026-05-06T15:25:52.562094+00:00",
       "sheets": [
         "0_Index",
         "SCREEN_1_WEAK_RESULT",
@@ -225,8 +225,8 @@
     },
     {
       "file": "ST_Target_Observed_Environment_Diagnostic.xlsx",
-      "sizeBytes": 56420,
-      "lastModified": "2026-05-09T12:07:54.254392+00:00",
+      "sizeBytes": 56070,
+      "lastModified": "2026-05-20T21:48:42.898705+00:00",
       "sheets": [
         "README",
         "0_Respondent_Metadata",
@@ -244,7 +244,7 @@
     {
       "file": "ST_Target_Self_Assessment_Module.xlsx",
       "sizeBytes": 46609,
-      "lastModified": "2026-05-09T12:07:54.261189+00:00",
+      "lastModified": "2026-05-06T15:25:52.548419+00:00",
       "sheets": [
         "0_Instructions",
         "1_Respondent_Metadata",
@@ -261,7 +261,7 @@
     {
       "file": "ST_Triage_Framework.xlsx",
       "sizeBytes": 38487,
-      "lastModified": "2026-05-09T12:07:54.261189+00:00",
+      "lastModified": "2026-05-06T15:25:52.485676+00:00",
       "sheets": [
         "0_Index",
         "1_Trigger_Conditions",

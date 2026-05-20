@@ -8134,7 +8134,7 @@
           "secondaryDomain": "Authority Signal",
           "legacyEvidenceType": "Management meetings \u00b7 Negotiation behavior",
           "surveyDesignNote": "Covers how authority and evidence interact in decisions. Four options are mutually exclusive and capture distinct environment signals.",
-          "directObservationGate": "",
+          "directObservationGate": "Direct Observation Gate (v3.1) \u2014 Did your diligence team produce direct, observable evidence on this dimension?",
           "answerFields": {
             "evidenceType": "",
             "knowledgeLevel": "",
@@ -8244,7 +8244,7 @@
           "secondaryDomain": "Retention Signal",
           "legacyEvidenceType": "Compensation data \u00b7 Org chart \u00b7 Promotion/retention data",
           "surveyDesignNote": "Promotion pattern is one of the most diagnostic signals for environment type. Options cover four distinct logics.",
-          "directObservationGate": "",
+          "directObservationGate": "Direct Observation Gate (v3.1) \u2014 Did your diligence team produce direct, observable evidence on this dimension?",
           "answerFields": {
             "evidenceType": "",
             "knowledgeLevel": "",
@@ -8354,7 +8354,7 @@
           "secondaryDomain": "Capital Deployment",
           "legacyEvidenceType": "Data room \u00b7 Financial model \u00b7 KPI history",
           "surveyDesignNote": "Resource allocation reveals revealed preference, not stated values. Options are operationally distinct.",
-          "directObservationGate": "",
+          "directObservationGate": "Direct Observation Gate (v3.1) \u2014 Did your diligence team produce direct, observable evidence on this dimension?",
           "answerFields": {
             "evidenceType": "",
             "knowledgeLevel": "",
@@ -8464,7 +8464,7 @@
           "secondaryDomain": "Dissent Response",
           "legacyEvidenceType": "Management meetings \u00b7 Negotiation behavior \u00b7 Bad-news episode",
           "surveyDesignNote": "Conflict resolution pattern distinguishes NT/STJ (procedural), NF/NT (intellectual), NF/SFJ (moral suppression), STJ/STP (power).",
-          "directObservationGate": "",
+          "directObservationGate": "Direct Observation Gate (v3.1) \u2014 Did your diligence team produce direct, observable evidence on this dimension?",
           "answerFields": {
             "evidenceType": "",
             "knowledgeLevel": "",
@@ -8574,7 +8574,7 @@
           "secondaryDomain": "Leadership Behavior",
           "legacyEvidenceType": "Management meetings \u00b7 Founder interview",
           "surveyDesignNote": "Authority demonstration is a key environment marker. Options are behaviorally grounded and mutually exclusive.",
-          "directObservationGate": "",
+          "directObservationGate": "Direct Observation Gate (v3.1) \u2014 Did your diligence team produce direct, observable evidence on this dimension?",
           "answerFields": {
             "evidenceType": "",
             "knowledgeLevel": "",
@@ -8684,7 +8684,7 @@
           "secondaryDomain": "Accountability Signal",
           "legacyEvidenceType": "Management meetings \u00b7 Financial model \u00b7 Bad-news episode",
           "surveyDesignNote": "Failure response directly reveals whether environment is performance-accountable, experimental, relational, or coercive.",
-          "directObservationGate": "",
+          "directObservationGate": "Direct Observation Gate (v3.1) \u2014 Did your diligence team produce direct, observable evidence on this dimension?",
           "answerFields": {
             "evidenceType": "",
             "knowledgeLevel": "",
@@ -8794,7 +8794,7 @@
           "secondaryDomain": "Belonging Signal",
           "legacyEvidenceType": "Employee interviews \u00b7 Functional leader interviews",
           "surveyDesignNote": "Trust basis is highly diagnostic. Options cover the four dominant belonging logics across the environment spectrum.",
-          "directObservationGate": "",
+          "directObservationGate": "Direct Observation Gate (v3.1) \u2014 Did your diligence team produce direct, observable evidence on this dimension?",
           "answerFields": {
             "evidenceType": "",
             "knowledgeLevel": "",
@@ -8904,7 +8904,7 @@
           "secondaryDomain": "Operational Cadence",
           "legacyEvidenceType": "Process documentation \u00b7 KPI history \u00b7 Data room",
           "surveyDesignNote": "Execution pattern distinguishes NT/STP (iteration), SFP/SFJ (system compliance), SFJ/SFP (relational), NT/STJ (structured metrics).",
-          "directObservationGate": "",
+          "directObservationGate": "Direct Observation Gate (v3.1) \u2014 Did your diligence team produce direct, observable evidence on this dimension?",
           "answerFields": {
             "evidenceType": "",
             "knowledgeLevel": "",
@@ -9014,7 +9014,7 @@
           "secondaryDomain": "Change Response",
           "legacyEvidenceType": "Integration planning discussions \u00b7 Negotiation behavior",
           "surveyDesignNote": "Integration reaction reveals what the environment actually values when change is threatened. Options are mutually distinct.",
-          "directObservationGate": "",
+          "directObservationGate": "Direct Observation Gate (v3.1) \u2014 Did your diligence team produce direct, observable evidence on this dimension?",
           "answerFields": {
             "evidenceType": "",
             "knowledgeLevel": "",
@@ -9124,7 +9124,7 @@
           "secondaryDomain": "Accountability Asymmetry",
           "legacyEvidenceType": "Compensation data \u00b7 Org chart \u00b7 Promotion/retention data",
           "surveyDesignNote": "Underperformer handling is a critical signal for environment type. SFJ/SFP protects tenure; NT/STJ maintains accountability; SFP/SFJ retains compliance.",
-          "directObservationGate": "",
+          "directObservationGate": "Direct Observation Gate (v3.1) \u2014 Did your diligence team produce direct, observable evidence on this dimension?",
           "answerFields": {
             "evidenceType": "",
             "knowledgeLevel": "",
@@ -9234,7 +9234,7 @@
           "secondaryDomain": "Decision Rights",
           "legacyEvidenceType": "Management meetings \u00b7 Process documentation \u00b7 Negotiation behavior",
           "surveyDesignNote": "Speed/control trade-off is operationally concrete and reveals accountability structure. Options are mutually exclusive patterns.",
-          "directObservationGate": "",
+          "directObservationGate": "Direct Observation Gate (v3.1) \u2014 Did your diligence team produce direct, observable evidence on this dimension?",
           "answerFields": {
             "evidenceType": "",
             "knowledgeLevel": "",
@@ -9344,7 +9344,7 @@
           "secondaryDomain": "Disclosure Signal",
           "legacyEvidenceType": "Negotiation behavior \u00b7 Bad-news episode \u00b7 Management meetings",
           "surveyDesignNote": "Disclosure behavior under pressure is one of the most revealing diligence signals. Options cover transparency, defensiveness, values-framing, and strategic concealment.",
-          "directObservationGate": "",
+          "directObservationGate": "Direct Observation Gate (v3.1) \u2014 Did your diligence team produce direct, observable evidence on this dimension?",
           "answerFields": {
             "evidenceType": "",
             "knowledgeLevel": "",
@@ -9454,7 +9454,7 @@
           "secondaryDomain": "Leadership Dynamic",
           "legacyEvidenceType": "Management meetings \u00b7 Founder interview \u00b7 Functional leader interviews",
           "surveyDesignNote": "Status behavior in cross-functional settings reveals hierarchy type. Options cover coercive (STJ/STP), structured (NT/STJ), collaborative (NF/NT), and mission-hierarchy (NF/SFJ).",
-          "directObservationGate": "",
+          "directObservationGate": "Direct Observation Gate (v3.1) \u2014 Did your diligence team produce direct, observable evidence on this dimension?",
           "answerFields": {
             "evidenceType": "",
             "knowledgeLevel": "",
@@ -9564,7 +9564,7 @@
           "secondaryDomain": "Integration Framing",
           "legacyEvidenceType": "Integration planning discussions \u00b7 Management meetings",
           "surveyDesignNote": "Culture framing during integration reveals what the environment actually treats as valuable. Each option maps to a distinct environment logic.",
-          "directObservationGate": "",
+          "directObservationGate": "Direct Observation Gate (v3.1) \u2014 Did your diligence team produce direct, observable evidence on this dimension?",
           "answerFields": {
             "evidenceType": "",
             "knowledgeLevel": "",
@@ -9674,7 +9674,7 @@
           "secondaryDomain": "Innovation Signal",
           "legacyEvidenceType": "Data room \u00b7 Process documentation \u00b7 Functional leader interviews",
           "surveyDesignNote": "Technical approach is diagnostic for NT/STP (speed), NT/STJ (rigor), NF/SFP (creative), NF/NT (consensus through convergence).",
-          "directObservationGate": "",
+          "directObservationGate": "Direct Observation Gate (v3.1) \u2014 Did your diligence team produce direct, observable evidence on this dimension?",
           "answerFields": {
             "evidenceType": "",
             "knowledgeLevel": "",
@@ -9784,7 +9784,7 @@
           "secondaryDomain": "Consequence Pattern",
           "legacyEvidenceType": "Management meetings \u00b7 Compensation data \u00b7 Negotiation behavior",
           "surveyDesignNote": "Consequence pattern distinguishes NT/STJ (policy), SFJ/SFP (relational), STJ/STP (coercive punishment), STP/STJ (exclusion from network).",
-          "directObservationGate": "",
+          "directObservationGate": "Direct Observation Gate (v3.1) \u2014 Did your diligence team produce direct, observable evidence on this dimension?",
           "answerFields": {
             "evidenceType": "",
             "knowledgeLevel": "",
@@ -9894,7 +9894,7 @@
           "secondaryDomain": "Leadership Framing",
           "legacyEvidenceType": "Founder interview \u00b7 Management meetings",
           "surveyDesignNote": "Success narrative is a reliable self-reveal. Options are distinct framings unlikely to overlap. Note: NT/STP would also use performance language but with emphasis on experimentation \u2014 this question captures the dominant narrative style.",
-          "directObservationGate": "",
+          "directObservationGate": "Direct Observation Gate (v3.1) \u2014 Did your diligence team produce direct, observable evidence on this dimension?",
           "answerFields": {
             "evidenceType": "",
             "knowledgeLevel": "",
@@ -10004,7 +10004,7 @@
           "secondaryDomain": "Narrative Integrity",
           "legacyEvidenceType": "Management meetings \u00b7 Negotiation behavior \u00b7 Employee interviews",
           "surveyDesignNote": "Facade/core distinction is the highest-leverage signal for environment accuracy. Alignment maps to NF/NT; aspirational gap to NF/SFJ; strategic gap to STP/STJ; compliance gap to SFP/SFJ.",
-          "directObservationGate": "",
+          "directObservationGate": "Direct Observation Gate (v3.1) \u2014 Did your diligence team produce direct, observable evidence on this dimension?",
           "answerFields": {
             "evidenceType": "",
             "knowledgeLevel": "",
@@ -10114,7 +10114,7 @@
           "secondaryDomain": "Creative Logic",
           "legacyEvidenceType": "Management meetings \u00b7 Founder interview \u00b7 Product/creative team observation",
           "surveyDesignNote": "NEW v3.1 question. Closes NF/SFP coverage gap flagged in source v1.0 Validation_Checks (NF/SFP had only 4 slots, minimum 5 required). Discriminates The Creative Commons from The Performance Arena, The Disruption Lab, and The Mission Field. Direct-observation gate compatible.",
-          "directObservationGate": "",
+          "directObservationGate": "Direct Observation Gate (v3.1) \u2014 Did your diligence team produce direct, observable evidence on this dimension?",
           "answerFields": {
             "evidenceType": "",
             "knowledgeLevel": "",

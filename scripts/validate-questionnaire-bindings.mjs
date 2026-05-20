@@ -8,6 +8,8 @@ import { TARGET_SELF_ASSESSMENT_DATA } from "../src/data/targetSelfAssessmentDat
 const questionnaires = JSON.parse(readFileSync(new URL("../src/generated/newlogic/questionnaires.json", import.meta.url), "utf8"));
 const formBindings = JSON.parse(readFileSync(new URL("../src/generated/newlogic/formBindings.json", import.meta.url), "utf8"));
 
+const STEP_TOD_DIRECT_OBSERVATION_GATE_TEXT = "Direct Observation Gate (v3.1) — Did your diligence team produce direct, observable evidence on this dimension?";
+
 function normalize(value) {
   return String(value ?? "").replace(/\s+/g, " ").trim();
 }
@@ -53,6 +55,33 @@ function bindingGateCount(bindingKey) {
   return (formBindings.bindings[bindingKey] ?? []).filter((row) => row.opt === "Gate").length;
 }
 
+function assertStepTodDirectObservationGates() {
+  const generatedTedQuestions = generatedModule("targetObservedEnvironment").questions
+    .filter((question) => generatedQuestionId(question).startsWith("TED "));
+  assert.equal(generatedTedQuestions.length, 19, "STEP-TOD TED question count drift");
+
+  for (const question of generatedTedQuestions) {
+    const questionId = generatedQuestionId(question);
+    assert.equal(
+      normalize(question.directObservationGate),
+      STEP_TOD_DIRECT_OBSERVATION_GATE_TEXT,
+      `STEP-TOD: direct observation gate drift on ${questionId}`,
+    );
+  }
+
+  const runtimeTedQuestions = TARGET_OBSERVATION_DIAGNOSTIC.questions
+    .filter((question) => question.id.startsWith("TED "));
+  assert.equal(runtimeTedQuestions.length, 19, "STEP-TOD runtime TED question count drift");
+
+  for (const question of runtimeTedQuestions) {
+    assert.equal(
+      normalize(question.directObservationGate?.prompt),
+      STEP_TOD_DIRECT_OBSERVATION_GATE_TEXT,
+      `STEP-TOD: runtime direct observation gate drift on ${question.id}`,
+    );
+  }
+}
+
 compareRuntimeModule(
   "STEP-2A",
   ACQUIRER_TRACK_DATA.acquirerModule.questions,
@@ -78,6 +107,7 @@ compareRuntimeModule(
   TARGET_OBSERVATION_DIAGNOSTIC.questions,
   generatedModule("targetObservedEnvironment").questions,
 );
+assertStepTodDirectObservationGates();
 
 assert.equal(bindingQuestions("step2A").size, 11, "STEP-2A binding question count drift");
 assert.equal(bindingQuestions("step2C").size, 11, "STEP-2C binding question count drift");
