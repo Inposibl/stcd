@@ -2089,15 +2089,7 @@ function TargetObservationSetupForm({ existingSetup = {}, submitLabel = "Continu
   );
 }
 
-function TargetObservationSetupIntroScreen({ session, setSession }) {
-  const [emailState, setEmailState] = useState("");
-  const [showAuthorizedEmail, setShowAuthorizedEmail] = useState(false);
-  const [authorizedRecipientEmail, setAuthorizedRecipientEmail] = useState("");
-  const [authorizedEmailSending, setAuthorizedEmailSending] = useState(false);
-  const invite = session.targetObservationSetupInvite;
-  const authorizedRouteLocked = Boolean(invite);
-  const authorizedSurveyComplete = Boolean(invite?.completed && invite?.targetObservation?.completed && invite?.target2B?.completed);
-
+function useAuthorizedObservationCompletionRefresh(invite, setSession) {
   useEffect(() => {
     if (!invite || invite.completed) return undefined;
 
@@ -2157,6 +2149,18 @@ function TargetObservationSetupIntroScreen({ session, setSession }) {
       window.clearInterval(timer);
     };
   }, [invite, setSession]);
+}
+
+function TargetObservationSetupIntroScreen({ session, setSession }) {
+  const [emailState, setEmailState] = useState("");
+  const [showAuthorizedEmail, setShowAuthorizedEmail] = useState(false);
+  const [authorizedRecipientEmail, setAuthorizedRecipientEmail] = useState("");
+  const [authorizedEmailSending, setAuthorizedEmailSending] = useState(false);
+  const invite = session.targetObservationSetupInvite;
+  const authorizedRouteLocked = Boolean(invite);
+  const authorizedSurveyComplete = Boolean(invite?.completed && invite?.targetObservation?.completed && invite?.target2B?.completed);
+
+  useAuthorizedObservationCompletionRefresh(invite, setSession);
 
   if (!canContinueToTargetObservationSetup(session)) {
     return (
