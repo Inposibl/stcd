@@ -1,18 +1,33 @@
 import { validateTargetObservationSetup } from "../src/flow/targetObservationFlow.js";
-import { methodNotAllowed, parseJsonBody, jsonResponse } from "./_response.js";
 import { isSessionLedgerStorageError, saveTargetObservationSetup } from "./_sessionLedger.js";
 
-export default async function handler(request: Request) {
-  if (request.method !== "POST") {
-    return methodNotAllowed(request.method, ["POST"]);
+function parseNodeBody(req) {
+  if (typeof req.body === "string") {
+    try {
+      return JSON.parse(req.body);
+    } catch {
+      return null;
+    }
   }
 
-  const body = await parseJsonBody(request);
+  return typeof req.body === "object" && req.body ? req.body : null;
+}
+
+export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    return res.status(405).json({
+      status: "method-not-allowed",
+      method: req.method,
+      allowed: ["POST"],
+    });
+  }
+
+  const body = parseNodeBody(req);
   const sessionId = typeof body?.sessionId === "string" ? body.sessionId.trim() : "";
   const setup = typeof body?.setup === "object" && body.setup ? body.setup : {};
 
   if (!sessionId) {
-    return jsonResponse(400, {
+    return res.status(400).json({
       status: "invalid-request",
       error: "sessionId is required",
     });
@@ -20,7 +35,7 @@ export default async function handler(request: Request) {
 
   const validation = validateTargetObservationSetup(setup);
   if (!validation.valid) {
-    return jsonResponse(400, {
+    return res.status(400).json({
       status: "setup-incomplete",
       missing: validation.missing,
     });
@@ -30,13 +45,20 @@ export default async function handler(request: Request) {
   try {
     session = await saveTargetObservationSetup(sessionId, validation.normalized);
   } catch (error) {
-    return jsonResponse(isSessionLedgerStorageError(error) ? 503 : 500, {
-      status: isSessionLedgerStorageError(error) ? error.status : "target-observation-setup-save-failed",
+    if (isSessionLedgerStorageError(error)) {
+      return res.status(503).json({
+        status: error.status,
+        error: error.message,
+      });
+    }
+
+    return res.status(500).json({
+      status: "target-observation-setup-save-failed",
       error: error instanceof Error ? error.message : "Target Observation setup could not be saved",
     });
   }
 
-  return jsonResponse(200, {
+  return res.status(200).json({
     status: "target-observation-setup-stored",
     sessionId,
     targetObservationSetup: session.targetObservationSetup,

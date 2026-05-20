@@ -1,12 +1,27 @@
 import { isSessionLedgerStorageError, saveTargetObservationCompletion } from "./_sessionLedger.js";
-import { methodNotAllowed, parseJsonBody, jsonResponse } from "./_response.js";
 
-export default async function handler(request: Request) {
-  if (request.method !== "POST") {
-    return methodNotAllowed(request.method, ["POST"]);
+function parseNodeBody(req) {
+  if (typeof req.body === "string") {
+    try {
+      return JSON.parse(req.body);
+    } catch {
+      return null;
+    }
   }
 
-  const body = await parseJsonBody(request);
+  return typeof req.body === "object" && req.body ? req.body : null;
+}
+
+export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    return res.status(405).json({
+      status: "method-not-allowed",
+      method: req.method,
+      allowed: ["POST"],
+    });
+  }
+
+  const body = parseNodeBody(req);
   const assessmentSessionId = typeof body?.assessmentSessionId === "string" ? body.assessmentSessionId.trim() : "";
   const observationSessionId = typeof body?.observationSessionId === "string" ? body.observationSessionId.trim() : "";
   const codeHash = typeof body?.codeHash === "string" ? body.codeHash.trim() : "";
@@ -16,7 +31,7 @@ export default async function handler(request: Request) {
   const targetDiagnostic = typeof body?.targetDiagnostic === "object" && body.targetDiagnostic ? body.targetDiagnostic : {};
 
   if (!assessmentSessionId || !observationSessionId || !codeHash || !digitalCode) {
-    return jsonResponse(400, {
+    return res.status(400).json({
       endpoint: "/api/submit-target-observation",
       status: "invalid-request",
       error: "assessmentSessionId, observationSessionId, codeHash, and digitalCode are required",
@@ -35,14 +50,22 @@ export default async function handler(request: Request) {
       targetDiagnostic,
     });
   } catch (error) {
-    return jsonResponse(isSessionLedgerStorageError(error) ? 503 : 500, {
+    if (isSessionLedgerStorageError(error)) {
+      return res.status(503).json({
+        endpoint: "/api/submit-target-observation",
+        status: error.status,
+        error: error.message,
+      });
+    }
+
+    return res.status(500).json({
       endpoint: "/api/submit-target-observation",
-      status: isSessionLedgerStorageError(error) ? error.status : "target-observation-save-failed",
+      status: "target-observation-save-failed",
       error: error instanceof Error ? error.message : "Target Observation submission could not be saved",
     });
   }
 
-  return jsonResponse(result.ok ? 200 : 400, {
+  return res.status(result.ok ? 200 : 400).json({
     endpoint: "/api/submit-target-observation",
     ...result,
   });
