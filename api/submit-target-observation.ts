@@ -1,4 +1,4 @@
-import { saveTargetObservationCompletion } from "./_sessionLedger.js";
+import { isSessionLedgerStorageError, saveTargetObservationCompletion } from "./_sessionLedger.js";
 import { methodNotAllowed, parseJsonBody, jsonResponse } from "./_response.js";
 
 export default async function handler(request: Request) {
@@ -23,15 +23,24 @@ export default async function handler(request: Request) {
     });
   }
 
-  const result = saveTargetObservationCompletion({
-    assessmentSessionId,
-    observationSessionId,
-    codeHash,
-    digitalCode,
-    setup,
-    answers,
-    targetDiagnostic,
-  });
+  let result;
+  try {
+    result = await saveTargetObservationCompletion({
+      assessmentSessionId,
+      observationSessionId,
+      codeHash,
+      digitalCode,
+      setup,
+      answers,
+      targetDiagnostic,
+    });
+  } catch (error) {
+    return jsonResponse(isSessionLedgerStorageError(error) ? 503 : 500, {
+      endpoint: "/api/submit-target-observation",
+      status: isSessionLedgerStorageError(error) ? error.status : "target-observation-save-failed",
+      error: error instanceof Error ? error.message : "Target Observation submission could not be saved",
+    });
+  }
 
   return jsonResponse(result.ok ? 200 : 400, {
     endpoint: "/api/submit-target-observation",

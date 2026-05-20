@@ -1,6 +1,6 @@
 import { validateTargetObservationSetup } from "../src/flow/targetObservationFlow.js";
 import { methodNotAllowed, parseJsonBody, jsonResponse } from "./_response.js";
-import { saveTargetObservationSetup } from "./_sessionLedger.js";
+import { isSessionLedgerStorageError, saveTargetObservationSetup } from "./_sessionLedger.js";
 
 export default async function handler(request: Request) {
   if (request.method !== "POST") {
@@ -26,7 +26,16 @@ export default async function handler(request: Request) {
     });
   }
 
-  const session = saveTargetObservationSetup(sessionId, validation.normalized);
+  let session;
+  try {
+    session = await saveTargetObservationSetup(sessionId, validation.normalized);
+  } catch (error) {
+    return jsonResponse(isSessionLedgerStorageError(error) ? 503 : 500, {
+      status: isSessionLedgerStorageError(error) ? error.status : "target-observation-setup-save-failed",
+      error: error instanceof Error ? error.message : "Target Observation setup could not be saved",
+    });
+  }
+
   return jsonResponse(200, {
     status: "target-observation-setup-stored",
     sessionId,
