@@ -784,8 +784,8 @@ function CaseStudiesScreen() {
           <h1>10 Retroactive Analyses</h1>
           <p>$400B+ in value destroyed. $1T+ enabled. The same ECS formula - computed before the deal closed.</p>
         </header>
-        <CaseStudyGroup title="Failures - 5 Cases" cases={failures} />
         <CaseStudyGroup title="Successes - 5 Cases" cases={successes} />
+        <CaseStudyGroup title="Failures - 5 Cases" cases={failures} />
       </section>
     </main>
   );
