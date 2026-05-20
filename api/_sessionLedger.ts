@@ -132,6 +132,7 @@ async function redisCommand(command: unknown[], failureStatus: string) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REDIS_REST_TIMEOUT_MS);
   let response: Response;
+  let payload: { error?: string; result?: unknown } | null;
   try {
     response = await fetch(config.url, {
       method: "POST",
@@ -142,8 +143,12 @@ async function redisCommand(command: unknown[], failureStatus: string) {
       body: JSON.stringify(command),
       signal: controller.signal,
     });
+    payload = await response.json().catch((error) => {
+      if (controller.signal.aborted) throw error;
+      return null;
+    });
   } catch (error) {
-    const aborted = typeof error === "object"
+    const aborted = controller.signal.aborted || typeof error === "object"
       && error !== null
       && "name" in error
       && (error as { name?: unknown }).name === "AbortError";
@@ -157,7 +162,6 @@ async function redisCommand(command: unknown[], failureStatus: string) {
     clearTimeout(timeout);
   }
 
-  const payload = await response.json().catch(() => null);
   if (!response.ok || payload?.error) {
     throw new SessionLedgerStorageError(
       failureStatus,
