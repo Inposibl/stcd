@@ -1,28 +1,39 @@
-import { methodNotAllowed, jsonResponse } from "./_response.js";
 import { isSessionLedgerStorageError, targetObservationState } from "./_sessionLedger.js";
 
-export default async function handler(request: Request) {
-  if (request.method !== "GET") {
-    return methodNotAllowed(request.method, ["GET"]);
+export default async function handler(req, res) {
+  if (req.method !== "GET") {
+    return res.status(405).json({
+      status: "method-not-allowed",
+      method: req.method,
+      allowed: ["GET"],
+    });
   }
 
-  const url = new URL(request.url, "https://st.local");
+  const url = new URL(req.url, "https://st.local");
   const sessionId = url.searchParams.get("sessionId")?.trim();
   if (!sessionId) {
-    return jsonResponse(400, {
+    return res.status(400).json({
       status: "invalid-request",
       error: "sessionId is required",
     });
   }
 
   try {
-    return jsonResponse(200, {
+    const state = await targetObservationState(sessionId);
+    return res.status(200).json({
       status: "target-observation-state",
-      ...await targetObservationState(sessionId),
+      ...state,
     });
   } catch (error) {
-    return jsonResponse(isSessionLedgerStorageError(error) ? 503 : 500, {
-      status: isSessionLedgerStorageError(error) ? error.status : "target-observation-state-unavailable",
+    if (isSessionLedgerStorageError(error)) {
+      return res.status(503).json({
+        status: error.status,
+        error: error.message,
+      });
+    }
+
+    return res.status(500).json({
+      status: "target-observation-state-unavailable",
       error: error instanceof Error ? error.message : "Target Observation state is unavailable",
     });
   }
