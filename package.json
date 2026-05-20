@@ -13,6 +13,7 @@
     "validate:step2b": "node scripts/validate-step2b.mjs",
     "validate:g4b": "node scripts/validate-g4b.mjs",
     "validate:g4c": "node scripts/validate-g4c.mjs",
+    "validate:target-observation-runtime": "node scripts/validate-target-observation-runtime-guards.mjs",
     "validate:questionnaire-bindings": "node scripts/validate-questionnaire-bindings.mjs",
     "validate:g3": "node scripts/validate-g3.mjs",
     "validate:evidence-capture": "node scripts/validate-evidence-capture.mjs",
