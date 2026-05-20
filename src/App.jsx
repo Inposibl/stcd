@@ -4399,7 +4399,10 @@ function PreliminaryTargetGateScreen({ session, setSession }) {
   const track1Ready = canCreatePreliminaryAssessment(session);
   const preliminary = session.preliminaryAssessment;
   const invite = session.targetInvite;
+  const authorizedObservationInvite = session.targetObservationSetupInvite;
   const targetSelfComplete = Boolean(session.targetSelfAssessment?.completed || invite?.completed);
+
+  useAuthorizedObservationCompletionRefresh(authorizedObservationInvite, setSession);
 
   function createPreliminary() {
     const result = attachPreliminaryAssessment(session);
