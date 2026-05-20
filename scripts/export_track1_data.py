@@ -5,6 +5,11 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 
+raise RuntimeError(
+    "This legacy exporter is disabled. It reads an unsafe parent-level ST_Form_Binding_Prompt.xlsx path and must not be used. Use `npm run export:newlogic` instead. Canonical source: NewLogic 03.05.2026/ST_Form_Binding_Prompt.xlsx."
+)
+
+
 WORKSPACE_ROOT = Path(__file__).resolve().parents[2]
 OUTPUT_FILE = WORKSPACE_ROOT / "framer-vercel-public" / "src" / "data" / "acquirerTrackData.js"
 
