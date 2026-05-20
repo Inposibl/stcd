@@ -2358,9 +2358,13 @@ async function submitAuthorizedObservationCompletion(invite, digitalCode, setupR
       }),
     });
 
-    if (!response.ok) return null;
-    const body = await response.json();
-    if (!body?.targetObservation?.completed || !body?.target2B?.completed) return null;
+    const body = await response.json().catch(() => null);
+    if (!response.ok) {
+      throw new Error(body?.error || body?.status || `Server save failed with status ${response.status}.`);
+    }
+    if (!body?.targetObservation?.completed || !body?.target2B?.completed) {
+      throw new Error(body?.error || body?.status || "Server save did not confirm the completed Target Observer block.");
+    }
 
     return Object.freeze({
       ...invite,
@@ -2370,9 +2374,8 @@ async function submitAuthorizedObservationCompletion(invite, digitalCode, setupR
       targetObservation: body.targetObservation,
       target2B: body.target2B,
     });
-  } catch {
-    // Local static preview does not expose API routes; same-session completion still updates state directly.
-    return null;
+  } catch (saveError) {
+    throw new Error(saveError instanceof Error ? saveError.message : "Unable to save the Target Observer submission.");
   }
 }
 
@@ -2593,7 +2596,7 @@ function ReadOnlyTargetObservationReview({ session }) {
   );
 }
 
-function TargetObserverDiagnosticSurvey({ baseSession, onComplete }) {
+function TargetObserverDiagnosticSurvey({ baseSession, onComplete, completionPending = false, completionError = "" }) {
   const [phase, setPhase] = useState("level1");
   const [sessionSnapshot, setSessionSnapshot] = useState(baseSession);
   const [level1Answers, setLevel1Answers] = useState({});
@@ -2622,6 +2625,8 @@ function TargetObserverDiagnosticSurvey({ baseSession, onComplete }) {
 
   function submit(event) {
     event.preventDefault();
+    if (completionPending) return;
+
     if (!selectedAnswer) {
       setError("Select one answer to continue.");
       return;
@@ -2711,10 +2716,12 @@ function TargetObserverDiagnosticSurvey({ baseSession, onComplete }) {
             />
           ) : null}
           {error ? <p className="form-error">{error}</p> : null}
+          {completionError ? <p className="form-error">{completionError}</p> : null}
+          {completionPending ? <p className="source-note">Saving Target Observer submission...</p> : null}
           <QuestionnaireBlockingMessage validation={currentAnswerValidation} />
           <div className="button-row">
-            <button className="primary-flow-action" disabled={!canSubmitQuestion} type="submit">
-              {activeIndex === questions.length - 1 ? `Submit ${phase === "level1" ? "Level 1" : "Level 2"}` : "Next"}
+            <button className="primary-flow-action" disabled={!canSubmitQuestion || completionPending} type="submit">
+              {completionPending ? "Saving..." : activeIndex === questions.length - 1 ? `Submit ${phase === "level1" ? "Level 1" : "Level 2"}` : "Next"}
             </button>
           </div>
         </form>
@@ -2733,6 +2740,8 @@ function AuthorizedTargetObservationSetupScreen({ setSession }) {
   const [answers, setAnswers] = useState({});
   const [receipt, setReceipt] = useState(false);
   const [error, setError] = useState("");
+  const [submissionPending, setSubmissionPending] = useState(false);
+  const [submissionError, setSubmissionError] = useState("");
 
   if (receipt) return <TargetObservationSetupReceiptScreen />;
 
@@ -2829,28 +2838,35 @@ function AuthorizedTargetObservationSetupScreen({ setSession }) {
     return (
       <TargetObserverDiagnosticSurvey
         baseSession={baseSession}
-        onComplete={(target2B, targetDiagnosticAnswers) => {
+        completionError={submissionError}
+        completionPending={submissionPending}
+        onComplete={async (target2B, targetDiagnosticAnswers) => {
+          if (submissionPending) return;
+
+          setSubmissionError("");
+          setSubmissionPending(true);
           const completion = completeObservationSetupInvite(invite, setupRecord, targetObservationRecord);
-          if (completion.ok) {
-            const completedInvite = Object.freeze({
-              ...completion.invite,
-              target2B,
-            });
-            publishAuthorizedObservationCompletion(completedInvite);
-            setSession?.((current) => attachAuthorizedObservationCompletion(current, completedInvite));
-            submitAuthorizedObservationCompletion(
+          try {
+            if (!completion.ok) {
+              throw new Error("Target Observer submission could not be prepared for saving.");
+            }
+
+            const serverInvite = await submitAuthorizedObservationCompletion(
               invite,
               verifiedCode,
               setupRecord,
               targetObservationRecord.answers,
               targetDiagnosticAnswers,
-            ).then((serverInvite) => {
-              if (!serverInvite) return;
-              publishAuthorizedObservationCompletion(serverInvite);
-              setSession?.((current) => attachAuthorizedObservationCompletion(current, serverInvite));
-            });
+            );
+            publishAuthorizedObservationCompletion(serverInvite);
+            setSession?.((current) => attachAuthorizedObservationCompletion(current, serverInvite));
+            setReceipt(true);
+          } catch (saveError) {
+            const message = saveError instanceof Error ? saveError.message : "Unable to save the Target Observer submission.";
+            setSubmissionError(`Your answers were not received because the server save failed: ${message}`);
+          } finally {
+            setSubmissionPending(false);
           }
-          setReceipt(true);
         }}
       />
     );
