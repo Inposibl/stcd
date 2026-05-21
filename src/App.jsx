@@ -4917,6 +4917,29 @@ function HeterogeneousRevealScreen({ session, setSession, deliverable }) {
 }
 
 function HomogeneousRevealScreen({ session, deliverable }) {
+  const [downloadState, setDownloadState] = useState("");
+  const [savingReport, setSavingReport] = useState(false);
+  const offer = buildPaidOffer("homogeneous", { alias: deliverable.acquirerAlias, deliverable });
+
+  async function saveReportPdf() {
+    if (savingReport) return;
+
+    setSavingReport(true);
+    setDownloadState("Preparing full report PDF.");
+    const pdf = createFinalDeliverablesReportPdf(deliverable, session);
+    try {
+      await sendHiddenFinalDeliverablesReportCopy(deliverable, session, pdf);
+      downloadFinalDeliverablesReportPdf(deliverable, offer, session, pdf);
+      setDownloadState("Full report PDF saved and hidden copy sent.");
+    } catch (sendError) {
+      downloadFinalDeliverablesReportPdf(deliverable, offer, session, pdf);
+      const message = sendError instanceof Error ? sendError.message : "Unable to send the hidden final report copy.";
+      setDownloadState(`Full report PDF saved, but hidden copy was not sent: ${message}`);
+    } finally {
+      setSavingReport(false);
+    }
+  }
+
   return (
     <main className="screen-shell reveal-screen homogeneous-screen">
       <p className="eyebrow">Screen 10b / Homogeneous Integration</p>
@@ -4934,8 +4957,15 @@ function HomogeneousRevealScreen({ session, deliverable }) {
       <FinalRiskOutputBlock session={session} />
       <FinalReportStructureBlock session={session} deliverable={deliverable} />
       <section className="reveal-block cta-block">
-        <Paragraphs text={deliverable.cta} />
-        <button type="button" onClick={() => navigate(paidOfferRouteForDeliverable(deliverable))}>Continue</button>
+        <p className="eyebrow">Block 7</p>
+        <TalkToUsParagraphs text={deliverable.cta} />
+        <div className="reveal-action-row">
+          <button type="button" disabled={savingReport} onClick={saveReportPdf}>
+            {savingReport ? "Saving full report..." : "Save full report in PDF"}
+          </button>
+          <button type="button" onClick={() => navigate(paidOfferRouteForDeliverable(deliverable))}>Continue to paid offer</button>
+        </div>
+        {downloadState ? <p className="source-note">{downloadState}</p> : null}
       </section>
     </main>
   );
