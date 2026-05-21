@@ -5030,6 +5030,7 @@ const PDF_BRAND = Object.freeze({
   tableLine: "CCCCCC",
   tableStripe: "F5F7FA",
   panelFill: "EBF3FA",
+  panelStroke: "B9D3EA",
   green: "1A6B5C",
 });
 
@@ -5079,9 +5080,8 @@ function createSimplePdf(lineItems) {
 
   function addFooter() {
     pages.forEach((page, index) => {
-      if (index === 0) return;
       const footerLeft = "structural-typology.com  \u00b7  Confidential";
-      const footerRight = `Page ${index + 1}`;
+      const footerRight = `Page ${index + 1} of ${pages.length}`;
       const fontSize = 9;
       const ruleY = 54;
       const textY = 38;
@@ -5411,11 +5411,17 @@ function listPublicResourceNames(rows) {
 
 function addCaseStudyPdfSection(items, number, title) {
   items.push({
+    type: "rule",
+    color: PDF_BRAND.accent,
+    width: 1,
+    before: 16,
+    after: 8,
+  });
+  items.push({
     text: `${number}. ${title}`,
     size: 16,
     bold: true,
     color: PDF_BRAND.navy,
-    before: 18,
     after: 8,
     maxCharacters: 58,
   });
@@ -5440,6 +5446,7 @@ function addCaseStudyPdfParagraph(items, text, options = {}) {
     size: options.size ?? 11,
     color: options.color ?? PDF_BRAND.body,
     bold: options.bold ?? false,
+    align: options.align,
     before: options.before,
     after: options.after ?? 7,
     maxCharacters: options.maxCharacters ?? 78,
@@ -5461,8 +5468,8 @@ function buildFinalDeliverablesReportLines(deliverable, session) {
   if (!deliverable?.ready) {
     return [
       { text: "ACADEMY OF STRUCTURAL TYPOLOGY", size: 9, bold: true, align: "center", color: PDF_BRAND.accent, after: 20, maxCharacters: 90 },
-      { text: "M&A INTEGRATION RISK DUE DILIGENCE", size: 23, bold: true, align: "center", color: PDF_BRAND.navy, after: 12, maxCharacters: 48 },
-      { text: "The report is not ready for this session.", size: 11, align: "center", color: PDF_BRAND.muted },
+      { text: "FINAL DELIVERABLES REPORT", size: 26, bold: true, align: "center", color: PDF_BRAND.navy, after: 12, maxCharacters: 44 },
+      { text: "The report is not ready for this session.", size: 12, align: "center", color: PDF_BRAND.muted },
     ];
   }
 
@@ -5480,44 +5487,51 @@ function buildFinalDeliverablesReportLines(deliverable, session) {
     month: "long",
     day: "numeric",
   });
-  const reportPairTitle = `${deliverable.acquirerAlias} \u00d7 ${deliverable.targetAlias}`;
+  const dealTitle = `${dealContext.acquirerName ?? deliverable.acquirerAlias} acquiring ${dealContext.targetName ?? deliverable.targetAlias}`;
 
   const items = [
-    { text: "ACADEMY OF STRUCTURAL TYPOLOGY", size: 9, bold: true, align: "center", color: PDF_BRAND.accent, after: 22, maxCharacters: 90 },
+    { text: "ACADEMY OF STRUCTURAL TYPOLOGY", size: 9, bold: true, align: "center", color: PDF_BRAND.accent, after: 18, maxCharacters: 90 },
     {
-      text: reportPairTitle,
-      size: 23,
+      text: "FINAL DELIVERABLES REPORT",
+      size: 26,
       bold: true,
       align: "center",
       color: PDF_BRAND.navy,
-      after: 12,
-      maxCharacters: 46,
+      after: 9,
+      maxCharacters: 44,
     },
     {
-      text: "Structural Typology Final Report",
-      size: 11,
+      text: dealTitle,
+      size: 14,
+      bold: true,
       align: "center",
-      color: PDF_BRAND.muted,
-      after: 8,
-      maxCharacters: 78,
+      color: PDF_BRAND.body,
+      after: 7,
+      maxCharacters: 64,
     },
     {
       text: "Preliminary Assessment Report, Final Deliverables Report, Analyst Findings, and Final Risk Outputs",
       size: 11,
       align: "center",
       color: PDF_BRAND.muted,
+      after: 14,
+      maxCharacters: 78,
+    },
+    {
+      text: `${deliverable.compatibilityRange}  \u00b7  ${deliverable.riskBand}  \u00b7  ${triageReport.routing?.gateLabel ?? "Analyst review required"}`,
+      size: 12,
+      bold: true,
+      align: "center",
+      color: PDF_BRAND.navy,
+      fill: PDF_BRAND.panelFill,
+      stroke: PDF_BRAND.panelStroke,
+      strokeWidth: 0.6,
+      paddingY: 12,
       after: 18,
       maxCharacters: 78,
     },
     {
-      type: "rule",
-      color: PDF_BRAND.accent,
-      width: 0.75,
-      before: 8,
-      after: 22,
-    },
-    {
-      text: `M&A Integration Risk Due Diligence Series  \u00b7  ${generatedDate}`,
+      text: `M&A Post-Deal Behavior Forecast  \u00b7  ${generatedDate}`,
       size: 10,
       align: "center",
       color: PDF_BRAND.muted,
@@ -5531,6 +5545,27 @@ function buildFinalDeliverablesReportLines(deliverable, session) {
       color: PDF_BRAND.accent,
       after: 0,
       maxCharacters: 78,
+    },
+    {
+      type: "rule",
+      color: PDF_BRAND.accent,
+      width: 0.75,
+      before: 18,
+      after: 20,
+    },
+    {
+      type: "table",
+      columns: [156, 312],
+      rows: [
+        ["Report Field", "Data"],
+        ["Compatibility range", deliverable.compatibilityRange],
+        ["Risk band", deliverable.riskBand],
+        ["Report gate", triageReport.routing?.gateLabel ?? "Analyst review required"],
+        ["Confidence cap", triageReport.routing?.confidenceCap ?? riskOutputReport.confidenceCap],
+        ["Top risk output", riskOutputReport.rankedOutputs[0]?.riskCategory ?? "Monitor"],
+      ],
+      maxCellCharacters: 260,
+      after: 10,
     },
     { type: "pageBreak" },
   ];
@@ -5550,20 +5585,6 @@ function buildFinalDeliverablesReportLines(deliverable, session) {
   if (deliverable.narrative?.implication) {
     addCaseStudyPdfParagraph(items, `If the signal appears: ${deliverable.narrative.implication}`);
   }
-
-  items.push({
-    type: "table",
-    columns: [156, 312],
-    rows: [
-      ["Report Field", "Data"],
-      ["Compatibility range", deliverable.compatibilityRange],
-      ["Risk band", deliverable.riskBand],
-      ["Report gate", triageReport.routing?.gateLabel ?? "Analyst review required"],
-      ["Confidence cap", triageReport.routing?.confidenceCap ?? riskOutputReport.confidenceCap],
-      ["Top risk output", riskOutputReport.rankedOutputs[0]?.riskCategory ?? "Monitor"],
-    ],
-    maxCellCharacters: 260,
-  });
 
   addCaseStudyPdfSection(items, 2, "Deal Context");
   items.push({
@@ -5724,18 +5745,19 @@ function buildFinalDeliverablesReportLines(deliverable, session) {
     maxCellCharacters: 260,
   });
 
-  addCaseStudyPdfParagraph(items, "ABOUT STRUCTURAL TYPOLOGY", {
-    size: 11,
+  addCaseStudyPdfParagraph(items, "ABOUT Post-Deal Behavior Forecast Methodology", {
+    size: 12,
     bold: true,
     color: PDF_BRAND.navy,
     before: 12,
     after: 5,
     maxCharacters: 78,
+    align: "center",
   });
   addCaseStudyPdfParagraph(
     items,
     "Structural Typology is a predictive model of organisational behaviour applied here to M&A integration risk. Its final diagnostic output distinguishes what respondents said, what evidence supports, what evidence contradicts, what remains unknown, and where analyst interpretation is required.",
-    { size: 11, color: PDF_BRAND.body, after: 8 },
+    { size: 11, color: PDF_BRAND.body, align: "center", after: 8, maxCharacters: 74 },
   );
   items.push({
     text: "structural-typology.com  \u00b7  info@structural-typology.academy",
