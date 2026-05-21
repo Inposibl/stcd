@@ -4582,7 +4582,6 @@ function PreliminaryTargetGateScreen({ session, setSession }) {
             >
               Enter e-mail for sending
             </button>
-            <button type="button" onClick={() => navigate(invite.surveyLink)}>Open Target Self-Assessment</button>
           </div>
           {showTargetSelfEmail ? (
             <form className="invite-grid" onSubmit={sendTargetSelfEmail}>
