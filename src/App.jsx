@@ -6066,13 +6066,16 @@ function ConsultationRequestScreen({ session, setSession }) {
 
 function FinalDeliverablesScreen({ session, setSession }) {
   const deliverable = buildFinalDeliverable(session);
+  const preliminaryAssessmentAvailable = Boolean(session?.acquirer2A?.completed && session?.targetObservation?.completed);
   if (!deliverable.ready) {
     return (
       <main className="screen-shell flow-screen compact-flow">
         <p className="eyebrow">Final deliverables</p>
         <h1>Final deliverables are locked</h1>
         <p className="lead">Complete the Acquirer path and verified Target self-assessment before opening Screen 10.</p>
-        <button type="button" onClick={() => navigate("/screen-9a-target-code-gate")}>Open Preliminary Assessment</button>
+        {preliminaryAssessmentAvailable ? (
+          <button type="button" onClick={() => navigate("/screen-9a-target-code-gate")}>Open Preliminary Assessment</button>
+        ) : null}
       </main>
     );
   }
