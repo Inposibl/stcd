@@ -4867,11 +4867,6 @@ function HeterogeneousRevealScreen({ session, setSession, deliverable }) {
     }
   }
 
-  function resetAndStart() {
-    setSession(resetPublicAssessmentSession(session));
-    navigate("/");
-  }
-
   return (
     <main className="screen-shell reveal-screen">
       <p className="eyebrow">Screen 10 / Reveal sequence</p>
@@ -4913,7 +4908,6 @@ function HeterogeneousRevealScreen({ session, setSession, deliverable }) {
                 {savingReport ? "Saving full report..." : "Save full report in PDF"}
               </button>
               <button type="button" onClick={() => navigate(paidOfferRouteForDeliverable(deliverable))}>Continue to paid offer</button>
-              <button type="button" onClick={resetAndStart}>Reset all data and back to start page</button>
             </div>
             {downloadState ? <p className="source-note">{downloadState}</p> : null}
           </section>
@@ -5781,7 +5775,7 @@ async function sendHiddenFinalDeliverablesReportCopy(deliverable, session, exist
   return payload;
 }
 
-function PaidOfferScreen({ session, variant }) {
+function PaidOfferScreen({ session, setSession, variant }) {
   const deliverable = buildFinalDeliverable(session);
   const isHomogeneous = variant === "homogeneous";
   const offer = buildPaidOffer(variant, {
@@ -5791,6 +5785,11 @@ function PaidOfferScreen({ session, variant }) {
   const pairLabel = deliverable.ready
     ? `${deliverable.acquirerAlias} acquiring ${deliverable.targetAlias}`
     : "Pair context pending";
+
+  function handleResetAllData() {
+    setSession(resetPublicAssessmentSession(session));
+    navigate("/");
+  }
 
   return (
     <main className="screen-shell paid-offer-screen">
@@ -5824,6 +5823,9 @@ function PaidOfferScreen({ session, variant }) {
             </button>
           </div>
         </section>
+      </div>
+      <div className="button-row">
+        <button type="button" onClick={handleResetAllData}>Reset all data and back to start page</button>
       </div>
     </main>
   );
@@ -6161,10 +6163,10 @@ export default function App() {
       return <FinalDeliverablesScreen session={session} setSession={setSession} />;
     }
     if (screen.id === "screen-11-paid-offer") {
-      return <PaidOfferScreen session={session} variant="heterogeneous" />;
+      return <PaidOfferScreen session={session} setSession={setSession} variant="heterogeneous" />;
     }
     if (screen.id === "screen-11b-homogeneous-offer") {
-      return <PaidOfferScreen session={session} variant="homogeneous" />;
+      return <PaidOfferScreen session={session} setSession={setSession} variant="homogeneous" />;
     }
     if (screen.id === "screen-12-email-capture") {
       return <EmailCaptureScreen session={session} setSession={setSession} />;
