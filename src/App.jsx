@@ -1413,6 +1413,33 @@ function DirectObservationGatePanel({ question, answer, onChange }) {
   );
 }
 
+function EvidenceSegmentedField({ fieldId, label, options, value, onChange }) {
+  const labelId = `${fieldId}-label`;
+
+  return (
+    <div className="field-block evidence-segment-field">
+      <span id={labelId}>{label}</span>
+      <div className="evidence-segment-group" role="group" aria-labelledby={labelId}>
+        {options.map((option) => {
+          const selected = value === option.value;
+          const optionLabel = option.label ?? option.title;
+          return (
+            <button
+              aria-pressed={selected}
+              className={selected ? "evidence-segment-button is-selected" : "evidence-segment-button"}
+              key={option.value}
+              onClick={() => onChange(option.value)}
+              type="button"
+            >
+              {optionLabel}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function EvidenceClassificationPanel({ answer, onChange, showDirectObservation = true }) {
   const normalized = normalizeEvidenceAnswer(answer);
 
@@ -1472,42 +1499,27 @@ function EvidenceClassificationPanel({ answer, onChange, showDirectObservation =
             </select>
           </label>
         ) : null}
-        <label className="field-block">
-          <span>Evidence type</span>
-          <select
-            value={normalized.evidenceType}
-            onChange={(event) => updateField("evidenceType", event.target.value)}
-          >
-            <option value="">Select evidence type</option>
-            {evidenceTypeOptions.map((option) => (
-              <option key={option.value} value={option.value}>{option.title}</option>
-            ))}
-          </select>
-        </label>
-        <label className="field-block">
-          <span>Knowledge level</span>
-          <select
-            value={normalized.knowledgeLevel}
-            onChange={(event) => updateField("knowledgeLevel", event.target.value)}
-          >
-            <option value="">Select knowledge level</option>
-            {knowledgeLevelOptions.map((option) => (
-              <option key={option.value} value={option.value}>{option.title}</option>
-            ))}
-          </select>
-        </label>
-        <label className="field-block">
-          <span>Confidence</span>
-          <select
-            value={normalized.confidence}
-            onChange={(event) => updateField("confidence", event.target.value)}
-          >
-            <option value="">Select confidence</option>
-            {confidenceOptions.map((option) => (
-              <option key={option.value} value={option.value}>{option.title}</option>
-            ))}
-          </select>
-        </label>
+        <EvidenceSegmentedField
+          fieldId="evidence-type"
+          label="Evidence type"
+          onChange={(value) => updateField("evidenceType", value)}
+          options={evidenceTypeOptions}
+          value={normalized.evidenceType}
+        />
+        <EvidenceSegmentedField
+          fieldId="knowledge-level"
+          label="Knowledge level"
+          onChange={(value) => updateField("knowledgeLevel", value)}
+          options={knowledgeLevelOptions}
+          value={normalized.knowledgeLevel}
+        />
+        <EvidenceSegmentedField
+          fieldId="confidence"
+          label="Confidence"
+          onChange={(value) => updateField("confidence", value)}
+          options={confidenceOptions}
+          value={normalized.confidence}
+        />
       </div>
       {showReliabilityFlags ? (
         <fieldset className="reliability-flag-fieldset">

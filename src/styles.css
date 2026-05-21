@@ -1754,6 +1754,54 @@ textarea {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.evidence-segment-field {
+  align-content: start;
+}
+
+.evidence-segment-group {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.evidence-segment-button {
+  background: #ffffff;
+  border: 1px solid #d9dee8;
+  border-radius: 8px;
+  color: #1f2937;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+  min-height: 36px;
+  padding: 8px 11px;
+  text-align: left;
+}
+
+.evidence-segment-button:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+}
+
+.evidence-segment-button:focus-visible {
+  outline: 3px solid rgba(22, 163, 74, 0.24);
+  outline-offset: 2px;
+}
+
+.evidence-segment-button.is-selected {
+  background: #ecfdf5;
+  border-color: #16a34a;
+  box-shadow: inset 0 0 0 1px rgba(22, 163, 74, 0.22);
+  color: #15803d;
+  font-weight: 800;
+}
+
+.evidence-segment-button.is-selected:hover {
+  background: #dcfce7;
+  border-color: #15803d;
+}
+
 .reliability-flag-fieldset {
   border: 1px solid #e2e8f0;
   border-radius: 8px;
