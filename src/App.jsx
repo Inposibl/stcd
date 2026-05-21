@@ -4972,9 +4972,17 @@ function HomogeneousRevealScreen({ session, deliverable }) {
 }
 
 const FINAL_DELIVERABLE_PDF_FILE_NAME = "structural-typology-final-deliverables-report.pdf";
+const PDF_ENVIRONMENT_CODE_PATTERN = /\b(?:NF|NT|SFJ|SFP|STJ|STP|SP|SJ)\/(?:NF|NT|SFJ|SFP|STJ|STP|SP|SJ)\b/g;
 
-function normalizePdfText(value) {
-  return publicText(value)
+function normalizePdfText(value, options = {}) {
+  const preservedCodes = [];
+  const source = String(value ?? "").replace(PDF_ENVIRONMENT_CODE_PATTERN, (match) => {
+    if (!options.preserveEnvironmentCodes) return match;
+    const token = `__PDF_ENV_CODE_${preservedCodes.length}__`;
+    preservedCodes.push([token, match]);
+    return token;
+  });
+  let text = publicText(source)
     .replace(/\u2013|\u2014/g, "-")
     .replace(/\u2018|\u2019/g, "'")
     .replace(/\u201c|\u201d/g, "\"")
@@ -4982,13 +4990,16 @@ function normalizePdfText(value) {
     .replace(/\u2192/g, "->")
     .replace(/\u25b6/g, ">")
     .replace(/\u2605/g, "*")
-    .replace(/\u2913/g, "Download")
-    .replace(/[^\x09\x0a\x0d\x20-\x7e\u00b7\u00d7]/g, "");
+    .replace(/\u2913/g, "Download");
+  for (const [token, code] of preservedCodes) {
+    text = text.replaceAll(token, code);
+  }
+  return text.replace(/[^\x09\x0a\x0d\x20-\x7e\u00b7\u00d7]/g, "");
 }
 
-function escapePdfText(value) {
+function escapePdfText(value, options = {}) {
   let escaped = "";
-  for (const char of normalizePdfText(value)) {
+  for (const char of normalizePdfText(value, options)) {
     if (char === "\\") escaped += "\\\\";
     else if (char === "(") escaped += "\\(";
     else if (char === ")") escaped += "\\)";
@@ -4999,8 +5010,8 @@ function escapePdfText(value) {
   return escaped;
 }
 
-function wrapPdfText(value, maxCharacters) {
-  const words = normalizePdfText(value).split(/\s+/).filter(Boolean);
+function wrapPdfText(value, maxCharacters, options = {}) {
+  const words = normalizePdfText(value, options).split(/\s+/).filter(Boolean);
   const lines = [];
   let current = "";
 
@@ -5068,13 +5079,13 @@ function createSimplePdf(lineItems) {
     pages[pages.length - 1].push(commands.join("\n"));
   }
 
-  function approximateTextWidth(text, fontSize) {
-    return normalizePdfText(text).length * fontSize * 0.48;
+  function approximateTextWidth(text, fontSize, options = {}) {
+    return normalizePdfText(text, options).length * fontSize * 0.48;
   }
 
-  function textX(line, fontSize, align = "left") {
-    if (align === "center") return Math.max(left, (pageWidth - approximateTextWidth(line, fontSize)) / 2);
-    if (align === "right") return Math.max(left, pageWidth - right - approximateTextWidth(line, fontSize));
+  function textX(line, fontSize, align = "left", options = {}) {
+    if (align === "center") return Math.max(left, (pageWidth - approximateTextWidth(line, fontSize, options)) / 2);
+    if (align === "right") return Math.max(left, pageWidth - right - approximateTextWidth(line, fontSize, options));
     return left;
   }
 
@@ -5101,6 +5112,7 @@ function createSimplePdf(lineItems) {
     const maxCharacters = item.maxCharacters ?? (fontSize >= 16 ? 46 : 78);
     const align = item.align ?? "left";
     const font = item.bold ? "F2" : "F1";
+    const textOptions = { preserveEnvironmentCodes: item.preserveEnvironmentCodes === true };
 
     if (!item.text) {
       y -= item.space ?? 10;
@@ -5114,17 +5126,17 @@ function createSimplePdf(lineItems) {
     }
 
     if (item.fill) {
-      const wrapped = wrapPdfText(item.text, maxCharacters);
+      const wrapped = wrapPdfText(item.text, maxCharacters, textOptions);
       const boxHeight = wrapped.length * lineHeight + (item.paddingY ?? 12) * 2;
       ensureSpace(boxHeight);
       rect(left, y - boxHeight + 5, contentWidth, boxHeight, item.fill, item.stroke === undefined ? PDF_BRAND.tableLine : item.stroke, item.strokeWidth ?? 0.5);
       y -= item.paddingY ?? 12;
     }
 
-    for (const line of wrapPdfText(item.text, maxCharacters)) {
+    for (const line of wrapPdfText(item.text, maxCharacters, textOptions)) {
       if (y < bottom) newPage();
-      const x = align === "left" ? left + (item.indent ?? 0) : textX(line, fontSize, align);
-      pages[pages.length - 1].push(`${rgb(item.color ?? PDF_BRAND.body)} rg BT /${font} ${fontSize} Tf ${x} ${y} Td (${escapePdfText(line)}) Tj ET`);
+      const x = align === "left" ? left + (item.indent ?? 0) : textX(line, fontSize, align, textOptions);
+      pages[pages.length - 1].push(`${rgb(item.color ?? PDF_BRAND.body)} rg BT /${font} ${fontSize} Tf ${x} ${y} Td (${escapePdfText(line, textOptions)}) Tj ET`);
       y -= lineHeight;
     }
     y -= item.after ?? 0;
@@ -5137,8 +5149,28 @@ function createSimplePdf(lineItems) {
     y -= item.after ?? 10;
   }
 
-  function tableCellText(value, limit) {
-    const text = normalizePdfText(value);
+  function addSectionHeading(item) {
+    const fontSize = item.size ?? 16;
+    const lineHeight = item.lineHeight ?? Math.ceil(fontSize * 1.35);
+    const maxCharacters = item.maxCharacters ?? 58;
+    const textOptions = { preserveEnvironmentCodes: item.preserveEnvironmentCodes === true };
+    const wrapped = wrapPdfText(item.text, maxCharacters, textOptions);
+    const before = item.before ?? 16;
+    const ruleGap = item.ruleGap ?? 24;
+    const after = item.after ?? 8;
+    ensureSpace(before + ruleGap + wrapped.length * lineHeight + after);
+    y -= before;
+    pages[pages.length - 1].push(`q ${item.width ?? 1} w ${rgb(item.color ?? PDF_BRAND.accent)} RG ${left} ${y} m ${pageWidth - right} ${y} l S Q`);
+    y -= ruleGap;
+    for (const line of wrapped) {
+      pages[pages.length - 1].push(`${rgb(item.textColor ?? PDF_BRAND.navy)} rg BT /F2 ${fontSize} Tf ${left} ${y} Td (${escapePdfText(line, textOptions)}) Tj ET`);
+      y -= lineHeight;
+    }
+    y -= after;
+  }
+
+  function tableCellText(value, limit, options = {}) {
+    const text = normalizePdfText(value, options);
     if (!limit || text.length <= limit) return text;
     return `${text.slice(0, Math.max(0, limit - 3)).trim()}...`;
   }
@@ -5154,6 +5186,7 @@ function createSimplePdf(lineItems) {
     const headerSize = item.headerSize ?? 9.5;
     const lineHeight = item.lineHeight ?? 12;
     const maxCellCharacters = item.maxCellCharacters ?? 280;
+    const textOptions = { preserveEnvironmentCodes: item.preserveEnvironmentCodes === true };
 
     y -= item.before ?? 4;
 
@@ -5163,7 +5196,7 @@ function createSimplePdf(lineItems) {
       const cellLines = row.map((cell, cellIndex) => {
         const width = columns[cellIndex] ?? (contentWidth / row.length);
         const maxCharacters = Math.max(10, Math.floor((width - paddingX * 2) / (activeFontSize * 0.46)));
-        return wrapPdfText(tableCellText(cell, maxCellCharacters), maxCharacters);
+        return wrapPdfText(tableCellText(cell, maxCellCharacters, textOptions), maxCharacters, textOptions);
       });
       const rowHeight = Math.max(...cellLines.map((lines) => lines.length)) * lineHeight + paddingY * 2;
       ensureSpace(rowHeight + 4);
@@ -5180,7 +5213,7 @@ function createSimplePdf(lineItems) {
         const font = isHeader ? "F2" : "F1";
         let textY = y - paddingY - activeFontSize;
         for (const line of cellLines[cellIndex]) {
-          pages[pages.length - 1].push(`${rgb(textColor)} rg BT /${font} ${activeFontSize} Tf ${x + paddingX} ${textY} Td (${escapePdfText(line)}) Tj ET`);
+          pages[pages.length - 1].push(`${rgb(textColor)} rg BT /${font} ${activeFontSize} Tf ${x + paddingX} ${textY} Td (${escapePdfText(line, textOptions)}) Tj ET`);
           textY -= lineHeight;
         }
         x += width;
@@ -5194,6 +5227,8 @@ function createSimplePdf(lineItems) {
   for (const item of lineItems) {
     if (item.type === "pageBreak") {
       newPage();
+    } else if (item.type === "sectionHeading") {
+      addSectionHeading(item);
     } else if (item.type === "rule") {
       addRule(item);
     } else if (item.type === "table") {
@@ -5411,17 +5446,12 @@ function listPublicResourceNames(rows) {
 
 function addCaseStudyPdfSection(items, number, title) {
   items.push({
-    type: "rule",
-    color: PDF_BRAND.accent,
-    width: 1,
-    before: 16,
-    after: 8,
-  });
-  items.push({
+    type: "sectionHeading",
     text: `${number}. ${title}`,
     size: 16,
-    bold: true,
     color: PDF_BRAND.navy,
+    textColor: PDF_BRAND.navy,
+    ruleGap: 24,
     after: 8,
     maxCharacters: 58,
   });
@@ -5464,6 +5494,45 @@ function addCaseStudyPdfBulletList(items, bullets) {
   }
 }
 
+const PDF_ENVIRONMENT_DESCRIPTION_FALLBACKS = Object.freeze({
+  "NF/NT": "The Idea Lab converts ambiguity into hypotheses, language, and new strategic frames. Authority follows the best argument rather than title or hierarchy.",
+  "NF/SFJ": "The Mission Field stabilises work through shared purpose, duty, belonging, and a moral narrative. Authority is tied to visible connection with the mission.",
+  "NF/SFP": "The Creative Commons turns personal expression into collective energy and visible culture. Authority moves toward people who create trust, resonance, and participation.",
+  "NT/STJ": "The Performance Arena converts goals into plans, metrics, accountability, and execution. Authority follows proven competence, measurable results, and reliable judgement.",
+  "NT/STP": "The Disruption Lab breaks constraints through rapid experiments, tools, and technical moves. Authority belongs to the person whose working solution survives contact with reality.",
+  "SFJ/SFP": "The Hometown Network coordinates people through reciprocity, memory, loyalty, and social continuity. Authority belongs to those who are known, trusted, and protective of the group.",
+  "SFP/SFJ": "The Franchise Machine turns recognisable experience into repeatable consumption. Authority sits with those who control the customer ritual, brand promise, and delivery pattern.",
+  "STJ/STP": "The Power Racket protects power through rules, enforcement, and resource capture. Authority belongs to those who control access, sanctions, territory, and permissions.",
+  "STP/STJ": "The Enforcer Network resolves uncertainty through decisive action and hard accountability. Authority belongs to those who can act under pressure and enforce consequences.",
+});
+
+function pdfEnvironmentSummary(code) {
+  const inputValue = String(code ?? "").trim();
+  const normalizedInput = inputValue.replace(/\s+/g, " ").toLowerCase();
+  const environment = ENVIRONMENTS.find((item) => {
+    const aliases = [item.code, item.alias, aliasFor(item.code)]
+      .filter(Boolean)
+      .map((value) => String(value).trim().replace(/\s+/g, " ").toLowerCase());
+    return aliases.includes(normalizedInput);
+  });
+  const resolvedCode = environment?.code ?? inputValue;
+  const alias = environment?.alias ?? aliasFor(inputValue);
+  const displayName = resolvedCode && alias && alias !== resolvedCode
+    ? `${alias} (${resolvedCode})`
+    : alias || resolvedCode || "Pending";
+  const description = [
+    environment?.oneLineDefinition,
+    environment?.shortDescription,
+  ].filter(Boolean).join(" ") || PDF_ENVIRONMENT_DESCRIPTION_FALLBACKS[resolvedCode] || `${displayName} is the detected interaction environment for this side of the deal.`;
+
+  return Object.freeze({
+    alias: alias || "Pending",
+    code: resolvedCode,
+    displayName,
+    description,
+  });
+}
+
 function buildFinalDeliverablesReportLines(deliverable, session) {
   if (!deliverable?.ready) {
     return [
@@ -5487,6 +5556,9 @@ function buildFinalDeliverablesReportLines(deliverable, session) {
     month: "long",
     day: "numeric",
   });
+  const acquirerEnvironment = pdfEnvironmentSummary(deliverable.acquirerEnvironmentCode);
+  const targetEnvironment = pdfEnvironmentSummary(deliverable.targetEnvironmentCode);
+  const environmentPairTitle = `${acquirerEnvironment.alias} \u00d7 ${targetEnvironment.alias}`;
   const dealTitle = `${dealContext.acquirerName ?? deliverable.acquirerAlias} acquiring ${dealContext.targetName ?? deliverable.targetAlias}`;
 
   const items = [
@@ -5499,6 +5571,15 @@ function buildFinalDeliverablesReportLines(deliverable, session) {
       color: PDF_BRAND.navy,
       after: 9,
       maxCharacters: 44,
+    },
+    {
+      text: environmentPairTitle,
+      size: 16,
+      bold: true,
+      align: "center",
+      color: PDF_BRAND.navyMid,
+      after: 7,
+      maxCharacters: 58,
     },
     {
       text: dealTitle,
@@ -5605,6 +5686,27 @@ function buildFinalDeliverablesReportLines(deliverable, session) {
       ].filter(Boolean).join("; ")],
     ],
     maxCellCharacters: 320,
+  });
+
+  addCaseStudyPdfSubsection(items, "Detected Interaction Environments");
+  items.push({
+    type: "table",
+    columns: [92, 154, 222],
+    preserveEnvironmentCodes: true,
+    rows: [
+      ["Side", "Detected Environment", "PDF-only Description"],
+      [
+        "Acquirer",
+        acquirerEnvironment.displayName,
+        `${dealContext.acquirerName ?? "The acquirer"} is read as ${acquirerEnvironment.displayName}. ${acquirerEnvironment.description}`,
+      ],
+      [
+        "Target",
+        targetEnvironment.displayName,
+        `${dealContext.targetName ?? "The target"} is read as ${targetEnvironment.displayName}. ${targetEnvironment.description}`,
+      ],
+    ],
+    maxCellCharacters: 340,
   });
 
   addCaseStudyPdfSection(items, 3, "Evidence Coverage and Reliability");
