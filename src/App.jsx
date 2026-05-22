@@ -5078,6 +5078,48 @@ function HomogeneousRevealScreen({ session, deliverable }) {
 
 const FINAL_DELIVERABLE_PDF_FILE_NAME = "structural-typology-final-deliverables-report.pdf";
 const PDF_ENVIRONMENT_CODE_PATTERN = /\b(?:NF|NT|SFJ|SFP|STJ|STP|SP|SJ)\/(?:NF|NT|SFJ|SFP|STJ|STP|SP|SJ)\b/g;
+const PDF_BUYER_FACING_ALIASES = Object.freeze({
+  "STJ/STP": "Enforcement-Dominance Operating Pattern",
+  "STP/STJ": "Tactical-Control Operating Pattern",
+  "SFP/SFJ": "Replication-and-Loyalty Operating Pattern",
+});
+const PDF_BUYER_FACING_ALIAS_TEXT = Object.freeze({
+  "The Power Racket": PDF_BUYER_FACING_ALIASES["STJ/STP"],
+  "The Enforcer Network": PDF_BUYER_FACING_ALIASES["STP/STJ"],
+  "The Franchise Machine": PDF_BUYER_FACING_ALIASES["SFP/SFJ"],
+});
+const PDF_INTERNAL_LEXICON_REPLACEMENTS = Object.freeze([
+  [/\bLayer\s*2 evidence\b/gi, "supporting evidence"],
+  [/\btriage tier\b/gi, "review level"],
+  [/\banalyst worksheet\b/gi, "review record"],
+  [/\bRHQA route\b/gi, "confirmation protocol"],
+  [/\bRing-Fence route\b/gi, "risk-control protocol"],
+  [/\breliability flag\b/gi, "evidence caveat"],
+]);
+
+function applyBuyerFacingAliases(value) {
+  let text = String(value ?? "");
+  for (const [code, alias] of Object.entries(PDF_BUYER_FACING_ALIASES)) {
+    text = text.replaceAll(code, alias);
+  }
+  for (const [source, replacement] of Object.entries(PDF_BUYER_FACING_ALIAS_TEXT)) {
+    text = text.replaceAll(source, replacement);
+  }
+  return text;
+}
+
+function applyPublicPdfTextRules(value) {
+  let text = applyBuyerFacingAliases(value);
+  for (const [pattern, replacement] of PDF_INTERNAL_LEXICON_REPLACEMENTS) {
+    text = text.replace(pattern, replacement);
+  }
+  return text
+    .replace(/\bbuy\b/gi, "commission")
+    .replace(/\bpurchase\b/gi, "commission")
+    .replace(/\bengage us\b/gi, "start the full work")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
 
 function normalizePdfText(value, options = {}) {
   const preservedCodes = [];
@@ -5087,7 +5129,7 @@ function normalizePdfText(value, options = {}) {
     preservedCodes.push([token, match]);
     return token;
   });
-  let text = publicText(source)
+  let text = applyPublicPdfTextRules(publicText(source))
     .replace(/\u2013|\u2014/g, "-")
     .replace(/\u2018|\u2019/g, "'")
     .replace(/\u201c|\u201d/g, "\"")
@@ -5135,19 +5177,23 @@ function wrapPdfText(value, maxCharacters, options = {}) {
 }
 
 const PDF_BRAND = Object.freeze({
-  navy: "1B3A5C",
-  navyMid: "2E5F8A",
-  blue: "4A7BAF",
-  accent: "4A7BAF",
+  navy: "1F3864",
+  navyMid: "2E75B6",
+  blue: "2E75B6",
+  accent: "2E75B6",
   body: "1A1A1A",
-  muted: "6B7A8D",
+  muted: "595959",
   lightText: "FFFFFF",
   white: "FFFFFF",
-  tableLine: "CCCCCC",
-  tableStripe: "F5F7FA",
-  panelFill: "EBF3FA",
-  panelStroke: "B9D3EA",
-  green: "1A6B5C",
+  tableLine: "D9D9D9",
+  tableStripe: "F7F9FB",
+  panelFill: "E8F5E9",
+  panelStroke: "2E7D32",
+  warningFill: "FFF4E5",
+  warningStroke: "E8A33D",
+  green: "2E7D32",
+  amber: "E8A33D",
+  red: "C0392B",
 });
 
 function createSimplePdf(lineItems) {
@@ -5196,14 +5242,12 @@ function createSimplePdf(lineItems) {
 
   function addFooter() {
     pages.forEach((page, index) => {
-      const footerLeft = "structural-typology.com  \u00b7  Confidential";
-      const footerRight = `Page ${index + 1} of ${pages.length}`;
-      const fontSize = 9;
+      const footerLeft = `structural-typology.com  \u00b7  Confidential  \u00b7  Page ${index + 1}`;
+      const fontSize = 8;
       const ruleY = 54;
       const textY = 38;
-      page.push(`q 0.5 w ${rgb(PDF_BRAND.accent)} RG ${left} ${ruleY} m ${pageWidth - right} ${ruleY} l S Q`);
+      page.push(`q 0.5 w ${rgb(PDF_BRAND.tableLine)} RG ${left} ${ruleY} m ${pageWidth - right} ${ruleY} l S Q`);
       page.push(`${rgb(PDF_BRAND.muted)} rg BT /F1 ${fontSize} Tf ${left} ${textY} Td (${escapePdfText(footerLeft)}) Tj ET`);
-      page.push(`${rgb(PDF_BRAND.muted)} rg BT /F1 ${fontSize} Tf ${textX(footerRight, fontSize, "right")} ${textY} Td (${escapePdfText(footerRight)}) Tj ET`);
     });
   }
 
@@ -5275,9 +5319,7 @@ function createSimplePdf(lineItems) {
   }
 
   function tableCellText(value, limit, options = {}) {
-    const text = normalizePdfText(value, options);
-    if (!limit || text.length <= limit) return text;
-    return `${text.slice(0, Math.max(0, limit - 3)).trim()}...`;
+    return normalizePdfText(value, options);
   }
 
   function addTable(item) {
@@ -5553,7 +5595,7 @@ function addCaseStudyPdfSection(items, number, title) {
   items.push({
     type: "sectionHeading",
     text: `${number}. ${title}`,
-    size: 16,
+    size: 15,
     color: PDF_BRAND.navy,
     textColor: PDF_BRAND.navy,
     ruleGap: 24,
@@ -5565,9 +5607,9 @@ function addCaseStudyPdfSection(items, number, title) {
 function addCaseStudyPdfSubsection(items, title) {
   items.push({
     text: title,
-    size: 13,
+    size: 12,
     bold: true,
-    color: PDF_BRAND.navyMid,
+    color: PDF_BRAND.blue,
     before: 8,
     after: 5,
     maxCharacters: 64,
@@ -5621,10 +5663,9 @@ function pdfEnvironmentSummary(code) {
     return aliases.includes(normalizedInput);
   });
   const resolvedCode = environment?.code ?? inputValue;
-  const alias = environment?.alias ?? aliasFor(inputValue);
-  const displayName = resolvedCode && alias && alias !== resolvedCode
-    ? `${alias} (${resolvedCode})`
-    : alias || resolvedCode || "Pending";
+  const originalAlias = environment?.alias ?? aliasFor(inputValue);
+  const alias = PDF_BUYER_FACING_ALIASES[resolvedCode] ?? applyBuyerFacingAliases(originalAlias);
+  const displayName = alias || resolvedCode || "Pending";
   const description = [
     environment?.oneLineDefinition,
     environment?.shortDescription,
@@ -5635,6 +5676,165 @@ function pdfEnvironmentSummary(code) {
     code: resolvedCode,
     displayName,
     description,
+    authorityStructure: environment?.authorityStructure ?? "",
+    decisionMechanism: environment?.decisionMechanism ?? "",
+    innovationStance: environment?.innovationStance ?? "",
+    resourceTarget: environment?.resourceTarget ?? "",
+    systemicRole: environment?.systemicRole ?? "",
+  });
+}
+
+function pdfLayerAText(value) {
+  return applyPublicPdfTextRules(publicReportText(value));
+}
+
+function isPlaceholderPartyName(value) {
+  const text = String(value ?? "").trim();
+  if (!text) return true;
+  return /^(?:aa|bb|test|testing|demo|sample|placeholder|review acquirer|review target|acquirer pending|target pending)$/i.test(text)
+    || /^review\s+(?:acquirer|target)$/i.test(text)
+    || /^test[\s_-]*/i.test(text);
+}
+
+function pdfPartyName(value, fallback) {
+  return isPlaceholderPartyName(value) ? fallback : String(value).trim();
+}
+
+function humanizePdfValue(value) {
+  const text = String(value ?? "").trim();
+  if (!text) return "Not specified";
+  return text
+    .replace(/[_-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .replace(/\b\w/g, (match) => match.toUpperCase());
+}
+
+function pdfOptionText(options, value, fallback = "Not specified") {
+  const title = optionTitle(options, value);
+  if (title && title !== "Pending" && title !== value) return title;
+  return value ? humanizePdfValue(value) : fallback;
+}
+
+function pdfSentenceFragment(value) {
+  return pdfLayerAText(value).replace(/[.]+$/g, "");
+}
+
+function firstSentence(value) {
+  const text = pdfLayerAText(value);
+  const match = text.match(/^.*?(?:[.!?](?:\s|$)|$)/);
+  return (match?.[0] ?? text).trim();
+}
+
+function remainingSentences(value) {
+  const text = pdfLayerAText(value);
+  const first = firstSentence(text);
+  const remaining = text.slice(first.length).trim();
+  return remaining || text;
+}
+
+function pdfResourceList(rows) {
+  const resources = rows.map((row) => row.resource).filter(Boolean);
+  if (resources.length === 0) return "the highest-value operating routines";
+  if (resources.length === 1) return resources[0].toLowerCase();
+  if (resources.length === 2) return `${resources[0].toLowerCase()} and ${resources[1].toLowerCase()}`;
+  return `${resources.slice(0, -1).map((item) => item.toLowerCase()).join(", ")}, and ${resources.at(-1).toLowerCase()}`;
+}
+
+function pdfRoundedCompatibilityScore(deliverable) {
+  if (Number.isFinite(deliverable?.compatibilityScore)) return Math.round(deliverable.compatibilityScore);
+  const rangeNumbers = String(deliverable?.compatibilityRange ?? "").match(/\d+/g)?.map(Number) ?? [];
+  if (rangeNumbers.length >= 2) return Math.round((rangeNumbers[0] + rangeNumbers[1]) / 2);
+  if (rangeNumbers.length === 1) return rangeNumbers[0];
+  return 0;
+}
+
+function pdfBandColor(riskBand = "") {
+  const normalized = String(riskBand).toUpperCase();
+  if (normalized.includes("HIGH RISK")) return PDF_BRAND.red;
+  if (normalized.includes("MODERATE") && !normalized.includes("HIGH COMPATIBILITY")) return PDF_BRAND.amber;
+  return PDF_BRAND.green;
+}
+
+function pdfBandInterpretation(score, riskBand) {
+  const normalized = String(riskBand).toUpperCase();
+  if (normalized.includes("HIGH COMPATIBILITY")) {
+    return `A score of ${score} indicates relative structural safety. The forecast still names the non-obvious friction that can damage value if integration speed, authority, or decision rhythm is mishandled.`;
+  }
+  if (normalized.includes("HIGH RISK")) {
+    return `A score of ${score} indicates high integration risk. The forecast should not be softened: the operating systems are likely to misread each other under post-close pressure unless controls are set before routines are merged.`;
+  }
+  return `A score of ${score} is a specification, not a verdict. It identifies where integration pressure is most likely to surface and where management action should be focused first.`;
+}
+
+function pdfAcquirerEnvironmentExplanation(environment) {
+  const decisionPattern = pdfSentenceFragment(environment.decisionMechanism)
+    .replace(/^decisions are made by\s+/i, "")
+    .replace(/^decisions are made through\s+/i, "")
+    .replace(/^decision-making follows\s+/i, "");
+  return [
+    `Decision-making follows ${decisionPattern || "its established operating logic"}.`,
+    `It rewards ${pdfSentenceFragment(environment.resourceTarget) || "the resources that keep its operating model coherent"}.`,
+    `It resists moves that undermine this role: ${pdfSentenceFragment(environment.systemicRole) || "keeping work, trust, speed, and conflict coherent"}.`,
+    environment.authorityStructure,
+  ].filter(Boolean).join(" ");
+}
+
+function pdfTargetEnvironmentExplanation(environment) {
+  return [
+    `Leadership feels normal when ${pdfSentenceFragment(environment.authorityStructure) || "authority follows the pattern its people already trust"}.`,
+    `Trust, loyalty, conflict, and pressure are interpreted through ${pdfSentenceFragment(environment.decisionMechanism) || "that operating pattern"}.`,
+    environment.innovationStance,
+    environment.systemicRole,
+  ].filter(Boolean).join(" ");
+}
+
+function pdfCollisionRows(deliverable, acquirerEnvironment, targetEnvironment) {
+  const friction = deliverable?.friction ?? {};
+  const resourceRows = deliverable?.resourceConflictProfile?.highProbabilityConflicts?.slice(0, 3) ?? [];
+  const resourceText = pdfResourceList(resourceRows);
+  return [
+    ["Where they fit naturally", deliverable?.riskBand === "HIGH COMPATIBILITY"
+      ? `${acquirerEnvironment.alias} and ${targetEnvironment.alias} can create value when the acquirer's operating logic gives the target room to do what it already does well.`
+      : `${acquirerEnvironment.alias} can still create value with ${targetEnvironment.alias} when the deal protects ${resourceText} instead of forcing immediate operating sameness.`],
+    ["Where they misread each other", firstSentence(friction.fp1 || deliverable?.narrative?.prediction || deliverable?.body)],
+    ["The post-deal behavioural risk", pdfLayerAText(deliverable?.narrative?.implication || friction.fp3 || "The main risk is not disagreement in principle; it is repeated misreading under integration pressure.")],
+    ["Same management action, two opposite readings", `The same control action can read as normal discipline inside ${acquirerEnvironment.alias} and as a loss of legitimate operating space inside ${targetEnvironment.alias}.`],
+  ];
+}
+
+function pdfTimelineRows(deliverable) {
+  const friction = deliverable?.friction ?? {};
+  const anchors = deliverable?.anchors ?? [];
+  const fp1 = friction.fp1 || anchors[0]?.text || deliverable?.narrative?.prediction;
+  const fp2 = friction.fp2 || anchors[1]?.text;
+  const fp3 = friction.fp3 || anchors[2]?.text;
+  return [
+    ["Days 30-60", pdfLayerAText(fp1 || "Early integration pressure exposes whether the target can keep its normal operating rhythm."), pdfLayerAText(friction.earlyWarningSignal || anchors[0]?.text || fp1 || "The first signal appears in decision forums, meeting tempo, and the treatment of exceptions.")],
+    ["Months 2-6", pdfLayerAText(fp2 || "Repeated operating decisions reveal whether the two sides recognise the same authority and evidence."), remainingSentences(fp2 || "Watch whether the pattern becomes repeated rather than exceptional.")],
+    ["Months 6-18", pdfLayerAText(fp3 || "The long-term risk shows up in retention, output quality, and whether the target's strongest routines still work."), remainingSentences(fp3 || "Watch whether the people who created the target's value still recognise the combined operating environment as workable.")],
+  ];
+}
+
+function pdfBulletSentences(value, fallback) {
+  const text = pdfLayerAText(value || fallback);
+  const sentences = text.match(/[^.!?]+[.!?]+|[^.!?]+$/g)?.map((item) => item.trim()).filter(Boolean) ?? [];
+  return (sentences.length ? sentences : [text]).slice(0, 3);
+}
+
+function pdfRecommendedActions(deliverable) {
+  const resources = pdfResourceList(deliverable?.resourceConflictProfile?.highProbabilityConflicts?.slice(0, 3) ?? []);
+  const warning = firstSentence(deliverable?.friction?.earlyWarningSignal || deliverable?.narrative?.prediction);
+  return Object.freeze({
+    beforeClose: Object.freeze([
+      `Confirm whether this signal is already visible in diligence: ${warning}`,
+      `Name the owner for ${resources} before the first integration decisions are announced.`,
+      "Separate what must be standardised immediately from what should remain locally stable through the first operating cycle.",
+    ]),
+    afterClose: Object.freeze([
+      "Run the first signal review before day 30 and treat silence, delay, or defensive agreement as data.",
+      `Protect ${resources} until the combined leadership team has a shared decision rhythm.`,
+      "Convert the forecast into decision rights, escalation rules, and review cadence before routines are merged.",
+    ]),
   });
 }
 
@@ -5647,82 +5847,80 @@ function buildFinalDeliverablesReportLines(deliverable, session) {
     ];
   }
 
-  const finalReport = finalReportStructureForSession(session, deliverable);
   const dealContext = session?.dealContext?.data ?? {};
-  const evidenceItems = evidenceItemsFromSession(session).slice(0, 6);
-  const evidenceCoverage = finalReport.evidenceCoverage;
-  const contradictionFindings = finalReport.contradictionReport.findings.slice(0, 6);
-  const triageReport = finalReport.triageReport;
-  const riskOutputReport = finalReport.riskOutputReport;
-  const resourceRows = deliverable.resourceConflictProfile?.highProbabilityConflicts?.slice(0, 4) ?? [];
-  const analystWorksheet = finalReport.analystWorksheet;
-  const generatedDate = new Date(finalReport.generatedAt).toLocaleDateString("en-US", {
+  const resourceRows = deliverable.resourceConflictProfile?.highProbabilityConflicts?.slice(0, 3) ?? [];
+  const generatedDate = new Date().toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
     day: "numeric",
   });
   const acquirerEnvironment = pdfEnvironmentSummary(deliverable.acquirerEnvironmentCode);
   const targetEnvironment = pdfEnvironmentSummary(deliverable.targetEnvironmentCode);
-  const environmentPairTitle = `${acquirerEnvironment.alias} \u00d7 ${targetEnvironment.alias}`;
-  const dealTitle = `${dealContext.acquirerName ?? deliverable.acquirerAlias} acquiring ${dealContext.targetName ?? deliverable.targetAlias}`;
+  const acquirerName = pdfPartyName(dealContext.acquirerName, "your organisation");
+  const targetName = pdfPartyName(dealContext.targetName, "your target");
+  const coverTitle = `${acquirerEnvironment.alias} acquiring ${targetEnvironment.alias}`;
+  const score = pdfRoundedCompatibilityScore(deliverable);
+  const bandColor = pdfBandColor(deliverable.riskBand);
+  const narrative = deliverable.narrative ?? {};
+  const actions = pdfRecommendedActions(deliverable);
+  const collisionRows = pdfCollisionRows(deliverable, acquirerEnvironment, targetEnvironment);
+  const timelineRows = pdfTimelineRows(deliverable);
+  const decisiveSignal = deliverable.friction?.earlyWarningSignal || deliverable.anchors?.[0]?.text || narrative.prediction;
+  const ninetyDayChecks = pdfBulletSentences(deliverable.friction?.fp2 || deliverable.anchors?.[1]?.text, "Check whether the first conflict pattern has become a recurring operating routine.");
+  const oneEightyDayChecks = pdfBulletSentences(deliverable.friction?.fp3 || deliverable.anchors?.[2]?.text, "Check whether the target's strongest people and routines still recognise the combined operating system as workable.");
 
   const items = [
     { text: "ACADEMY OF STRUCTURAL TYPOLOGY", size: 9, bold: true, align: "center", color: PDF_BRAND.accent, after: 18, maxCharacters: 90 },
     {
-      text: "FINAL DELIVERABLES REPORT",
-      size: 26,
+      text: coverTitle,
+      size: 20,
       bold: true,
       align: "center",
       color: PDF_BRAND.navy,
       after: 9,
-      maxCharacters: 44,
+      maxCharacters: 58,
     },
     {
-      text: environmentPairTitle,
-      size: 16,
-      bold: true,
+      text: "Public Final Deliverables Report",
+      size: 11,
       align: "center",
-      color: PDF_BRAND.navyMid,
+      color: PDF_BRAND.muted,
       after: 7,
       maxCharacters: 58,
     },
     {
-      text: dealTitle,
-      size: 14,
-      bold: true,
-      align: "center",
-      color: PDF_BRAND.body,
-      after: 7,
-      maxCharacters: 64,
-    },
-    {
-      text: "Preliminary Assessment Report, Final Deliverables Report, Analyst Findings, and Final Risk Outputs",
+      text: `M&A Post-Deal Behavior Forecast  \u00b7  ${generatedDate}`,
       size: 11,
       align: "center",
       color: PDF_BRAND.muted,
-      after: 14,
+      after: 7,
       maxCharacters: 78,
     },
     {
-      text: `${deliverable.compatibilityRange}  \u00b7  ${deliverable.riskBand}  \u00b7  ${triageReport.routing?.gateLabel ?? "Analyst review required"}`,
+      text: `${acquirerName} acquiring ${targetName}`,
+      size: 11,
+      align: "center",
+      color: PDF_BRAND.body,
+      after: 16,
+      maxCharacters: 78,
+    },
+    {
+      text: String(score),
+      size: 28,
+      bold: true,
+      align: "center",
+      color: bandColor,
+      after: 2,
+      maxCharacters: 20,
+    },
+    {
+      text: deliverable.riskBand,
       size: 12,
       bold: true,
       align: "center",
-      color: PDF_BRAND.navy,
-      fill: PDF_BRAND.panelFill,
-      stroke: PDF_BRAND.panelStroke,
-      strokeWidth: 0.6,
-      paddingY: 12,
+      color: bandColor,
       after: 18,
-      maxCharacters: 78,
-    },
-    {
-      text: `M&A Post-Deal Behavior Forecast  \u00b7  ${generatedDate}`,
-      size: 10,
-      align: "center",
-      color: PDF_BRAND.muted,
-      after: 6,
-      maxCharacters: 78,
+      maxCharacters: 44,
     },
     {
       text: "structural-typology.com  \u00b7  info@structural-typology.academy",
@@ -5739,247 +5937,123 @@ function buildFinalDeliverablesReportLines(deliverable, session) {
       before: 18,
       after: 20,
     },
-    {
-      type: "table",
-      columns: [156, 312],
-      rows: [
-        ["Report Field", "Data"],
-        ["Compatibility range", deliverable.compatibilityRange],
-        ["Risk band", deliverable.riskBand],
-        ["Report gate", triageReport.routing?.gateLabel ?? "Analyst review required"],
-        ["Confidence cap", triageReport.routing?.confidenceCap ?? riskOutputReport.confidenceCap],
-        ["Top risk output", riskOutputReport.rankedOutputs[0]?.riskCategory ?? "Monitor"],
-      ],
-      maxCellCharacters: 260,
-      after: 10,
-    },
     { type: "pageBreak" },
   ];
 
   addCaseStudyPdfSection(items, 1, "Executive Summary");
   addCaseStudyPdfParagraph(
     items,
-    deliverable.narrative?.headline ?? deliverable.headline,
-    { size: 11, bold: true, color: PDF_BRAND.body, fill: PDF_BRAND.panelFill, stroke: "", paddingY: 12, after: 10 },
+    narrative.headline ?? deliverable.headline,
+    { size: 11, bold: true, color: PDF_BRAND.body, after: 10 },
   );
   addCaseStudyPdfParagraph(
     items,
     deliverable.screen === "screen-10b"
       ? deliverable.body
-      : deliverable.narrative?.situation,
+      : narrative.situation,
   );
-  if (deliverable.narrative?.implication) {
-    addCaseStudyPdfParagraph(items, `If the signal appears: ${deliverable.narrative.implication}`);
-  }
+  addCaseStudyPdfParagraph(items, `The one thing to watch: ${narrative.prediction || decisiveSignal || deliverable.anchors?.[0]?.text}`, {
+    fill: PDF_BRAND.panelFill,
+    stroke: PDF_BRAND.green,
+    strokeWidth: 1.2,
+    paddingY: 10,
+    after: 10,
+  });
+  addCaseStudyPdfParagraph(items, narrative.implication || "The integration outcome will depend on whether leadership notices the first behavioural signal early enough to adjust sequencing.");
 
-  addCaseStudyPdfSection(items, 2, "Deal Context");
+  addCaseStudyPdfSection(items, 2, "Deal Scenario");
   items.push({
     type: "table",
     columns: [156, 312],
     rows: [
-      ["Transaction Detail", "Data"],
-      ["Acquirer", dealContext.acquirerName ?? "Acquirer pending"],
-      ["Target", dealContext.targetName ?? "Target pending"],
-      ["Deal type", optionTitle(DEAL_TYPE_OPTIONS, dealContext.dealType)],
-      ["Acquisition motive", optionTitle(ACQUISITION_MOTIVE_OPTIONS, dealContext.acquisitionMotive)],
-      ["Respondent", [
-        optionTitle(RESPONDENT_SIDE_OPTIONS, dealContext.respondentSide),
-        optionTitle(RESPONDENT_ROLE_OPTIONS, dealContext.respondentRole),
-        optionTitle(RESPONDENT_SENIORITY_OPTIONS, dealContext.respondentSeniority),
-        optionTitle(RESPONDENT_FUNCTION_OPTIONS, dealContext.respondentFunction),
-        optionTitle(RESPONDENT_ACCESS_LEVEL_OPTIONS, dealContext.respondentAccessLevel),
-      ].filter(Boolean).join("; ")],
+      ["Deal field", "Plain-language read"],
+      ["Acquirer", acquirerName],
+      ["Target", targetName],
+      ["Deal type", pdfOptionText(DEAL_TYPE_OPTIONS, dealContext.dealType)],
+      ["Acquisition motive", pdfOptionText(ACQUISITION_MOTIVE_OPTIONS, dealContext.acquisitionMotive)],
+      ["Why this matters", `The deal depends on whether ${acquirerName} can preserve the target capability while changing the operating environment around it.`],
     ],
-    maxCellCharacters: 320,
   });
 
-  addCaseStudyPdfSubsection(items, "Detected Interaction Environments");
+  addCaseStudyPdfSection(items, 3, "The Two Environments");
+  addCaseStudyPdfSubsection(items, "3.1 Acquirer environment");
+  addCaseStudyPdfParagraph(items, `${acquirerEnvironment.displayName}: ${pdfAcquirerEnvironmentExplanation(acquirerEnvironment)}`);
+  addCaseStudyPdfSubsection(items, "3.2 Target environment");
+  addCaseStudyPdfParagraph(items, `${targetEnvironment.displayName}: ${pdfTargetEnvironmentExplanation(targetEnvironment)}`);
+
+  addCaseStudyPdfSection(items, 4, "Why These Two Environments Collide");
   items.push({
     type: "table",
-    columns: [92, 154, 222],
+    columns: [156, 312],
     preserveEnvironmentCodes: true,
-    rows: [
-      ["Side", "Detected Environment", "PDF-only Description"],
-      [
-        "Acquirer",
-        acquirerEnvironment.displayName,
-        `${dealContext.acquirerName ?? "The acquirer"} is read as ${acquirerEnvironment.displayName}. ${acquirerEnvironment.description}`,
-      ],
-      [
-        "Target",
-        targetEnvironment.displayName,
-        `${dealContext.targetName ?? "The target"} is read as ${targetEnvironment.displayName}. ${targetEnvironment.description}`,
-      ],
-    ],
-    maxCellCharacters: 340,
+    rows: [["Collision point", "Buyer-facing interpretation"], ...collisionRows],
   });
 
-  addCaseStudyPdfSection(items, 3, "Evidence Coverage and Reliability");
+  addCaseStudyPdfSection(items, 5, "Compatibility Score");
   addCaseStudyPdfParagraph(
     items,
-    "The final report separates respondent answers from documentary and analyst-reviewed evidence. Respondent answers are interpreted as structured evidence, not treated as factual truth.",
+    String(score),
+    { size: 28, bold: true, color: bandColor, align: "center", after: 0, maxCharacters: 20 },
   );
-  items.push({
-    type: "table",
-    columns: [156, 312],
-    rows: [
-      ["Coverage Item", "Status"],
-      ["Evidence captured", `${evidenceCoverage.totalCount} item(s)`],
-      ["Verified evidence", `${evidenceCoverage.verifiedCount} verified; ${evidenceCoverage.disputedCount} disputed`],
-      ["Linked findings", `${evidenceCoverage.linkedFindingCount} linked to contradiction or analyst findings`],
-      ["Verified risk coverage", evidenceCoverage.verifiedRiskCategories.length ? evidenceCoverage.verifiedRiskCategories.join(", ") : "No verified risk-category evidence captured yet"],
-      ["Analyst worksheet", `${analystWorksheet.reviewedCount}/${analystWorksheet.findingCount} finding(s) reviewed`],
-    ],
-    maxCellCharacters: 320,
-  });
-  if (evidenceItems.length > 0) {
-    items.push({
-      type: "table",
-      columns: [140, 88, 240],
-      rows: [
-        ["Evidence Item", "Status", "Analyst Extract"],
-        ...evidenceItems.map((item) => [
-          item.title,
-          optionLabel(EVIDENCE_REVIEW_STATUS_OPTIONS, item.reviewStatus),
-          item.analystExtract || item.storageReference,
-        ]),
-      ],
-      maxCellCharacters: 220,
-    });
-  }
-
-  addCaseStudyPdfSection(items, 4, "Contradiction Review and Triage");
-  items.push({
-    type: "table",
-    columns: [140, 88, 240],
-    rows: [
-      ["Finding", "Severity", "Diagnostic Meaning"],
-      ...contradictionFindings.map((finding) => [
-        finding.title,
-        contradictionSeverityLabel(finding.severity),
-        finding.explanation,
-      ]),
-    ],
-    maxCellCharacters: 260,
-  });
-  items.push({
-    type: "table",
-    columns: [156, 312],
-    rows: [
-      ["Triage Item", "Data"],
-      ["Effective tier", triageTierLabel(triageReport.effectiveTier)],
-      ["Reliability tier", triageTierLabel(triageReport.reliabilityTier)],
-      ["Contradiction tier", triageTierLabel(triageReport.contradictionTier)],
-      ["Instrument action", triageReport.instrumentAction],
-      ["Routing", `${triageReport.routing?.label ?? ""}. ${triageReport.routing?.action ?? ""}`],
-    ],
-    maxCellCharacters: 320,
-  });
-
-  addCaseStudyPdfSection(items, 5, "Formal Risk Output Records");
-  items.push({
-    type: "table",
-    columns: [132, 68, 58, 210],
-    rows: [
-      ["Risk Category", "Severity", "Score", "Analyst Interpretation"],
-      ...riskOutputReport.rankedOutputs.map((risk) => [
-        risk.riskCategory,
-        `${risk.severity}; ${risk.confidence}`,
-        `${risk.score}/100`,
-        `${risk.divergenceSummary} ${risk.evidenceSummary}`,
-      ]),
-    ],
-    maxCellCharacters: 230,
-  });
-
-  addCaseStudyPdfSection(items, 6, "Final Deliverables Report");
-  addCaseStudyPdfParagraph(
-    items,
-    "This section translates the diagnostic findings into the integration-control agenda for the specific deal pair.",
-  );
-  if (deliverable.protocol?.dealInsights?.length) {
-    items.push({
-      type: "table",
-      columns: [156, 312],
-      rows: [
-        ["Control Area", "Recommendation"],
-        ...deliverable.protocol.dealInsights.map((insight) => [insight.title, insight.text]),
-      ],
-      maxCellCharacters: 340,
-    });
-  }
-
-  if (resourceRows.length > 0) {
-    addCaseStudyPdfSubsection(items, "Primary resource-risk cluster");
-    addCaseStudyPdfBulletList(items, resourceRows.map((row) => `${row.resource}: ${row.potentialRisk}`));
-  }
-
-  if (deliverable.anchors?.length) {
-    items.push({
-      type: "table",
-      columns: [140, 328],
-      rows: [
-        ["Prediction Anchor", "Friction Outlook"],
-        ...deliverable.anchors.map((anchor) => [anchor.label, anchor.text]),
-      ],
-      maxCellCharacters: 320,
-    });
-  }
-
-  addCaseStudyPdfSection(items, 7, "Recommended Action and Limitations");
-  addCaseStudyPdfParagraph(
-    items,
-    "Use this report as the deal-level integration hypothesis. Confirm individual leadership fit before final sequencing decisions, and open a practitioner consultation when the transaction moves into integration planning.",
-    { after: 8 },
-  );
-  addCaseStudyPdfBulletList(
-    items,
-    finalReport.sections.find((section) => section.id === "limitations")?.items ?? [],
-  );
-
-  addCaseStudyPdfSection(items, 8, "Final Report Structure");
-  items.push({
-    type: "table",
-    columns: [38, 158, 272],
-    rows: [
-      ["No.", "Section", "Purpose"],
-      ...finalReport.sections.map((section, index) => [
-        String(index + 1),
-        section.title,
-        section.summary,
-      ]),
-    ],
-    maxCellCharacters: 260,
-  });
-
-  addCaseStudyPdfParagraph(items, "ABOUT Post-Deal Behavior Forecast Methodology", {
+  addCaseStudyPdfParagraph(items, deliverable.riskBand, {
     size: 12,
     bold: true,
-    color: PDF_BRAND.navy,
-    before: 12,
-    after: 5,
-    maxCharacters: 78,
+    color: bandColor,
     align: "center",
+    after: 8,
+    maxCharacters: 44,
   });
   addCaseStudyPdfParagraph(
     items,
-    "Structural Typology is a predictive model of organisational behaviour applied here to M&A integration risk. Its final diagnostic output distinguishes what respondents said, what evidence supports, what evidence contradicts, what remains unknown, and where analyst interpretation is required.",
-    { size: 11, color: PDF_BRAND.body, align: "center", after: 8, maxCharacters: 74 },
+    pdfBandInterpretation(score, deliverable.riskBand),
   );
+
+  addCaseStudyPdfSection(items, 6, "What Will Happen After Close");
   items.push({
-    text: "structural-typology.com  \u00b7  info@structural-typology.academy",
-    size: 10,
-    align: "center",
-    color: PDF_BRAND.accent,
-    after: 4,
-    maxCharacters: 78,
+    type: "table",
+    columns: [92, 188, 188],
+    rows: [["Window", "What surfaces", "What it looks like in the room"], ...timelineRows],
   });
+
+  addCaseStudyPdfSection(items, 7, "What to Watch — and When");
+  addCaseStudyPdfParagraph(items, `30-day decisive signal: ${decisiveSignal}`, {
+    fill: PDF_BRAND.warningFill,
+    stroke: PDF_BRAND.warningStroke,
+    strokeWidth: 1.2,
+    paddingY: 10,
+    after: 10,
+  });
+  addCaseStudyPdfSubsection(items, "90-day checks");
+  addCaseStudyPdfBulletList(items, ninetyDayChecks);
+  addCaseStudyPdfSubsection(items, "180-day checks");
+  addCaseStudyPdfBulletList(items, oneEightyDayChecks);
+
+  addCaseStudyPdfSection(items, 8, "Recommended Actions");
+  addCaseStudyPdfSubsection(items, "Before close");
+  addCaseStudyPdfBulletList(items, actions.beforeClose);
+  addCaseStudyPdfSubsection(items, "After close");
+  addCaseStudyPdfBulletList(items, actions.afterClose);
+
+  addCaseStudyPdfSection(items, 9, "What the Full Engagement Adds");
   items.push({
-    text: `Academy of Structural Typology  \u00b7  ${generatedDate}  \u00b7  Confidential`,
+    type: "table",
+    columns: [130, 338],
+    rows: [
+      ["Addition", "What changes"],
+      ["Confirmation", "The environment read is confirmed against the full evidence record and the leadership context of the actual deal."],
+      ["Named people", "The forecast is translated into which leaders are likely to thrive, stall, resist, or leave under the planned operating model."],
+      ["A protocol", "The forecast becomes sequencing, decision rights, escalation rules, and monitoring cadence for the first integration cycle."],
+    ],
+  });
+  addCaseStudyPdfParagraph(items, "The logical next step is to confirm the forecast against named leadership roles before final sequencing.", { after: 10 });
+  items.push({
+    text: "Preliminary, structure-based forecast; medium confidence; confirm individual leadership fit before final sequencing.",
     size: 9,
-    align: "center",
     color: PDF_BRAND.muted,
-    after: 4,
+    fill: "F2F2F2",
+    stroke: "",
+    paddingY: 8,
+    after: 6,
     maxCharacters: 78,
   });
 
