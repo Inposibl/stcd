@@ -1416,27 +1416,27 @@ function updateQuestionnaireSelectedAnswer(answers, question, value) {
   };
 }
 
-const TARGET_OBSERVER_DIRECT_OBSERVATION_FALLBACK_OPTION_PATTERN = /cannot answer from direct observation|not visible to me|observable evidence|was not gathered during diligence|not gathered during diligence/i;
+const DIRECT_OBSERVATION_INSUFFICIENT_OPTION_PATTERN = /cannot answer|no direct observation|not visible\b|observable evidence.*not gathered|was not gathered|not gathered|insufficient evidence|not enough evidence|cannot determine.*direct observation|do not know.*direct observation/i;
 
-function isTargetObserverDirectObservationFallbackOption(option) {
-  return TARGET_OBSERVER_DIRECT_OBSERVATION_FALLBACK_OPTION_PATTERN.test(option?.text ?? "");
+function isDirectObservationInsufficientOption(option) {
+  return DIRECT_OBSERVATION_INSUFFICIENT_OPTION_PATTERN.test(option?.text ?? "");
 }
 
-function targetObserverVisibleOptions(question, answer) {
+function questionnaireVisibleOptions(question, answer) {
   const normalized = normalizeEvidenceAnswer(answer);
   if (normalized.directObservationGate !== "yes") return question.options;
-  return question.options.filter((option) => !isTargetObserverDirectObservationFallbackOption(option));
+  return question.options.filter((option) => !isDirectObservationInsufficientOption(option));
 }
 
-function targetObserverSelectedOption(question, answer) {
+function questionnaireSelectedOption(question, answer) {
   const selected = selectedOptionValue(answer);
   if (!selected) return "";
-  return targetObserverVisibleOptions(question, answer).some((option) => option.value === selected) ? selected : "";
+  return questionnaireVisibleOptions(question, answer).some((option) => option.value === selected) ? selected : "";
 }
 
-function sanitizeTargetObserverAnswer(question, answer) {
+function sanitizeQuestionnaireAnswer(question, answer) {
   const normalized = normalizeEvidenceAnswer(answer);
-  if (!normalized.selectedOption || targetObserverSelectedOption(question, normalized)) return answer;
+  if (!normalized.selectedOption || questionnaireSelectedOption(question, normalized)) return answer;
   return updateEvidenceAnswer(normalized, { selectedOption: "" });
 }
 
@@ -1645,8 +1645,9 @@ function AcquirerModuleScreen({ session, setSession }) {
   const questions = ACQUIRER_TRACK_DATA.acquirerModule.questions;
   const question = questions[activeIndex];
   const currentAnswer = normalizeEvidenceAnswer(answers[question.id]);
-  const selectedAnswer = selectedOptionValue(currentAnswer);
-  const currentAnswerValidation = validateEvidenceClassifiedAnswer(answers[question.id]);
+  const visibleOptions = questionnaireVisibleOptions(question, currentAnswer);
+  const selectedAnswer = questionnaireSelectedOption(question, currentAnswer);
+  const currentAnswerValidation = validateEvidenceClassifiedAnswer(sanitizeQuestionnaireAnswer(question, answers[question.id]));
   const canSubmitQuestion = currentAnswerValidation.valid;
 
   if (!canStartAcquirerModule(session)) {
@@ -1665,7 +1666,7 @@ function AcquirerModuleScreen({ session, setSession }) {
   }
 
   function updateCurrentEvidenceAnswer(answer) {
-    setAnswers((current) => ({ ...current, [question.id]: answer }));
+    setAnswers((current) => ({ ...current, [question.id]: sanitizeQuestionnaireAnswer(question, answer) }));
     setError("");
   }
 
@@ -1708,7 +1709,7 @@ function AcquirerModuleScreen({ session, setSession }) {
           onChange={updateCurrentEvidenceAnswer}
         />
         <div className="option-list">
-          {question.options.map((option) => (
+          {visibleOptions.map((option) => (
             <label key={`${question.id}-${option.value}`} className="option-row">
               <input
                 checked={selectedAnswer === option.value}
@@ -1905,8 +1906,9 @@ function AcquirerVerificationQuestionnaire({ onComplete }) {
   const questions = ACQUIRER_TRACK_DATA.acquirerModule.questions;
   const question = questions[activeIndex];
   const currentAnswer = normalizeEvidenceAnswer(answers[question.id]);
-  const selectedAnswer = selectedOptionValue(currentAnswer);
-  const currentAnswerValidation = validateEvidenceClassifiedAnswer(answers[question.id]);
+  const visibleOptions = questionnaireVisibleOptions(question, currentAnswer);
+  const selectedAnswer = questionnaireSelectedOption(question, currentAnswer);
+  const currentAnswerValidation = validateEvidenceClassifiedAnswer(sanitizeQuestionnaireAnswer(question, answers[question.id]));
   const canSubmitQuestion = currentAnswerValidation.valid;
 
   function updateAnswer(value) {
@@ -1915,7 +1917,7 @@ function AcquirerVerificationQuestionnaire({ onComplete }) {
   }
 
   function updateCurrentEvidenceAnswer(answer) {
-    setAnswers((current) => ({ ...current, [question.id]: answer }));
+    setAnswers((current) => ({ ...current, [question.id]: sanitizeQuestionnaireAnswer(question, answer) }));
     setError("");
   }
 
@@ -1955,7 +1957,7 @@ function AcquirerVerificationQuestionnaire({ onComplete }) {
           onChange={updateCurrentEvidenceAnswer}
         />
         <div className="option-list">
-          {question.options.map((option) => (
+          {visibleOptions.map((option) => (
             <label key={`${question.id}-${option.value}`} className="option-row">
               <input
                 checked={selectedAnswer === option.value}
@@ -2508,9 +2510,9 @@ function TargetObservationQuestionnaire({ answers, setAnswers, setup, onComplete
   const questions = TARGET_OBSERVATION_DIAGNOSTIC.questions;
   const question = questions[activeIndex];
   const currentAnswer = normalizeEvidenceAnswer(answers[question.id]);
-  const visibleOptions = targetObserverVisibleOptions(question, currentAnswer);
-  const selectedAnswer = targetObserverSelectedOption(question, currentAnswer);
-  const currentAnswerValidation = validateEvidenceClassifiedAnswer(sanitizeTargetObserverAnswer(question, answers[question.id]));
+  const visibleOptions = questionnaireVisibleOptions(question, currentAnswer);
+  const selectedAnswer = questionnaireSelectedOption(question, currentAnswer);
+  const currentAnswerValidation = validateEvidenceClassifiedAnswer(sanitizeQuestionnaireAnswer(question, answers[question.id]));
   const canSubmitQuestion = currentAnswerValidation.valid;
 
   function updateAnswer(value) {
@@ -2519,7 +2521,7 @@ function TargetObservationQuestionnaire({ answers, setAnswers, setup, onComplete
   }
 
   function updateCurrentEvidenceAnswer(answer) {
-    setAnswers((current) => ({ ...current, [question.id]: sanitizeTargetObserverAnswer(question, answer) }));
+    setAnswers((current) => ({ ...current, [question.id]: sanitizeQuestionnaireAnswer(question, answer) }));
     setError("");
   }
 
@@ -2692,9 +2694,9 @@ function TargetObserverDiagnosticSurvey({ baseSession, onComplete, completionPen
   const setAnswers = phase === "level1" ? setLevel1Answers : setLevel2Answers;
   const question = questions[activeIndex];
   const currentAnswer = normalizeEvidenceAnswer(answers[question.id]);
-  const visibleOptions = targetObserverVisibleOptions(question, currentAnswer);
-  const selectedAnswer = targetObserverSelectedOption(question, currentAnswer);
-  const currentAnswerValidation = validateEvidenceClassifiedAnswer(sanitizeTargetObserverAnswer(question, answers[question.id]));
+  const visibleOptions = questionnaireVisibleOptions(question, currentAnswer);
+  const selectedAnswer = questionnaireSelectedOption(question, currentAnswer);
+  const currentAnswerValidation = validateEvidenceClassifiedAnswer(sanitizeQuestionnaireAnswer(question, answers[question.id]));
   const canSubmitQuestion = currentAnswerValidation.valid;
 
   function updateAnswer(value) {
@@ -2703,7 +2705,7 @@ function TargetObserverDiagnosticSurvey({ baseSession, onComplete, completionPen
   }
 
   function updateCurrentEvidenceAnswer(answer) {
-    setAnswers((current) => ({ ...current, [question.id]: sanitizeTargetObserverAnswer(question, answer) }));
+    setAnswers((current) => ({ ...current, [question.id]: sanitizeQuestionnaireAnswer(question, answer) }));
     setError("");
   }
 
@@ -3057,9 +3059,9 @@ function Step2BLevel1Screen({ session, setSession }) {
   const questions = TARGET_DIAGNOSTIC_DATA.level1.questions;
   const question = questions[activeIndex];
   const currentAnswer = normalizeEvidenceAnswer(answers[question.id]);
-  const visibleOptions = targetObserverVisibleOptions(question, currentAnswer);
-  const selectedAnswer = targetObserverSelectedOption(question, currentAnswer);
-  const currentAnswerValidation = validateEvidenceClassifiedAnswer(sanitizeTargetObserverAnswer(question, answers[question.id]));
+  const visibleOptions = questionnaireVisibleOptions(question, currentAnswer);
+  const selectedAnswer = questionnaireSelectedOption(question, currentAnswer);
+  const currentAnswerValidation = validateEvidenceClassifiedAnswer(sanitizeQuestionnaireAnswer(question, answers[question.id]));
   const canSubmitQuestion = currentAnswerValidation.valid;
 
   if (!canStartTargetDiagnostic(session)) {
@@ -3078,7 +3080,7 @@ function Step2BLevel1Screen({ session, setSession }) {
   }
 
   function updateCurrentEvidenceAnswer(answer) {
-    setAnswers((current) => ({ ...current, [question.id]: sanitizeTargetObserverAnswer(question, answer) }));
+    setAnswers((current) => ({ ...current, [question.id]: sanitizeQuestionnaireAnswer(question, answer) }));
     setError("");
   }
 
@@ -3207,9 +3209,9 @@ function Step2BLevel2Screen({ session, setSession }) {
   const questions = TARGET_DIAGNOSTIC_DATA.level2.questions;
   const question = questions[activeIndex];
   const currentAnswer = normalizeEvidenceAnswer(answers[question.id]);
-  const visibleOptions = targetObserverVisibleOptions(question, currentAnswer);
-  const selectedAnswer = targetObserverSelectedOption(question, currentAnswer);
-  const currentAnswerValidation = validateEvidenceClassifiedAnswer(sanitizeTargetObserverAnswer(question, answers[question.id]));
+  const visibleOptions = questionnaireVisibleOptions(question, currentAnswer);
+  const selectedAnswer = questionnaireSelectedOption(question, currentAnswer);
+  const currentAnswerValidation = validateEvidenceClassifiedAnswer(sanitizeQuestionnaireAnswer(question, answers[question.id]));
   const canSubmitQuestion = currentAnswerValidation.valid;
 
   if (!session.target2B?.level1?.completed) {
@@ -3239,7 +3241,7 @@ function Step2BLevel2Screen({ session, setSession }) {
   }
 
   function updateCurrentEvidenceAnswer(answer) {
-    setAnswers((current) => ({ ...current, [question.id]: sanitizeTargetObserverAnswer(question, answer) }));
+    setAnswers((current) => ({ ...current, [question.id]: sanitizeQuestionnaireAnswer(question, answer) }));
     setError("");
   }
 
@@ -3370,8 +3372,9 @@ function TargetSelfAssessmentSurvey({ session, setSession, invite = null }) {
   const questions = TARGET_SELF_ASSESSMENT_DATA.targetSelfAssessment.questions;
   const question = questions[activeIndex];
   const currentAnswer = normalizeEvidenceAnswer(answers[question.id]);
-  const selectedAnswer = selectedOptionValue(currentAnswer);
-  const currentAnswerValidation = validateEvidenceClassifiedAnswer(answers[question.id]);
+  const visibleOptions = questionnaireVisibleOptions(question, currentAnswer);
+  const selectedAnswer = questionnaireSelectedOption(question, currentAnswer);
+  const currentAnswerValidation = validateEvidenceClassifiedAnswer(sanitizeQuestionnaireAnswer(question, answers[question.id]));
   const canSubmitQuestion = currentAnswerValidation.valid;
 
   if (receipt || invite?.completed || (!invite && session.targetSelfAssessment?.completed)) return <TargetReceiptScreen invited={Boolean(invite)} />;
@@ -3398,7 +3401,7 @@ function TargetSelfAssessmentSurvey({ session, setSession, invite = null }) {
   }
 
   function updateCurrentEvidenceAnswer(answer) {
-    setAnswers((current) => ({ ...current, [question.id]: answer }));
+    setAnswers((current) => ({ ...current, [question.id]: sanitizeQuestionnaireAnswer(question, answer) }));
     setError("");
   }
 
@@ -3511,7 +3514,7 @@ function TargetSelfAssessmentSurvey({ session, setSession, invite = null }) {
             onChange={updateCurrentEvidenceAnswer}
           />
           <div className="option-list">
-            {question.options.map((option) => (
+            {visibleOptions.map((option) => (
               <label key={`${question.id}-${option.value}`} className="option-row">
                 <input
                   checked={selectedAnswer === option.value}
