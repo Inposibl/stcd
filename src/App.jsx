@@ -1416,6 +1416,30 @@ function updateQuestionnaireSelectedAnswer(answers, question, value) {
   };
 }
 
+const TARGET_OBSERVER_DIRECT_OBSERVATION_FALLBACK_OPTION_PATTERN = /cannot answer from direct observation|not visible to me|observable evidence|was not gathered during diligence|not gathered during diligence/i;
+
+function isTargetObserverDirectObservationFallbackOption(option) {
+  return TARGET_OBSERVER_DIRECT_OBSERVATION_FALLBACK_OPTION_PATTERN.test(option?.text ?? "");
+}
+
+function targetObserverVisibleOptions(question, answer) {
+  const normalized = normalizeEvidenceAnswer(answer);
+  if (normalized.directObservationGate !== "yes") return question.options;
+  return question.options.filter((option) => !isTargetObserverDirectObservationFallbackOption(option));
+}
+
+function targetObserverSelectedOption(question, answer) {
+  const selected = selectedOptionValue(answer);
+  if (!selected) return "";
+  return targetObserverVisibleOptions(question, answer).some((option) => option.value === selected) ? selected : "";
+}
+
+function sanitizeTargetObserverAnswer(question, answer) {
+  const normalized = normalizeEvidenceAnswer(answer);
+  if (!normalized.selectedOption || targetObserverSelectedOption(question, normalized)) return answer;
+  return updateEvidenceAnswer(normalized, { selectedOption: "" });
+}
+
 function DirectObservationGatePanel({ question, answer, onChange }) {
   const gate = question.directObservationGate;
   if (!gate) return null;
@@ -2484,8 +2508,9 @@ function TargetObservationQuestionnaire({ answers, setAnswers, setup, onComplete
   const questions = TARGET_OBSERVATION_DIAGNOSTIC.questions;
   const question = questions[activeIndex];
   const currentAnswer = normalizeEvidenceAnswer(answers[question.id]);
-  const selectedAnswer = selectedOptionValue(currentAnswer);
-  const currentAnswerValidation = validateEvidenceClassifiedAnswer(answers[question.id]);
+  const visibleOptions = targetObserverVisibleOptions(question, currentAnswer);
+  const selectedAnswer = targetObserverSelectedOption(question, currentAnswer);
+  const currentAnswerValidation = validateEvidenceClassifiedAnswer(sanitizeTargetObserverAnswer(question, answers[question.id]));
   const canSubmitQuestion = currentAnswerValidation.valid;
 
   function updateAnswer(value) {
@@ -2494,7 +2519,7 @@ function TargetObservationQuestionnaire({ answers, setAnswers, setup, onComplete
   }
 
   function updateCurrentEvidenceAnswer(answer) {
-    setAnswers((current) => ({ ...current, [question.id]: answer }));
+    setAnswers((current) => ({ ...current, [question.id]: sanitizeTargetObserverAnswer(question, answer) }));
     setError("");
   }
 
@@ -2551,7 +2576,7 @@ function TargetObservationQuestionnaire({ answers, setAnswers, setup, onComplete
           onChange={updateCurrentEvidenceAnswer}
         />
         <div className="option-list">
-          {question.options.map((option) => (
+          {visibleOptions.map((option) => (
             <label key={`${question.id}-${option.value}`} className="option-row">
               <input
                 checked={selectedAnswer === option.value}
@@ -2667,8 +2692,9 @@ function TargetObserverDiagnosticSurvey({ baseSession, onComplete, completionPen
   const setAnswers = phase === "level1" ? setLevel1Answers : setLevel2Answers;
   const question = questions[activeIndex];
   const currentAnswer = normalizeEvidenceAnswer(answers[question.id]);
-  const selectedAnswer = selectedOptionValue(currentAnswer);
-  const currentAnswerValidation = validateEvidenceClassifiedAnswer(answers[question.id]);
+  const visibleOptions = targetObserverVisibleOptions(question, currentAnswer);
+  const selectedAnswer = targetObserverSelectedOption(question, currentAnswer);
+  const currentAnswerValidation = validateEvidenceClassifiedAnswer(sanitizeTargetObserverAnswer(question, answers[question.id]));
   const canSubmitQuestion = currentAnswerValidation.valid;
 
   function updateAnswer(value) {
@@ -2677,7 +2703,7 @@ function TargetObserverDiagnosticSurvey({ baseSession, onComplete, completionPen
   }
 
   function updateCurrentEvidenceAnswer(answer) {
-    setAnswers((current) => ({ ...current, [question.id]: answer }));
+    setAnswers((current) => ({ ...current, [question.id]: sanitizeTargetObserverAnswer(question, answer) }));
     setError("");
   }
 
@@ -2753,7 +2779,7 @@ function TargetObserverDiagnosticSurvey({ baseSession, onComplete, completionPen
             onChange={updateCurrentEvidenceAnswer}
           />
           <div className="option-list">
-            {question.options.map((option) => (
+            {visibleOptions.map((option) => (
               <label key={`${question.id}-${option.value}`} className="option-row">
                 <input
                   checked={selectedAnswer === option.value}
@@ -3031,8 +3057,9 @@ function Step2BLevel1Screen({ session, setSession }) {
   const questions = TARGET_DIAGNOSTIC_DATA.level1.questions;
   const question = questions[activeIndex];
   const currentAnswer = normalizeEvidenceAnswer(answers[question.id]);
-  const selectedAnswer = selectedOptionValue(currentAnswer);
-  const currentAnswerValidation = validateEvidenceClassifiedAnswer(answers[question.id]);
+  const visibleOptions = targetObserverVisibleOptions(question, currentAnswer);
+  const selectedAnswer = targetObserverSelectedOption(question, currentAnswer);
+  const currentAnswerValidation = validateEvidenceClassifiedAnswer(sanitizeTargetObserverAnswer(question, answers[question.id]));
   const canSubmitQuestion = currentAnswerValidation.valid;
 
   if (!canStartTargetDiagnostic(session)) {
@@ -3051,7 +3078,7 @@ function Step2BLevel1Screen({ session, setSession }) {
   }
 
   function updateCurrentEvidenceAnswer(answer) {
-    setAnswers((current) => ({ ...current, [question.id]: answer }));
+    setAnswers((current) => ({ ...current, [question.id]: sanitizeTargetObserverAnswer(question, answer) }));
     setError("");
   }
 
@@ -3099,7 +3126,7 @@ function Step2BLevel1Screen({ session, setSession }) {
           onChange={updateCurrentEvidenceAnswer}
         />
         <div className="option-list">
-          {question.options.map((option) => (
+          {visibleOptions.map((option) => (
             <label key={`${question.id}-${option.value}`} className="option-row">
               <input
                 checked={selectedAnswer === option.value}
@@ -3180,8 +3207,9 @@ function Step2BLevel2Screen({ session, setSession }) {
   const questions = TARGET_DIAGNOSTIC_DATA.level2.questions;
   const question = questions[activeIndex];
   const currentAnswer = normalizeEvidenceAnswer(answers[question.id]);
-  const selectedAnswer = selectedOptionValue(currentAnswer);
-  const currentAnswerValidation = validateEvidenceClassifiedAnswer(answers[question.id]);
+  const visibleOptions = targetObserverVisibleOptions(question, currentAnswer);
+  const selectedAnswer = targetObserverSelectedOption(question, currentAnswer);
+  const currentAnswerValidation = validateEvidenceClassifiedAnswer(sanitizeTargetObserverAnswer(question, answers[question.id]));
   const canSubmitQuestion = currentAnswerValidation.valid;
 
   if (!session.target2B?.level1?.completed) {
@@ -3211,7 +3239,7 @@ function Step2BLevel2Screen({ session, setSession }) {
   }
 
   function updateCurrentEvidenceAnswer(answer) {
-    setAnswers((current) => ({ ...current, [question.id]: answer }));
+    setAnswers((current) => ({ ...current, [question.id]: sanitizeTargetObserverAnswer(question, answer) }));
     setError("");
   }
 
@@ -3260,7 +3288,7 @@ function Step2BLevel2Screen({ session, setSession }) {
           onChange={updateCurrentEvidenceAnswer}
         />
         <div className="option-list">
-          {question.options.map((option) => (
+          {visibleOptions.map((option) => (
             <label key={`${question.id}-${option.value}`} className="option-row">
               <input
                 checked={selectedAnswer === option.value}
