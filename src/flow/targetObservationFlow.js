@@ -84,6 +84,21 @@ export function generateObservationSetupCode(random = Math.random) {
   return String(100000 + Math.floor(random() * 900000)).slice(0, 6);
 }
 
+function normalizeObservationSessionId(value) {
+  return typeof value === "string" || typeof value === "number" ? String(value).trim() : "";
+}
+
+function isValidObservationSessionId(value) {
+  const normalized = normalizeObservationSessionId(value);
+  return Boolean(normalized && normalized !== "0");
+}
+
+function generatedObservationSessionId(createdAt, digitalCode) {
+  const parsed = Date.parse(createdAt);
+  const timestamp = Number.isFinite(parsed) && parsed > 0 ? parsed : Date.now();
+  return `obs-${timestamp}-${digitalCode}`;
+}
+
 export function buildObservationSetupSurveyLink({
   basePath = "/screen-6a-target-observation-setup/authorized",
   observationSessionId,
@@ -108,7 +123,7 @@ export function observationSetupInviteFromLinkParams(params, basePath = "/screen
   const createdAt = params?.get("createdAt") ?? "";
   const expiresAt = params?.get("expiresAt") ?? "";
 
-  if (!observationSessionId || !assessmentSessionId || !codeHash || !createdAt || !expiresAt) return null;
+  if (!isValidObservationSessionId(observationSessionId) || !assessmentSessionId || !codeHash || !createdAt || !expiresAt) return null;
 
   return Object.freeze({
     observationSessionId,
@@ -129,7 +144,10 @@ export function createObservationSetupInvite(session, options = {}) {
   const createdAt = options.createdAt ?? new Date().toISOString();
   const digitalCode = options.digitalCode ?? generateObservationSetupCode(options.random);
   const assessmentSessionId = options.assessmentSessionId ?? session?.sessionId ?? "public-preview-session";
-  const observationSessionId = options.observationSessionId ?? `obs-${Date.parse(createdAt)}-${digitalCode}`;
+  const requestedObservationSessionId = normalizeObservationSessionId(options.observationSessionId);
+  const observationSessionId = isValidObservationSessionId(requestedObservationSessionId)
+    ? requestedObservationSessionId
+    : generatedObservationSessionId(createdAt, digitalCode);
   const expiresAt = options.expiresAt ?? addHours(createdAt, OBSERVATION_SETUP_INVITE_TTL_HOURS);
   const basePath = options.basePath ?? "/screen-6a-target-observation-setup/authorized";
   const codeHash = hashObservationSetupCode(digitalCode, observationSessionId, assessmentSessionId);
@@ -162,6 +180,7 @@ export function createObservationSetupInvite(session, options = {}) {
 export function verifyObservationSetupInvite(invite, code, now = new Date().toISOString()) {
   const normalizedCode = typeof code === "string" ? code.trim() : "";
   if (!invite) return Object.freeze({ ok: false, status: "not-found" });
+  if (!isValidObservationSessionId(invite.observationSessionId)) return Object.freeze({ ok: false, status: "invalid-session" });
   if (invite.revoked) return Object.freeze({ ok: false, status: "revoked" });
   if (invite.completed) return Object.freeze({ ok: false, status: "completed" });
   if (new Date(now).getTime() > new Date(invite.expiresAt).getTime()) return Object.freeze({ ok: false, status: "expired" });
@@ -178,7 +197,7 @@ export function verifyObservationSetupInvite(invite, code, now = new Date().toIS
 }
 
 export function completeObservationSetupInvite(invite, setup, targetObservation = null, completedAt = new Date().toISOString()) {
-  if (!invite || invite.revoked || invite.completed || !setup?.completed || !targetObservation?.completed) {
+  if (!invite || !isValidObservationSessionId(invite.observationSessionId) || invite.revoked || invite.completed || !setup?.completed || !targetObservation?.completed) {
     return Object.freeze({
       ok: false,
       reason: "observation-setup-invite-not-completable",
@@ -193,17 +212,26 @@ export function completeObservationSetupInvite(invite, setup, targetObservation 
       completed: true,
       completedAt,
       targetObservationSetup: setup,
-      targetObservation,
+      targetObservation: Object.freeze({
+        ...targetObservation,
+        observationSessionId: invite.observationSessionId,
+      }),
     }),
   });
 }
 
 function completedInviteMatchesCurrentInvite(currentInvite, completedInvite) {
-  if (!currentInvite) return true;
+  if (!currentInvite) return false;
 
-  const currentObservationSessionId = currentInvite.observationSessionId ?? "";
-  const completedObservationSessionId = completedInvite?.observationSessionId ?? "";
-  if (currentObservationSessionId && completedObservationSessionId && currentObservationSessionId !== completedObservationSessionId) {
+  const currentObservationSessionId = normalizeObservationSessionId(currentInvite.observationSessionId);
+  const completedObservationSessionId = normalizeObservationSessionId(completedInvite?.observationSessionId);
+  const completedTargetObservationSessionId = normalizeObservationSessionId(completedInvite?.targetObservation?.observationSessionId);
+  if (
+    !isValidObservationSessionId(currentObservationSessionId)
+    || !isValidObservationSessionId(completedObservationSessionId)
+    || currentObservationSessionId !== completedObservationSessionId
+    || completedTargetObservationSessionId !== completedObservationSessionId
+  ) {
     return false;
   }
 
@@ -217,7 +245,7 @@ function completedInviteMatchesCurrentInvite(currentInvite, completedInvite) {
 }
 
 export function attachAuthorizedObservationCompletion(currentSession, completedInvite) {
-  if (!completedInvite?.completed || !completedInvite.targetObservation?.completed) return currentSession;
+  if (!completedInvite?.completed || !completedInvite.targetObservation?.completed || !completedInvite.target2B?.completed) return currentSession;
   if (currentSession?.sessionId !== completedInvite.assessmentSessionId) return currentSession;
 
   const currentInvite = currentSession.targetObservationSetupInvite;

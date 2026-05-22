@@ -209,7 +209,7 @@ function parseAuthorizedObservationCompletion(value) {
       !payload?.assessmentSessionId
       || !payload?.observationSessionId
       || !payload?.completed
-      || !hasCompletedTargetObserverSubmission(payload)
+      || !hasCompletedAuthorizedTargetObserverSubmission(payload)
     ) {
       return null;
     }
@@ -961,6 +961,15 @@ function hasSubmittedAnswerPayload(answers) {
   return Boolean(answers && typeof answers === "object" && Object.keys(answers).length > 0);
 }
 
+function normalizeObservationSessionId(value) {
+  return typeof value === "string" || typeof value === "number" ? String(value).trim() : "";
+}
+
+function hasValidObservationSessionId(value) {
+  const normalized = normalizeObservationSessionId(value);
+  return Boolean(normalized && normalized !== "0");
+}
+
 function hasSubmittedTargetObservation(record) {
   return Boolean(record?.completed && hasSubmittedAnswerPayload(record.answers));
 }
@@ -980,6 +989,17 @@ function hasCompletedTargetObserverSubmission(source) {
   return Boolean(
     source?.completed
       && hasSubmittedTargetObservation(source.targetObservation)
+      && hasSubmittedTargetDiagnostic(source.target2B),
+  );
+}
+
+function hasCompletedAuthorizedTargetObserverSubmission(source) {
+  const observationSessionId = normalizeObservationSessionId(source?.observationSessionId);
+  return Boolean(
+    hasValidObservationSessionId(observationSessionId)
+      && source?.completed
+      && hasSubmittedTargetObservation(source.targetObservation)
+      && normalizeObservationSessionId(source.targetObservation?.observationSessionId) === observationSessionId
       && hasSubmittedTargetDiagnostic(source.target2B),
   );
 }
@@ -2167,7 +2187,7 @@ function TargetObservationSetupForm({ existingSetup = {}, submitLabel = "Continu
 
 function useAuthorizedObservationCompletionRefresh(invite, setSession) {
   useEffect(() => {
-    if (!invite || invite.completed) return undefined;
+    if (!invite || !hasValidObservationSessionId(invite.observationSessionId) || hasCompletedAuthorizedTargetObserverSubmission(invite)) return undefined;
 
     let cancelled = false;
     let completionChannel = null;
@@ -2190,7 +2210,8 @@ function useAuthorizedObservationCompletionRefresh(invite, setSession) {
         const response = await fetch(`/api/target-observation-state?sessionId=${encodeURIComponent(invite.assessmentSessionId)}`);
         if (!response.ok) return;
         const body = await response.json();
-        if (cancelled || !hasCompletedTargetObserverSubmission({
+        if (cancelled || !hasCompletedAuthorizedTargetObserverSubmission({
+          observationSessionId: invite.observationSessionId,
           completed: true,
           targetObservation: body?.targetObservation,
           target2B: body?.target2B,
@@ -2237,8 +2258,9 @@ function TargetObservationSetupIntroScreen({ session, setSession }) {
   const [authorizedRecipientEmail, setAuthorizedRecipientEmail] = useState("");
   const [authorizedEmailSending, setAuthorizedEmailSending] = useState(false);
   const invite = session.targetObservationSetupInvite;
-  const authorizedRouteLocked = Boolean(invite);
-  const authorizedSurveyComplete = hasCompletedTargetObserverSubmission(invite);
+  const activeAuthorizedInvite = hasValidObservationSessionId(invite?.observationSessionId) ? invite : null;
+  const authorizedRouteLocked = Boolean(activeAuthorizedInvite);
+  const authorizedSurveyComplete = hasCompletedAuthorizedTargetObserverSubmission(activeAuthorizedInvite);
 
   useAuthorizedObservationCompletionRefresh(invite, setSession);
 
@@ -2262,7 +2284,7 @@ function TargetObservationSetupIntroScreen({ session, setSession }) {
     setAuthorizedEmailSending(false);
   }
 
-  const fullLink = invite ? `${window.location.origin}${invite.surveyLink}` : "";
+  const fullLink = activeAuthorizedInvite ? `${window.location.origin}${activeAuthorizedInvite.surveyLink}` : "";
 
   async function sendAuthorizedEmail(event) {
     event.preventDefault();
@@ -2281,8 +2303,8 @@ function TargetObservationSetupIntroScreen({ session, setSession }) {
         action: "send-authorized-link",
         recipientEmail,
         surveyLink: fullLink,
-        digitalCode: invite.digitalCode,
-        expiresAt: invite.expiresAt,
+        digitalCode: activeAuthorizedInvite.digitalCode,
+        expiresAt: activeAuthorizedInvite.expiresAt,
       });
       const response = await fetch(`/api/final-report?${params.toString()}`, { method: "POST" });
       const result = await response.json().catch(() => null);
@@ -2346,7 +2368,7 @@ function TargetObservationSetupIntroScreen({ session, setSession }) {
         </button>
       </section>
 
-      {invite ? (
+      {activeAuthorizedInvite ? (
         <section className="invite-panel">
           <h2>Authorized respondent link and digital code</h2>
             <div className="invite-grid">
@@ -2356,11 +2378,11 @@ function TargetObservationSetupIntroScreen({ session, setSession }) {
               </label>
               <label>
                 <span>6-digit code</span>
-                <input readOnly value={invite.digitalCode} />
+                <input readOnly value={activeAuthorizedInvite.digitalCode} />
               </label>
               <label>
                 <span>Expires at</span>
-                <input readOnly value={invite.expiresAt} />
+                <input readOnly value={activeAuthorizedInvite.expiresAt} />
               </label>
             </div>
             {!authorizedSurveyComplete ? (
@@ -2378,21 +2400,22 @@ function TargetObservationSetupIntroScreen({ session, setSession }) {
               >
                 Enter e-mail for sending
               </button>
-              <button
-                disabled={!authorizedSurveyComplete}
-                type="button"
-                onClick={() => navigate("/screen-6b-target-observation?review=authorized")}
-              >
-                Open Authorized Survey
-              </button>
               {authorizedSurveyComplete ? (
-                <button
-                  className="primary-flow-action"
-                  type="button"
-                  onClick={() => navigate("/screen-9a-target-code-gate")}
-                >
-                  Continue to Preliminary Assessment
-                </button>
+                <>
+                  <button
+                    type="button"
+                    onClick={() => navigate("/screen-6b-target-observation?review=authorized")}
+                  >
+                    Open Authorized Survey
+                  </button>
+                  <button
+                    className="primary-flow-action"
+                    type="button"
+                    onClick={() => navigate("/screen-9a-target-code-gate")}
+                  >
+                    Continue to Preliminary Assessment
+                  </button>
+                </>
               ) : null}
             </div>
             {showAuthorizedEmail ? (
@@ -2448,6 +2471,14 @@ async function submitAuthorizedObservationCompletion(invite, digitalCode, setupR
     }
     if (!body?.targetObservation?.completed || !body?.target2B?.completed) {
       throw new Error(body?.error || body?.status || "Server save did not confirm the completed Target Observer block.");
+    }
+    if (!hasCompletedAuthorizedTargetObserverSubmission({
+      ...invite,
+      completed: true,
+      targetObservation: body.targetObservation,
+      target2B: body.target2B,
+    })) {
+      throw new Error(body?.error || body?.status || "Server save did not match the current Target Observer session.");
     }
 
     return Object.freeze({
