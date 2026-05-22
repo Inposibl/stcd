@@ -209,7 +209,7 @@ function parseAuthorizedObservationCompletion(value) {
       !payload?.assessmentSessionId
       || !payload?.observationSessionId
       || !payload?.completed
-      || !payload?.targetObservation?.completed
+      || !hasCompletedTargetObserverSubmission(payload)
     ) {
       return null;
     }
@@ -955,6 +955,44 @@ function targetDiagnosticCompletionRoute(session) {
 
 function targetDiagnosticCompletionLabel(session) {
   return isStandaloneTargetDiagnosticSession(session) ? "Continue to Consultation" : "Continue to Preliminary Assessment";
+}
+
+function hasSubmittedAnswerPayload(answers) {
+  return Boolean(answers && typeof answers === "object" && Object.keys(answers).length > 0);
+}
+
+function hasSubmittedTargetObservation(record) {
+  return Boolean(record?.completed && hasSubmittedAnswerPayload(record.answers));
+}
+
+function hasSubmittedTargetDiagnostic(record) {
+  return Boolean(
+    record?.completed
+      && record?.finalScore
+      && (
+        hasSubmittedAnswerPayload(record.level1?.answers)
+        || hasSubmittedAnswerPayload(record.level2?.answers)
+      ),
+  );
+}
+
+function hasCompletedTargetObserverSubmission(source) {
+  return Boolean(
+    source?.completed
+      && hasSubmittedTargetObservation(source.targetObservation)
+      && hasSubmittedTargetDiagnostic(source.target2B),
+  );
+}
+
+function hasSessionTargetObserverSubmission(session) {
+  return Boolean(
+    hasSubmittedTargetObservation(session?.targetObservation)
+      && hasSubmittedTargetDiagnostic(session?.target2B),
+  );
+}
+
+function canOpenPreliminaryAssessment(session) {
+  return Boolean(canCreatePreliminaryAssessment(session) && hasSessionTargetObserverSubmission(session));
 }
 
 function AcquisitionMotiveScreen({ session, setSession }) {
@@ -2126,7 +2164,11 @@ function useAuthorizedObservationCompletionRefresh(invite, setSession) {
         const response = await fetch(`/api/target-observation-state?sessionId=${encodeURIComponent(invite.assessmentSessionId)}`);
         if (!response.ok) return;
         const body = await response.json();
-        if (cancelled || !body?.targetObservation?.completed || !body?.target2B?.completed) return;
+        if (cancelled || !hasCompletedTargetObserverSubmission({
+          completed: true,
+          targetObservation: body?.targetObservation,
+          target2B: body?.target2B,
+        })) return;
         const completedInvite = {
           ...invite,
           completed: true,
@@ -2170,7 +2212,7 @@ function TargetObservationSetupIntroScreen({ session, setSession }) {
   const [authorizedEmailSending, setAuthorizedEmailSending] = useState(false);
   const invite = session.targetObservationSetupInvite;
   const authorizedRouteLocked = Boolean(invite);
-  const authorizedSurveyComplete = Boolean(invite?.completed && invite?.targetObservation?.completed && invite?.target2B?.completed);
+  const authorizedSurveyComplete = hasCompletedTargetObserverSubmission(invite);
 
   useAuthorizedObservationCompletionRefresh(invite, setSession);
 
@@ -2553,7 +2595,7 @@ function ReadOnlyTargetObservationReview({ session }) {
     ?? {};
   const finalAnswer = activeIndex === questions.length - 1;
 
-  if (!observation?.completed) {
+  if (!hasSubmittedTargetObservation(observation)) {
     return (
       <main className="screen-shell flow-screen compact-flow">
         <p className="eyebrow">Screen 6b / Target Observation</p>
@@ -3245,7 +3287,7 @@ function Step2BLevel2Screen({ session, setSession }) {
             <strong>Target environment: {aliasFor(result.primaryEnvironmentCode)} - {result.signalBadge}</strong>
             <span>Primary signal score: {result.primarySignalScore}</span>
             <span>Secondary signal: {aliasFor(result.secondaryEnvironmentCode)} - {result.secondarySignalScore}</span>
-            <span>{isStandaloneTargetDiagnosticSession(session) ? "Advisor diagnostic saved for analyst review" : canCreatePreliminaryAssessment({ ...session, target2B: { ...session.target2B, completed: true } }) ? "Ready for Preliminary Assessment" : "Preliminary Assessment remains locked"}</span>
+            <span>{isStandaloneTargetDiagnosticSession(session) ? "Advisor diagnostic saved for analyst review" : canOpenPreliminaryAssessment({ ...session, target2B: { ...session.target2B, completed: true, finalScore: result, level2: { ...session.target2B?.level2, completed: true, answers } } }) ? "Ready for Preliminary Assessment" : "Preliminary Assessment remains locked"}</span>
           </section>
         ) : null}
         <div className="button-row">
@@ -4408,7 +4450,7 @@ function PreliminaryTargetGateScreen({ session, setSession }) {
   const [showTargetSelfEmail, setShowTargetSelfEmail] = useState(false);
   const [targetSelfRecipientEmail, setTargetSelfRecipientEmail] = useState("");
   const [targetSelfEmailSending, setTargetSelfEmailSending] = useState(false);
-  const track1Ready = canCreatePreliminaryAssessment(session);
+  const track1Ready = canOpenPreliminaryAssessment(session);
   const preliminary = session.preliminaryAssessment;
   const invite = session.targetInvite;
   const authorizedObservationInvite = session.targetObservationSetupInvite;
@@ -4417,6 +4459,7 @@ function PreliminaryTargetGateScreen({ session, setSession }) {
   useAuthorizedObservationCompletionRefresh(authorizedObservationInvite, setSession);
 
   function createPreliminary() {
+    if (!track1Ready) return;
     const result = attachPreliminaryAssessment(session);
     if (result.preliminaryAssessment?.completed && !result.session.targetInvite && !result.session.targetSelfAssessment?.completed) {
       const inviteResult = createTargetInvite(result.session);
@@ -6190,7 +6233,7 @@ function ConsultationRequestScreen({ session, setSession }) {
 
 function FinalDeliverablesScreen({ session, setSession }) {
   const deliverable = buildFinalDeliverable(session);
-  const preliminaryAssessmentAvailable = Boolean(session?.acquirer2A?.completed && session?.targetObservation?.completed);
+  const preliminaryAssessmentAvailable = Boolean(session?.acquirer2A?.completed && hasSessionTargetObserverSubmission(session));
   if (!deliverable.ready) {
     return (
       <main className="screen-shell flow-screen compact-flow">
