@@ -5092,12 +5092,33 @@ function buyerFacingActionText(value) {
     .replace(/\binformation\b(?!\s+flow)/gi, "information flow");
 }
 
+function forecastPartyName(session, deliverable, side) {
+  const key = side === "acquirer" ? "acquirerName" : "targetName";
+  const fallback = side === "acquirer" ? "your organisation" : "your target";
+  const aliasFallback = side === "acquirer" ? deliverable?.acquirerAlias : deliverable?.targetAlias;
+  const candidates = [
+    session?.dealContext?.data?.[key],
+    session?.preliminaryAssessment?.dealContext?.[key],
+    session?.targetInvite?.reportBinding?.dealContext?.[key],
+    session?.targetInvite?.reportBinding?.[key],
+    aliasFallback,
+  ];
+
+  for (const candidate of candidates) {
+    if (isPlaceholderPartyName(candidate)) continue;
+    const text = forecastReportText(candidate, "");
+    if (text) return text;
+  }
+
+  return forecastReportText(pdfPartyName(aliasFallback, fallback), fallback);
+}
+
 function buildForecastLedPublicReport(deliverable, session) {
   const dealContext = session?.dealContext?.data ?? {};
   const acquirerEnvironment = pdfEnvironmentSummary(deliverable?.acquirerEnvironmentCode);
   const targetEnvironment = pdfEnvironmentSummary(deliverable?.targetEnvironmentCode);
-  const acquirerName = forecastReportText(pdfPartyName(dealContext.acquirerName, "your organisation"));
-  const targetName = forecastReportText(pdfPartyName(dealContext.targetName, "your target"));
+  const acquirerName = forecastPartyName(session, deliverable, "acquirer");
+  const targetName = forecastPartyName(session, deliverable, "target");
   const score = pdfRoundedCompatibilityScore(deliverable);
   const riskBand = forecastReportText(deliverable?.riskBand, "Risk band pending");
   const narrative = deliverable?.narrative ?? {};
@@ -6222,6 +6243,7 @@ function isPlaceholderPartyName(value) {
   const text = String(value ?? "").trim();
   if (!text) return true;
   return /^(?:aa|bb|test|testing|demo|sample|placeholder|review acquirer|review target|acquirer pending|target pending)$/i.test(text)
+    || /^(?:your organisation|your organization|your target)$/i.test(text)
     || /^review\s+(?:acquirer|target)$/i.test(text)
     || /^test[\s_-]*/i.test(text);
 }
