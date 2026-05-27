@@ -3387,7 +3387,7 @@ function TargetReceiptScreen({ invited = false }) {
         <p className="eyebrow">Target Self-Assessment</p>
         <h1>{TARGET_SELF_ASSESSMENT_DATA.receipt.title}</h1>
         <p>{TARGET_SELF_ASSESSMENT_DATA.receipt.body}</p>
-        {invited ? <p className="source-note">When the original assessment tab is still open in this browser, it is notified automatically. If that tab does not update, return to it and open Final Deliverables.</p> : null}
+        {invited ? <p className="source-note">When the original assessment tab is still open in this browser, it is notified automatically. If that tab does not update, return to it and open the forecast report.</p> : null}
         <strong>{TARGET_SELF_ASSESSMENT_DATA.receipt.close}</strong>
       </section>
     </main>
@@ -5326,7 +5326,7 @@ function ForecastLedPublicReport({ report }) {
           <p style={FORECAST_REPORT_STYLES.coverLead}><strong>Decision implication:</strong> {report.decisionImplication}</p>
           <p style={FORECAST_REPORT_STYLES.scoreChip}><span>Compatibility score</span><span>{report.compatibility.demotedNote}</span></p>
         </div>
-        <p className="source-note" style={FORECAST_REPORT_STYLES.muted}>Public Final Deliverables Report / M&amp;A Post-Deal Behavior Forecast / {report.generatedDate}</p>
+        <p className="source-note" style={FORECAST_REPORT_STYLES.muted}>Preliminary Forecast Brief / M&amp;A Post-Deal Behavior Forecast / {report.generatedDate}</p>
       </section>
 
       <ForecastReportSection number={1} title="Executive Decision Summary">
@@ -5902,7 +5902,7 @@ function cleanPdfReportText(value) {
   return publicReportText(value)
     .replace(/Screen\s*[0-9A-Za-z-]*/gi, "")
     .replace(/\bPA\b/g, "Preliminary Assessment")
-    .replace(/\bFD\b/g, "Final Deliverables")
+    .replace(/\bFD\b/g, "forecast report")
     .replace(/\s{2,}/g, " ")
     .trim();
 }
@@ -6338,7 +6338,7 @@ function buildFinalDeliverablesReportLines(deliverable, session) {
       maxCharacters: 58,
     },
     {
-      text: "Public Final Deliverables Report",
+      text: "Preliminary Forecast Brief",
       size: 11,
       align: "center",
       color: PDF_BRAND.muted,
@@ -6565,7 +6565,7 @@ function downloadFinalDeliverablesReportPdf(deliverable, offer, session, existin
 
 async function sendHiddenFinalDeliverablesReportCopy(deliverable, session, existingPdf = null) {
   if (!deliverable?.ready) {
-    throw new Error("Final Deliverables report is not ready.");
+    throw new Error("Forecast report is not ready.");
   }
 
   const pdf = existingPdf ?? createFinalDeliverablesReportPdf(deliverable, session);
