@@ -5,6 +5,8 @@ import {
   ACQUISITION_MOTIVE_OPTIONS,
   CANONICAL_DEAL_CONTEXT_FIELD_IDS,
   COMPETITOR_PRESERVATION_OPTIONS,
+  DEAL_ECONOMICS_CURRENCY_OPTIONS,
+  DEAL_ECONOMICS_STATUS_OPTIONS,
   DEAL_TYPE_OPTIONS,
   RESPONDENT_ACCESS_LEVEL_OPTIONS,
   RESPONDENT_FUNCTION_OPTIONS,
@@ -23,6 +25,7 @@ import {
   scoreAcquirerModule,
   validateAcquisitionMotive,
   validateDealContext,
+  validateDealEconomics,
   validateDealIdentity,
   validateDealStartContext,
   validateTransactionDetails,
@@ -52,6 +55,8 @@ assert.deepEqual(TRANSACTION_DETAIL_SECTIONS.map((section) => section.id), [
   "firmTenure",
   "integrationTimeline",
 ]);
+assert.deepEqual(DEAL_ECONOMICS_CURRENCY_OPTIONS, ["USD", "EUR", "GBP", "Other"]);
+assert.deepEqual(DEAL_ECONOMICS_STATUS_OPTIONS.map((option) => option.value), ["confirmed", "estimated", "not_available"]);
 assert.deepEqual(CANONICAL_DEAL_CONTEXT_FIELD_IDS, [
   "acquirerName",
   "targetName",
@@ -159,6 +164,31 @@ const detailsValidation = validateTransactionDetails({
 });
 assert.equal(detailsValidation.valid, true);
 
+const emptyEconomicsValidation = validateDealEconomics({});
+assert.equal(emptyEconomicsValidation.valid, true);
+assert.deepEqual(emptyEconomicsValidation.normalized, {
+  enterpriseValue: null,
+  enterpriseValueCurrency: "",
+  enterpriseValueStatus: "not_available",
+  compensationAssumptions: null,
+  compensationCurrency: "",
+  compensationStatus: "not_available",
+});
+const incompleteEconomicsValidation = validateDealEconomics({
+  enterpriseValueStatus: "estimated",
+});
+assert.equal(incompleteEconomicsValidation.valid, false);
+assert.deepEqual(incompleteEconomicsValidation.missing, ["enterpriseValue", "enterpriseValueCurrency"]);
+const providedEconomicsValidation = validateDealEconomics({
+  enterpriseValue: "125000000",
+  enterpriseValueCurrency: "USD",
+  enterpriseValueStatus: "estimated",
+  compensationAssumptions: "4500000",
+  compensationCurrency: "USD",
+  compensationStatus: "confirmed",
+});
+assert.equal(providedEconomicsValidation.valid, true);
+
 const dealContext = {
   ...dealIdentity,
   transactionRole: "partner_md",
@@ -168,6 +198,12 @@ const dealContext = {
 const normalizedDealContext = {
   ...dealContext,
   acquisitionMotive: "management_buyout",
+  enterpriseValue: null,
+  enterpriseValueCurrency: "",
+  enterpriseValueStatus: "not_available",
+  compensationAssumptions: null,
+  compensationCurrency: "",
+  compensationStatus: "not_available",
 };
 const startValidation = validateDealStartContext(dealContext);
 assert.equal(startValidation.valid, true);
@@ -208,6 +244,20 @@ const withContext = attachDealContext(initialSession, dealContext).session;
 assert.equal(withContext.dealContext.completed, true);
 assert.deepEqual(withContext.dealContext.data, normalizedDealContext);
 assert.equal(canStartAcquirerModule(withContext), true);
+const withEconomics = attachDealContext(initialSession, {
+  ...dealContext,
+  enterpriseValue: "125000000",
+  enterpriseValueCurrency: "USD",
+  enterpriseValueStatus: "estimated",
+  compensationAssumptions: "4500000",
+  compensationCurrency: "USD",
+  compensationStatus: "confirmed",
+}).session;
+assert.equal(withEconomics.dealContext.data.enterpriseValue, 125000000);
+assert.equal(withEconomics.dealContext.data.enterpriseValueCurrency, "USD");
+assert.equal(withEconomics.dealContext.data.enterpriseValueStatus, "estimated");
+assert.equal(withEconomics.dealContext.data.compensationAssumptions, 4500000);
+assert.equal(withEconomics.dealContext.data.compensationStatus, "confirmed");
 
 const allAAnswers = Object.fromEntries(
   ACQUIRER_TRACK_DATA.acquirerModule.questions.map((question) => [question.id, evidenceClassifiedAnswer("A")]),

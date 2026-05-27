@@ -495,6 +495,9 @@ const CHECKS = [
       assertCheck(app.includes("Reset all data and back to start page"), "Screen 10 CTA must reset and return to start");
       assertCheck(app.includes("Preliminary Assessment Report"), "saved PDF must include Preliminary Assessment report section");
       assertCheck(app.includes("Final Deliverables Report"), "saved PDF must include Final Deliverables report section");
+      assertCheck(app.includes("economics: buildDealEconomicsReport(session)"), "public final report must map Deal Economics from session");
+      assertCheck(app.includes("report.economics.lines.map"), "HTML Deal Economics must render report.economics.lines");
+      assertCheck(app.includes("for (const line of report.economics.lines)"), "PDF Deal Economics must render report.economics.lines");
       assertCheck(!app.includes("Generated: ${new Date().toISOString()}"), "saved PDF must not expose generated timestamp technical line");
       assertCheck(!app.includes("Full Analysis Context"), "saved PDF must not include sales/comparison context");
       assertCheck(!app.includes("Free output:"), "saved PDF must not include free/paid comparison rows");

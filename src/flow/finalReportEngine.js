@@ -6,6 +6,10 @@ import { buildTriageReport } from "./triageEngine.js";
 
 export const FINAL_REPORT_ENGINE_VERSION = "newlogic-final-report-v1";
 
+export const DEAL_ECONOMICS_UNAVAILABLE_TEXT = "Financial exposure is not calculated in this preliminary sample because deal value and compensation inputs are not confirmed.";
+export const DEAL_ECONOMICS_INPUT_PROMPT_TEXT = "Provide EV and confirmed compensation inputs to calculate a structure-based risk envelope.";
+export const DEAL_ECONOMICS_MISSING_INPUT_TEXT = "Missing input: EV / deal value and confirmed compensation assumptions.";
+
 export const FINAL_REPORT_SECTION_ORDER = Object.freeze([
   "executive_summary",
   "deal_context",
@@ -31,6 +35,107 @@ function labelize(value, fallback = "Pending") {
 
 function sentence(value) {
   return String(value ?? "").trim();
+}
+
+function firstPresentValue(candidates) {
+  for (const candidate of candidates) {
+    if (candidate !== undefined && candidate !== null && candidate !== "") return candidate;
+  }
+  return null;
+}
+
+function dealEconomicsValue(session, key) {
+  return firstPresentValue([
+    session?.dealContext?.data?.[key],
+    session?.preliminaryAssessment?.dealContext?.[key],
+  ]);
+}
+
+function parseDealEconomicsNumber(value) {
+  if (value === undefined || value === null || value === "") return null;
+  const number = Number(value);
+  return Number.isFinite(number) && number >= 0 ? number : null;
+}
+
+function dealEconomicsStatusLabel(status) {
+  return String(status ?? "not_available").replace(/_/g, " ");
+}
+
+function formatDealEconomicsAmount(currency, amount) {
+  const formatted = Number(amount).toLocaleString("en-US", {
+    maximumFractionDigits: 2,
+  });
+  return `${currency} ${formatted}`;
+}
+
+function dealEconomicsInput(session, config) {
+  const status = String(dealEconomicsValue(session, config.statusKey) ?? "not_available");
+  const amount = parseDealEconomicsNumber(dealEconomicsValue(session, config.valueKey));
+  const currency = String(dealEconomicsValue(session, config.currencyKey) ?? "").trim();
+  const provided = (status === "confirmed" || status === "estimated") && amount !== null && Boolean(currency);
+
+  return Object.freeze({
+    provided,
+    status,
+    statusLabel: dealEconomicsStatusLabel(status),
+    amount,
+    currency,
+    line: provided ? `${config.label}: ${formatDealEconomicsAmount(currency, amount)} (${dealEconomicsStatusLabel(status)}).` : "",
+  });
+}
+
+export function buildDealEconomicsReport(session = {}) {
+  const enterpriseValue = dealEconomicsInput(session, {
+    valueKey: "enterpriseValue",
+    currencyKey: "enterpriseValueCurrency",
+    statusKey: "enterpriseValueStatus",
+    label: "Enterprise value / deal value provided",
+  });
+  const compensation = dealEconomicsInput(session, {
+    valueKey: "compensationAssumptions",
+    currencyKey: "compensationCurrency",
+    statusKey: "compensationStatus",
+    label: "Compensation assumptions provided",
+  });
+
+  const lines = (() => {
+    if (!enterpriseValue.provided && !compensation.provided) {
+      return [
+        DEAL_ECONOMICS_UNAVAILABLE_TEXT,
+        DEAL_ECONOMICS_MISSING_INPUT_TEXT,
+        DEAL_ECONOMICS_INPUT_PROMPT_TEXT,
+      ];
+    }
+    if (enterpriseValue.provided && !compensation.provided) {
+      return [
+        enterpriseValue.line,
+        "Compensation assumptions are not confirmed, so the structure-based risk envelope is not calculated.",
+      ];
+    }
+    if (!enterpriseValue.provided && compensation.provided) {
+      return [
+        compensation.line,
+        "EV / deal value is not confirmed, so the structure-based risk envelope is not calculated.",
+      ];
+    }
+    return [
+      enterpriseValue.line,
+      compensation.line,
+      "Both EV and compensation assumptions are available. Risk-envelope calculation requires a defined formula.",
+    ];
+  })();
+
+  return Object.freeze({
+    available: enterpriseValue.provided || compensation.provided,
+    inputsAvailable: enterpriseValue.provided && compensation.provided,
+    calculated: false,
+    enterpriseValue,
+    compensation,
+    lines: Object.freeze(lines),
+    text: lines[0] ?? "",
+    missingInput: lines[1] ?? "",
+    prompt: lines[2] ?? "",
+  });
 }
 
 function compactList(items, limit = 5) {

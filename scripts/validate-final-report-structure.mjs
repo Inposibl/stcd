@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import {
+  DEAL_ECONOMICS_UNAVAILABLE_TEXT,
   FINAL_REPORT_SECTION_ORDER,
+  buildDealEconomicsReport,
   buildFinalReportStructure,
 } from "../src/flow/finalReportEngine.js";
 import { attachAnalystWorksheetReview, buildAnalystWorksheet } from "../src/flow/analystWorkflow.js";
@@ -175,5 +178,61 @@ assert.ok(auditRecord.items.some((item) => item.includes("newlogic-final-report-
 
 const publicPayload = JSON.stringify(report);
 assert.equal(/\badmin\b|source-file|source file|\bcorpus\b|internal validation|route scaffold|source-bound/i.test(publicPayload), false);
+
+const noEconomicsReport = buildDealEconomicsReport({});
+assert.equal(noEconomicsReport.calculated, false);
+assert.ok(noEconomicsReport.lines.includes(DEAL_ECONOMICS_UNAVAILABLE_TEXT));
+assert.ok(noEconomicsReport.lines.includes("Missing input: EV / deal value and confirmed compensation assumptions."));
+
+const evOnlyEconomicsReport = buildDealEconomicsReport({
+  dealContext: {
+    data: {
+      enterpriseValue: 125000000,
+      enterpriseValueCurrency: "USD",
+      enterpriseValueStatus: "estimated",
+      compensationStatus: "not_available",
+    },
+  },
+});
+assert.equal(evOnlyEconomicsReport.calculated, false);
+assert.ok(evOnlyEconomicsReport.lines.includes("Enterprise value / deal value provided: USD 125,000,000 (estimated)."));
+assert.ok(evOnlyEconomicsReport.lines.includes("Compensation assumptions are not confirmed, so the structure-based risk envelope is not calculated."));
+assert.equal(evOnlyEconomicsReport.lines.some((line) => /calculated risk envelope/i.test(line)), false);
+
+const compensationOnlyEconomicsReport = buildDealEconomicsReport({
+  preliminaryAssessment: {
+    dealContext: {
+      enterpriseValueStatus: "not_available",
+      compensationAssumptions: 4500000,
+      compensationCurrency: "EUR",
+      compensationStatus: "confirmed",
+    },
+  },
+});
+assert.equal(compensationOnlyEconomicsReport.calculated, false);
+assert.ok(compensationOnlyEconomicsReport.lines.includes("Compensation assumptions provided: EUR 4,500,000 (confirmed)."));
+assert.ok(compensationOnlyEconomicsReport.lines.includes("EV / deal value is not confirmed, so the structure-based risk envelope is not calculated."));
+assert.equal(compensationOnlyEconomicsReport.lines.some((line) => /calculated risk envelope/i.test(line)), false);
+
+const completeEconomicsReport = buildDealEconomicsReport({
+  dealContext: {
+    data: {
+      enterpriseValue: 125000000,
+      enterpriseValueCurrency: "GBP",
+      enterpriseValueStatus: "confirmed",
+      compensationAssumptions: 4500000,
+      compensationCurrency: "GBP",
+      compensationStatus: "estimated",
+    },
+  },
+});
+assert.equal(completeEconomicsReport.calculated, false);
+assert.ok(completeEconomicsReport.lines.includes("Enterprise value / deal value provided: GBP 125,000,000 (confirmed)."));
+assert.ok(completeEconomicsReport.lines.includes("Compensation assumptions provided: GBP 4,500,000 (estimated)."));
+assert.ok(completeEconomicsReport.lines.includes("Both EV and compensation assumptions are available. Risk-envelope calculation requires a defined formula."));
+
+const appSource = readFileSync(new URL("../src/App.jsx", import.meta.url), "utf8");
+assert.ok(appSource.includes("report.economics.lines.map"), "HTML Deal Economics must render report.economics.lines");
+assert.ok(appSource.includes("for (const line of report.economics.lines)"), "PDF Deal Economics must render report.economics.lines");
 
 console.log("Final report structure smoke test passed");

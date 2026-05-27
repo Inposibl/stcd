@@ -204,6 +204,14 @@ export const TRANSACTION_DETAIL_SECTIONS = Object.freeze([
   }),
 ]);
 
+export const DEAL_ECONOMICS_CURRENCY_OPTIONS = Object.freeze(["USD", "EUR", "GBP", "Other"]);
+
+export const DEAL_ECONOMICS_STATUS_OPTIONS = Object.freeze([
+  Object.freeze({ title: "Confirmed", value: "confirmed" }),
+  Object.freeze({ title: "Estimated", value: "estimated" }),
+  Object.freeze({ title: "Not available yet", value: "not_available" }),
+]);
+
 export const CANONICAL_DEAL_CONTEXT_FIELD_IDS = Object.freeze([
   "acquirerName",
   "targetName",
@@ -220,6 +228,12 @@ export const DEAL_CONTEXT_FIELD_IDS = Object.freeze([
   "acquisitionMotive",
   "competitorPreservation",
   ...TRANSACTION_DETAIL_SECTIONS.map((section) => section.id),
+  "enterpriseValue",
+  "enterpriseValueCurrency",
+  "enterpriseValueStatus",
+  "compensationAssumptions",
+  "compensationCurrency",
+  "compensationStatus",
 ]);
 
 const ACQUISITION_MOTIVE_VALUES = new Set(ACQUISITION_MOTIVE_OPTIONS.map((option) => option.value));
@@ -233,6 +247,8 @@ const RESPONDENT_ACCESS_LEVEL_VALUES = new Set(RESPONDENT_ACCESS_LEVEL_OPTIONS.m
 const TRANSACTION_DETAIL_VALUES = Object.freeze(Object.fromEntries(
   TRANSACTION_DETAIL_SECTIONS.map((section) => [section.id, new Set(section.options.map((option) => option.value))]),
 ));
+const DEAL_ECONOMICS_CURRENCY_VALUES = new Set(DEAL_ECONOMICS_CURRENCY_OPTIONS);
+const DEAL_ECONOMICS_STATUS_VALUES = new Set(DEAL_ECONOMICS_STATUS_OPTIONS.map((option) => option.value));
 
 const DEAL_IDENTITY_TEXT_FIELDS = Object.freeze(["acquirerName", "targetName"]);
 const DEAL_IDENTITY_OPTION_FIELDS = Object.freeze([
@@ -301,6 +317,82 @@ function pickTransactionDetails(input = {}) {
       .map((section) => [section.id, normalizeString(input[section.id])])
       .filter(([fieldId, value]) => TRANSACTION_DETAIL_VALUES[fieldId].has(value)),
   ));
+}
+
+function normalizeDealEconomicsStatus(value) {
+  const status = normalizeString(value);
+  return DEAL_ECONOMICS_STATUS_VALUES.has(status) ? status : "not_available";
+}
+
+function normalizeDealEconomicsCurrency(value) {
+  const currency = normalizeString(value);
+  return DEAL_ECONOMICS_CURRENCY_VALUES.has(currency) ? currency : "";
+}
+
+function parseNonNegativeNumber(value) {
+  const text = value == null ? "" : String(value).trim();
+  if (!text) return { provided: false, valid: true, value: null };
+  const number = Number(text);
+  return {
+    provided: true,
+    valid: Number.isFinite(number) && number >= 0,
+    value: Number.isFinite(number) && number >= 0 ? number : null,
+  };
+}
+
+function normalizeDealEconomicsInput(input, config, missing) {
+  const status = normalizeDealEconomicsStatus(input[config.statusKey]);
+  const currency = normalizeDealEconomicsCurrency(input[config.currencyKey]);
+  const parsedValue = parseNonNegativeNumber(input[config.valueKey]);
+  const requiresValue = status === "confirmed" || status === "estimated";
+
+  const normalized = {
+    [config.valueKey]: requiresValue ? parsedValue.value : null,
+    [config.currencyKey]: requiresValue ? currency : "",
+    [config.statusKey]: status,
+  };
+
+  if (parsedValue.provided && !parsedValue.valid) {
+    missing.push(config.valueKey);
+  }
+
+  if (requiresValue) {
+    if (!parsedValue.provided || !parsedValue.valid) {
+      if (!missing.includes(config.valueKey)) missing.push(config.valueKey);
+    }
+    if (!currency) {
+      missing.push(config.currencyKey);
+    }
+  }
+
+  return normalized;
+}
+
+export function validateDealEconomics(input = {}) {
+  const missing = [];
+  const enterpriseValue = normalizeDealEconomicsInput(input, {
+    valueKey: "enterpriseValue",
+    currencyKey: "enterpriseValueCurrency",
+    statusKey: "enterpriseValueStatus",
+  }, missing);
+  const compensation = normalizeDealEconomicsInput(input, {
+    valueKey: "compensationAssumptions",
+    currencyKey: "compensationCurrency",
+    statusKey: "compensationStatus",
+  }, missing);
+
+  return Object.freeze({
+    valid: missing.length === 0,
+    missing: Object.freeze(missing),
+    normalized: Object.freeze({
+      ...enterpriseValue,
+      ...compensation,
+    }),
+  });
+}
+
+function pickDealEconomics(input = {}) {
+  return validateDealEconomics(input).normalized;
 }
 
 export function validateDealIdentity(input = {}) {
@@ -396,7 +488,8 @@ export function validateTransactionDetails(input = {}) {
 export function validateDealContext(input = {}) {
   const startValidation = validateDealStartContext(input);
   const detailsValidation = validateTransactionDetails(input);
-  const missing = [...startValidation.missing, ...detailsValidation.missing];
+  const economicsValidation = validateDealEconomics(input);
+  const missing = [...startValidation.missing, ...detailsValidation.missing, ...economicsValidation.missing];
 
   return Object.freeze({
     valid: missing.length === 0,
@@ -404,6 +497,7 @@ export function validateDealContext(input = {}) {
     normalized: Object.freeze({
       ...startValidation.normalized,
       ...detailsValidation.normalized,
+      ...economicsValidation.normalized,
     }),
   });
 }
@@ -412,6 +506,7 @@ export function attachAcquisitionMotive(session, input, storedAt = new Date().to
   const validation = validateDealStartContext(input);
   const existingDetails = pickTransactionDetails(session?.dealContext?.data ?? {});
   const existingIdentity = pickDealIdentity(session?.dealContext?.data ?? {});
+  const existingEconomics = pickDealEconomics(session?.dealContext?.data ?? {});
   const requiresTransactionDetails = validation.valid && requiresAcquirerTransactionDetails(validation.normalized);
   const nextRoute = validation.valid ? nextRouteForDealStart(validation.normalized) : null;
 
@@ -428,6 +523,7 @@ export function attachAcquisitionMotive(session, input, storedAt = new Date().to
               ...existingIdentity,
               ...validation.normalized,
               ...existingDetails,
+              ...existingEconomics,
             }),
           })
         : Object.freeze({

@@ -8,6 +8,8 @@ import { TARGET_OBSERVATION_DIAGNOSTIC } from "./data/targetObservedEnvironmentD
 import { TARGET_SELF_ASSESSMENT_DATA } from "./data/targetSelfAssessmentData.js";
 import {
   ACQUISITION_MOTIVE_OPTIONS,
+  DEAL_ECONOMICS_CURRENCY_OPTIONS,
+  DEAL_ECONOMICS_STATUS_OPTIONS,
   DEAL_TYPE_OPTIONS,
   RESPONDENT_ACCESS_LEVEL_OPTIONS,
   RESPONDENT_FUNCTION_OPTIONS,
@@ -118,7 +120,7 @@ import {
   buildPaidOffer,
   publicText,
 } from "./flow/finalDeliverableFlow.js";
-import { buildFinalReportStructure } from "./flow/finalReportEngine.js";
+import { buildDealEconomicsReport, buildFinalReportStructure } from "./flow/finalReportEngine.js";
 import { screenByRoute } from "./screenRegistry.js";
 import "./styles.css";
 
@@ -918,6 +920,12 @@ const DEAL_CONTEXT_MISSING_LABELS = Object.freeze({
   transactionRole: "Transaction responsibility level",
   firmTenure: "Your tenure at the firm",
   integrationTimeline: "Planned integration pace",
+  enterpriseValue: "Estimated deal value / enterprise value",
+  enterpriseValueCurrency: "Enterprise value currency",
+  enterpriseValueStatus: "Enterprise value status",
+  compensationAssumptions: "Management compensation / retention assumptions",
+  compensationCurrency: "Compensation currency",
+  compensationStatus: "Compensation status",
 });
 
 function dealContextFieldLabel(fieldId) {
@@ -1193,9 +1201,15 @@ function AcquisitionMotiveScreen({ session, setSession }) {
 
 function TransactionDetailsScreen({ session, setSession }) {
   const existingContext = session.dealContext?.data ?? {};
-  const [form, setForm] = useState(() =>
-    Object.fromEntries(TRANSACTION_DETAIL_SECTIONS.map((section) => [section.id, existingContext[section.id] ?? ""])),
-  );
+  const [form, setForm] = useState(() => ({
+    ...Object.fromEntries(TRANSACTION_DETAIL_SECTIONS.map((section) => [section.id, existingContext[section.id] ?? ""])),
+    enterpriseValue: existingContext.enterpriseValue ?? "",
+    enterpriseValueCurrency: existingContext.enterpriseValueCurrency ?? "USD",
+    enterpriseValueStatus: existingContext.enterpriseValueStatus ?? "not_available",
+    compensationAssumptions: existingContext.compensationAssumptions ?? "",
+    compensationCurrency: existingContext.compensationCurrency ?? "USD",
+    compensationStatus: existingContext.compensationStatus ?? "not_available",
+  }));
   const [error, setError] = useState("");
   const hasDealStartContext = Boolean(existingContext.dealType && existingContext.respondentSide);
   const canContinue = TRANSACTION_DETAIL_SECTIONS.every((section) => Boolean(form[section.id]));
@@ -1208,7 +1222,24 @@ function TransactionDetailsScreen({ session, setSession }) {
   ];
 
   function updateDetail(sectionId, value) {
-    setForm((current) => ({ ...current, [sectionId]: value }));
+    setForm((current) => {
+      const next = { ...current, [sectionId]: value };
+      if (sectionId === "enterpriseValue" && value !== "" && current.enterpriseValueStatus === "not_available") {
+        next.enterpriseValueStatus = "estimated";
+        next.enterpriseValueCurrency = current.enterpriseValueCurrency || "USD";
+      }
+      if (sectionId === "compensationAssumptions" && value !== "" && current.compensationStatus === "not_available") {
+        next.compensationStatus = "estimated";
+        next.compensationCurrency = current.compensationCurrency || "USD";
+      }
+      if (sectionId === "enterpriseValueStatus" && value === "not_available") {
+        next.enterpriseValue = "";
+      }
+      if (sectionId === "compensationStatus" && value === "not_available") {
+        next.compensationAssumptions = "";
+      }
+      return next;
+    });
     setError("");
   }
 
@@ -1273,6 +1304,64 @@ function TransactionDetailsScreen({ session, setSession }) {
             </div>
           </section>
         ))}
+
+        <section className="transaction-section" aria-label="Deal Economics">
+          <h2>DEAL ECONOMICS</h2>
+          <div className="deal-identity-grid">
+            <label className="field-block">
+              <span>Estimated deal value / enterprise value <small>Used only to estimate the structure-based risk envelope in the preliminary forecast.</small></span>
+              <input
+                min="0"
+                onChange={(event) => updateDetail("enterpriseValue", event.target.value)}
+                step="any"
+                type="number"
+                value={form.enterpriseValue}
+              />
+            </label>
+            <label className="field-block">
+              <span>Currency</span>
+              <select value={form.enterpriseValueCurrency} onChange={(event) => updateDetail("enterpriseValueCurrency", event.target.value)}>
+                {DEAL_ECONOMICS_CURRENCY_OPTIONS.map((currency) => (
+                  <option key={currency} value={currency}>{currency}</option>
+                ))}
+              </select>
+            </label>
+            <label className="field-block">
+              <span>Status</span>
+              <select value={form.enterpriseValueStatus} onChange={(event) => updateDetail("enterpriseValueStatus", event.target.value)}>
+                {DEAL_ECONOMICS_STATUS_OPTIONS.map((status) => (
+                  <option key={status.value} value={status.value}>{status.title}</option>
+                ))}
+              </select>
+            </label>
+            <label className="field-block">
+              <span>Management compensation / retention assumptions <small>Used to estimate exposure linked to leadership retention, resistance, or post-close underperformance.</small></span>
+              <input
+                min="0"
+                onChange={(event) => updateDetail("compensationAssumptions", event.target.value)}
+                step="any"
+                type="number"
+                value={form.compensationAssumptions}
+              />
+            </label>
+            <label className="field-block">
+              <span>Currency</span>
+              <select value={form.compensationCurrency} onChange={(event) => updateDetail("compensationCurrency", event.target.value)}>
+                {DEAL_ECONOMICS_CURRENCY_OPTIONS.map((currency) => (
+                  <option key={currency} value={currency}>{currency}</option>
+                ))}
+              </select>
+            </label>
+            <label className="field-block">
+              <span>Status</span>
+              <select value={form.compensationStatus} onChange={(event) => updateDetail("compensationStatus", event.target.value)}>
+                {DEAL_ECONOMICS_STATUS_OPTIONS.map((status) => (
+                  <option key={status.value} value={status.value}>{status.title}</option>
+                ))}
+              </select>
+            </label>
+          </div>
+        </section>
 
         {error ? <p className="form-error">{error}</p> : null}
         <div className="button-row">
@@ -4955,9 +5044,6 @@ const ROLE_LEVEL_FORECAST_MISSING_FIELDS = Object.freeze([
   "Transition window",
   "Role-specific recommendation",
 ]);
-const DEAL_ECONOMICS_UNAVAILABLE_TEXT = "Financial exposure is not calculated in this preliminary sample because deal value and compensation inputs are not confirmed.";
-const DEAL_ECONOMICS_INPUT_PROMPT_TEXT = "Provide EV and confirmed compensation inputs to calculate a structure-based risk envelope.";
-const DEAL_ECONOMICS_MISSING_INPUT_TEXT = "Missing input: EV / deal value and confirmed compensation assumptions.";
 const FORECAST_REPORT_LIMITATIONS_TEXT = "This is a preliminary, structure-based forecast with medium confidence. Confirm individual leadership fit before final sequencing.";
 const SEALED_PREVIEW_CONTEXT_TEXT = "This preview is based on the environment pair only. Individual leadership confirmation is available in the full engagement.";
 const FORECAST_REPORT_FORBIDDEN_PATTERNS = Object.freeze([
@@ -5229,12 +5315,7 @@ function buildForecastLedPublicReport(deliverable, session) {
       ninetyDayChecks: Object.freeze(ninetyDayChecks),
       oneEightyDayChecks: Object.freeze(oneEightyDayChecks),
     }),
-    economics: Object.freeze({
-      available: false,
-      text: forecastReportText(DEAL_ECONOMICS_UNAVAILABLE_TEXT, DEAL_ECONOMICS_UNAVAILABLE_TEXT, { noMoney: true }),
-      missingInput: DEAL_ECONOMICS_MISSING_INPUT_TEXT,
-      prompt: forecastReportText(DEAL_ECONOMICS_INPUT_PROMPT_TEXT, DEAL_ECONOMICS_INPUT_PROMPT_TEXT, { noMoney: true }),
-    }),
+    economics: buildDealEconomicsReport(session),
     actions: Object.freeze({
       beforeClose: Object.freeze(forecastList(actions.beforeClose, [], 3).map(buyerFacingActionText)),
       afterClose: Object.freeze(forecastList(actions.afterClose, [], 3).map(buyerFacingActionText)),
@@ -5494,9 +5575,9 @@ function ForecastLedPublicReport({ report }) {
       </ForecastReportSection>
 
       <ForecastReportSection number={10} title="Deal Economics" variant="economics">
-        <p>{report.economics.text}</p>
-        <p>{report.economics.missingInput}</p>
-        <p>{report.economics.prompt}</p>
+        {report.economics.lines.map((line) => (
+          <p key={line}>{line}</p>
+        ))}
       </ForecastReportSection>
 
       <ForecastReportSection number={11} title="Recommended Actions">
@@ -6581,9 +6662,9 @@ function buildFinalDeliverablesReportLines(deliverable, session) {
   addCaseStudyPdfBulletList(items, report.watch.oneEightyDayChecks);
 
   addCaseStudyPdfSection(items, 10, "Deal Economics");
-  addCaseStudyPdfParagraph(items, report.economics.text);
-  addCaseStudyPdfParagraph(items, report.economics.missingInput);
-  addCaseStudyPdfParagraph(items, report.economics.prompt);
+  for (const line of report.economics.lines) {
+    addCaseStudyPdfParagraph(items, line);
+  }
 
   addCaseStudyPdfSection(items, 11, "Recommended Actions");
   addCaseStudyPdfSubsection(items, "Before close");
