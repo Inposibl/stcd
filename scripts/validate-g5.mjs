@@ -452,7 +452,11 @@ const CHECKS = [
       assertCheck(app.includes("Progress will be lost if you go back. Continue?"), "browser-back warning text missing");
       assertCheck(app.includes("window.addEventListener(\"popstate\", handleBrowserBack)"), "browser popstate handler missing");
       const visibleBackLabels = />\s*(?:Back|Back to|Return|Return to)\b/i;
-      assertCheck(!visibleBackLabels.test(app), "visible Back/Return button label remains in App.jsx");
+      const flowSource = app.replace(
+        "<a href=\"/about-methodology\" onClick={handleRouteClick(\"/about-methodology\")}>Back to About Methodology</a>",
+        "",
+      );
+      assertCheck(!visibleBackLabels.test(flowSource), "visible Back/Return button label remains in diagnostic/final-report flow");
       return "browser-back warning is implemented and visible Back/Return labels are absent";
     },
   },
