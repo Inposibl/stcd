@@ -4949,9 +4949,17 @@ function FinalReportStructureBlock({ session, deliverable }) {
 
 const FORECAST_REPORT_UNAVAILABLE_TEXT = "Not available in this preliminary sample.";
 const ROLE_LEVEL_FORECAST_UNAVAILABLE_TEXT = "Role-level forecast preview is not available in this preliminary sample. Full engagement confirms named leadership fit, transition windows, and role-specific recommendations.";
+const ROLE_LEVEL_FORECAST_MISSING_FIELDS = Object.freeze([
+  "Named leader",
+  "Fit role",
+  "Transition window",
+  "Role-specific recommendation",
+]);
 const DEAL_ECONOMICS_UNAVAILABLE_TEXT = "Financial exposure is not calculated in this preliminary sample because deal value and compensation inputs are not confirmed.";
 const DEAL_ECONOMICS_INPUT_PROMPT_TEXT = "Provide EV and confirmed compensation inputs to calculate a structure-based risk envelope.";
+const DEAL_ECONOMICS_MISSING_INPUT_TEXT = "Missing input: EV / deal value and confirmed compensation assumptions.";
 const FORECAST_REPORT_LIMITATIONS_TEXT = "This is a preliminary, structure-based forecast with medium confidence. Confirm individual leadership fit before final sequencing.";
+const SEALED_PREVIEW_CONTEXT_TEXT = "This preview is based on the environment pair only. Individual leadership confirmation is available in the full engagement.";
 const FORECAST_REPORT_FORBIDDEN_PATTERNS = Object.freeze([
   /\bMBTI\b/i,
   /\bVarna\b/i,
@@ -4981,6 +4989,14 @@ function normalizeForecastClientText(value) {
   return String(value ?? "").replace(/\s+/g, " ").trim();
 }
 
+function cleanForecastInternalTerms(value) {
+  return String(value ?? "")
+    .replace(/\bType-level confirmation\b/g, "Individual leadership confirmation")
+    .replace(/\btype-level confirmation\b/g, "individual leadership confirmation")
+    .replace(/\bstructural-level\b/gi, "environment-pair")
+    .replace(/\btype-level\b/gi, "individual leadership");
+}
+
 function isInvalidForecastClientText(value) {
   const text = normalizeForecastClientText(value);
   return !text
@@ -5006,11 +5022,20 @@ function forecastReportText(value, fallback = FORECAST_REPORT_UNAVAILABLE_TEXT, 
   const candidate = normalizeForecastClientText(forecastSourceValueToText(value, fallbackText));
   if (isInvalidForecastClientText(candidate)) return fallbackText;
 
-  const publicCandidate = normalizeForecastClientText(pdfLayerAText(candidate));
+  const publicCandidate = normalizeForecastClientText(cleanForecastInternalTerms(pdfLayerAText(candidate)));
   if (isInvalidForecastClientText(publicCandidate)) return fallbackText;
   if (options.noMoney && /\$\s*\d|\b(?:USD|EUR|GBP)\b/i.test(publicCandidate)) return fallbackText;
   if (!options.allowForbiddenTerms && containsForbiddenForecastTerm(publicCandidate)) return fallbackText;
   return publicCandidate;
+}
+
+function cleanForecastEnvironmentDescription(value) {
+  return forecastReportText(value)
+    .replace(/\binterpreted through\s+Decisions are made by\b/gi, "interpreted through decisions made by")
+    .replace(/\binterpreted through\s+Decisions are made through\b/gi, "interpreted through decisions made through")
+    .replace(/\binterpreted through\s+Decision-making follows\b/gi, "interpreted through decision-making that follows")
+    .replace(/\binterpreted through\s+Decisions\b/gi, "interpreted through decisions")
+    .replace(/\s+([,.])/g, "$1");
 }
 
 function forecastList(values, fallbackItems = [], limit = 3, options = {}) {
@@ -5037,8 +5062,34 @@ function forecastTimelinePhase(index) {
 
 function forecastWatchPrompt(timelineRow, prompt) {
   const window = forecastReportText(timelineRow?.window, "the relevant post-close window");
-  const phase = forecastReportText(timelineRow?.phase, "the forecast phase");
-  return `During ${window}, check whether ${phase} ${prompt}.`;
+  return `During ${window}, check whether the forecast signal ${prompt}.`;
+}
+
+function forecastPreviewId(session) {
+  const source = session?.preliminaryAssessment?.assessmentId
+    ?? session?.dealContext?.updatedAt
+    ?? session?.startedAt
+    ?? "";
+  const text = forecastReportText(source, "preview-only");
+  return text === FORECAST_REPORT_UNAVAILABLE_TEXT ? "preview-only" : text;
+}
+
+function forecastGeneratedTimestamp() {
+  return new Date().toLocaleString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+function buyerFacingActionText(value) {
+  return forecastReportText(value)
+    .replace(/\bknowledge, trust, and information\b/gi, "critical know-how, trust channels, and information flow")
+    .replace(/\bknowledge\b/gi, "critical know-how")
+    .replace(/\btrust\b(?!\s+channels)/gi, "trust channels")
+    .replace(/\binformation\b(?!\s+flow)/gi, "information flow");
 }
 
 function buildForecastLedPublicReport(deliverable, session) {
@@ -5057,6 +5108,7 @@ function buildForecastLedPublicReport(deliverable, session) {
     month: "long",
     day: "numeric",
   });
+  const generatedAt = forecastGeneratedTimestamp();
   const timelineRows = pdfTimelineRows(deliverable).map(([window, whatSurfaces, inTheRoom], index) => {
     const whatText = forecastReportText(whatSurfaces);
     const roomText = forecastReportText(inTheRoom);
@@ -5065,7 +5117,10 @@ function buildForecastLedPublicReport(deliverable, session) {
       phase: forecastTimelinePhase(index),
       window: forecastReportText(window),
       whatSurfaces: whatText,
-      inTheRoom: duplicate ? "" : roomText,
+      inTheRoomLabel: duplicate ? "Observable in the room" : "In the room",
+      inTheRoom: duplicate
+        ? `Check whether this forecast signal is visible during ${forecastReportText(window)}.`
+        : roomText,
     };
   });
   const forecastSignalSource = friction.earlyWarningSignal || anchors[0]?.text || narrative.prediction;
@@ -5111,11 +5166,11 @@ function buildForecastLedPublicReport(deliverable, session) {
     environments: Object.freeze({
       acquirer: Object.freeze({
         title: forecastReportText(acquirerEnvironment.displayName),
-        body: forecastReportText(pdfAcquirerEnvironmentExplanation(acquirerEnvironment)),
+        body: cleanForecastEnvironmentDescription(pdfAcquirerEnvironmentExplanation(acquirerEnvironment)),
       }),
       target: Object.freeze({
         title: forecastReportText(targetEnvironment.displayName),
-        body: forecastReportText(pdfTargetEnvironmentExplanation(targetEnvironment)),
+        body: cleanForecastEnvironmentDescription(pdfTargetEnvironmentExplanation(targetEnvironment)),
       }),
     }),
     collisionRows: Object.freeze(pdfCollisionRows(deliverable, acquirerEnvironment, targetEnvironment).map(([point, interpretation]) => Object.freeze({
@@ -5125,14 +5180,21 @@ function buildForecastLedPublicReport(deliverable, session) {
     roleLevelForecast: Object.freeze({
       available: false,
       text: forecastReportText(ROLE_LEVEL_FORECAST_UNAVAILABLE_TEXT, ROLE_LEVEL_FORECAST_UNAVAILABLE_TEXT, { allowForbiddenTerms: true }),
+      missingFields: ROLE_LEVEL_FORECAST_MISSING_FIELDS,
     }),
     sealedPredictionPreview: Object.freeze({
       title: "Sealed Prediction Preview — display-only, not ledger-recorded",
-      anchors: Object.freeze(anchors.map((anchor) => Object.freeze({
-        label: forecastReportText(anchor.label, "Forecast anchor"),
-        text: forecastReportText(anchor.text),
-      }))),
-      caveat: forecastReportText(deliverable?.caveat, "This preview is not ledger-recorded in the preliminary sample."),
+      rows: Object.freeze([
+        ["Preview ID", forecastPreviewId(session)],
+        ["Generated at", generatedAt],
+        ["Observable event", forecastReportText(anchors[0]?.text ?? narrative.prediction ?? friction.earlyWarningSignal)],
+        ["Window", forecastReportText(timelineRows[0]?.window, "Initial post-close observation window")],
+        ["Evidence required", "Observed post-close behavior matching the event in the stated window."],
+        ["Falsification condition", "The event does not appear in the stated window or appears only as an isolated exception."],
+        ["Decision consequence", forecastReportText(narrative.implication, "Use the preview to decide what must be checked before sequencing integration moves.")],
+        ["Status", "Display-only preview; not ledger-recorded."],
+      ]),
+      caveat: SEALED_PREVIEW_CONTEXT_TEXT,
     }),
     compatibility: Object.freeze({
       score,
@@ -5149,11 +5211,12 @@ function buildForecastLedPublicReport(deliverable, session) {
     economics: Object.freeze({
       available: false,
       text: forecastReportText(DEAL_ECONOMICS_UNAVAILABLE_TEXT, DEAL_ECONOMICS_UNAVAILABLE_TEXT, { noMoney: true }),
+      missingInput: DEAL_ECONOMICS_MISSING_INPUT_TEXT,
       prompt: forecastReportText(DEAL_ECONOMICS_INPUT_PROMPT_TEXT, DEAL_ECONOMICS_INPUT_PROMPT_TEXT, { noMoney: true }),
     }),
     actions: Object.freeze({
-      beforeClose: Object.freeze(forecastList(actions.beforeClose, [], 3)),
-      afterClose: Object.freeze(forecastList(actions.afterClose, [], 3)),
+      beforeClose: Object.freeze(forecastList(actions.beforeClose, [], 3).map(buyerFacingActionText)),
+      afterClose: Object.freeze(forecastList(actions.afterClose, [], 3).map(buyerFacingActionText)),
     }),
     fullEngagement: Object.freeze([
       Object.freeze(["Confirmation", "The preliminary forecast is checked against the full evidence record and leadership context of the actual deal."]),
@@ -5322,11 +5385,11 @@ function ForecastLedPublicReport({ report }) {
         <h2 style={FORECAST_REPORT_STYLES.coverTitle}>Preliminary Forecast Brief</h2>
         <div style={FORECAST_REPORT_STYLES.coverMeta}>
           <p style={FORECAST_REPORT_STYLES.coverLead}>{report.scenario}</p>
-          <p style={FORECAST_REPORT_STYLES.coverLead}><strong>Role-voice scenario:</strong> {report.coverHeadline}</p>
+          <p style={FORECAST_REPORT_STYLES.coverLead}><strong>Forecast signal:</strong> {report.coverHeadline}</p>
           <p style={FORECAST_REPORT_STYLES.coverLead}><strong>Decision implication:</strong> {report.decisionImplication}</p>
           <p style={FORECAST_REPORT_STYLES.scoreChip}><span>Compatibility score</span><span>{report.compatibility.demotedNote}</span></p>
         </div>
-        <p className="source-note" style={FORECAST_REPORT_STYLES.muted}>Preliminary Forecast Brief / M&amp;A Post-Deal Behavior Forecast / {report.generatedDate}</p>
+        <p className="source-note" style={FORECAST_REPORT_STYLES.muted}>M&amp;A Post-Deal Behavior Forecast / {report.generatedDate}</p>
       </section>
 
       <ForecastReportSection number={1} title="Executive Decision Summary">
@@ -5366,22 +5429,12 @@ function ForecastLedPublicReport({ report }) {
       <ForecastReportSection number={5} title="Role-Level Forecast Snapshot">
         <article style={FORECAST_REPORT_STYLES.soberCard}>
           <p>{report.roleLevelForecast.text}</p>
+          <ForecastBulletList items={report.roleLevelForecast.missingFields} />
         </article>
       </ForecastReportSection>
 
       <ForecastReportSection number={6} title={report.sealedPredictionPreview.title} variant="dashed">
-        {report.sealedPredictionPreview.anchors.length > 0 ? (
-          <div className="anchor-list">
-            {report.sealedPredictionPreview.anchors.map((anchor) => (
-              <article key={anchor.label}>
-                <strong>{anchor.label}</strong>
-                <p>{anchor.text}</p>
-              </article>
-            ))}
-          </div>
-        ) : (
-          <p>No sealed prediction preview anchors are available in this preliminary sample.</p>
-        )}
+        <ForecastFieldRows rows={report.sealedPredictionPreview.rows} />
         <p className="sealed-caveat"><em>{report.sealedPredictionPreview.caveat}</em></p>
       </ForecastReportSection>
 
@@ -5396,7 +5449,7 @@ function ForecastLedPublicReport({ report }) {
             <article key={row.phase}>
               <strong>{row.phase} / {row.window}</strong>
               <p><strong>What surfaces:</strong> {row.whatSurfaces}</p>
-              {row.inTheRoom ? <p><strong>In the room:</strong> {row.inTheRoom}</p> : null}
+              {row.inTheRoom ? <p><strong>{row.inTheRoomLabel}:</strong> {row.inTheRoom}</p> : null}
             </article>
           ))}
         </div>
@@ -5421,6 +5474,7 @@ function ForecastLedPublicReport({ report }) {
 
       <ForecastReportSection number={10} title="Deal Economics" variant="economics">
         <p>{report.economics.text}</p>
+        <p>{report.economics.missingInput}</p>
         <p>{report.economics.prompt}</p>
       </ForecastReportSection>
 
@@ -5441,7 +5495,7 @@ function ForecastLedPublicReport({ report }) {
         <ForecastFieldRows rows={report.fullEngagement} />
       </ForecastReportSection>
 
-      <ForecastReportSection number={13} title="Limitations Footer">
+      <ForecastReportSection number={13} title="Limitations">
         <p>{report.limitations}</p>
       </ForecastReportSection>
     </div>
@@ -5476,7 +5530,7 @@ function HeterogeneousRevealScreen({ session, setSession, deliverable }) {
   return (
     <main className="screen-shell reveal-screen">
       <p className="eyebrow">Screen 10 / Reveal sequence</p>
-      <h1>Preliminary Forecast Brief</h1>
+      <h1>Forecast report</h1>
       <section className={`outcome-banner outcome-${deliverable.outcomeLetter.toLowerCase()}`}>
         <strong>{publicText(deliverable.outcomeGuide.title)}</strong>
         {deliverable.outcomeGuide.condition ? <span>{publicText(deliverable.outcomeGuide.condition)}</span> : null}
@@ -5534,7 +5588,7 @@ function HomogeneousRevealScreen({ session, deliverable }) {
   return (
     <main className="screen-shell reveal-screen homogeneous-screen">
       <p className="eyebrow">Screen 10b / Homogeneous Integration</p>
-      <h1>Preliminary Forecast Brief</h1>
+      <h1>Forecast report</h1>
       <EstimationAccuracyNotice session={session} />
       <ForecastLedPublicReport report={forecastReport} />
       <section className="reveal-block cta-block">
@@ -6338,7 +6392,7 @@ function buildFinalDeliverablesReportLines(deliverable, session) {
       maxCharacters: 58,
     },
     {
-      text: "Preliminary Forecast Brief",
+      text: "Forecast-led public report",
       size: 11,
       align: "center",
       color: PDF_BRAND.muted,
@@ -6362,7 +6416,7 @@ function buildFinalDeliverablesReportLines(deliverable, session) {
       maxCharacters: 78,
     },
     {
-      text: `Role-voice scenario: ${report.coverHeadline}`,
+      text: `Forecast signal: ${report.coverHeadline}`,
       size: 11,
       align: "center",
       color: PDF_BRAND.body,
@@ -6456,16 +6510,14 @@ function buildFinalDeliverablesReportLines(deliverable, session) {
 
   addCaseStudyPdfSection(items, 5, "Role-Level Forecast Snapshot");
   addCaseStudyPdfParagraph(items, report.roleLevelForecast.text);
+  addCaseStudyPdfBulletList(items, report.roleLevelForecast.missingFields);
 
   addCaseStudyPdfSection(items, 6, report.sealedPredictionPreview.title);
-  if (report.sealedPredictionPreview.anchors.length > 0) {
-    for (const anchor of report.sealedPredictionPreview.anchors) {
-      addCaseStudyPdfSubsection(items, anchor.label);
-      addCaseStudyPdfParagraph(items, anchor.text);
-    }
-  } else {
-    addCaseStudyPdfParagraph(items, "No sealed prediction preview anchors are available in this preliminary sample.");
-  }
+  items.push({
+    type: "table",
+    columns: [150, 318],
+    rows: report.sealedPredictionPreview.rows,
+  });
   addCaseStudyPdfParagraph(items, report.sealedPredictionPreview.caveat, { size: 10, color: PDF_BRAND.muted });
 
   addCaseStudyPdfSection(items, 7, "Compatibility Score");
@@ -6489,7 +6541,7 @@ function buildFinalDeliverablesReportLines(deliverable, session) {
     addCaseStudyPdfSubsection(items, `${row.phase} / ${row.window}`);
     addCaseStudyPdfParagraph(items, `What surfaces: ${row.whatSurfaces}`);
     if (row.inTheRoom) {
-      addCaseStudyPdfParagraph(items, `In the room: ${row.inTheRoom}`);
+      addCaseStudyPdfParagraph(items, `${row.inTheRoomLabel}: ${row.inTheRoom}`);
     }
   }
 
@@ -6508,6 +6560,7 @@ function buildFinalDeliverablesReportLines(deliverable, session) {
 
   addCaseStudyPdfSection(items, 10, "Deal Economics");
   addCaseStudyPdfParagraph(items, report.economics.text);
+  addCaseStudyPdfParagraph(items, report.economics.missingInput);
   addCaseStudyPdfParagraph(items, report.economics.prompt);
 
   addCaseStudyPdfSection(items, 11, "Recommended Actions");
@@ -6526,7 +6579,7 @@ function buildFinalDeliverablesReportLines(deliverable, session) {
     ],
   });
   addCaseStudyPdfParagraph(items, "The logical next step is to confirm the forecast against named leadership roles before final sequencing.", { after: 10 });
-  addCaseStudyPdfSection(items, 13, "Limitations Footer");
+  addCaseStudyPdfSection(items, 13, "Limitations");
   items.push({
     text: report.limitations,
     size: 9,
