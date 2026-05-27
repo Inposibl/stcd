@@ -1,4 +1,4 @@
-import { sealPrediction } from "./_predictionLedger.js";
+import { sealPrediction } from "./_predictionLedger.ts";
 
 type NodeApiRequest = {
   method: string;
