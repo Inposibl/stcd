@@ -494,7 +494,11 @@ const CHECKS = [
       assertCheck(app.includes("href=\"/screen-12-consultation-request\""), "Screen 10 Talk to us link must route to consultation request");
       assertCheck(app.includes("Reset all data and back to start page"), "Screen 10 CTA must reset and return to start");
       assertCheck(app.includes("Preliminary Assessment Report"), "saved PDF must include Preliminary Assessment report section");
-      assertCheck(app.includes("Final Deliverables Report"), "saved PDF must include Final Deliverables report section");
+      assertCheck(app.includes("function buildFinalDeliverablesReportLines"), "saved PDF source must include report line builder");
+      assertCheck(app.includes("function createFinalDeliverablesReportPdf"), "saved PDF source must include PDF generator");
+      assertCheck(app.includes("Preliminary Forecast Brief"), "saved PDF must include current public report title");
+      assertCheck(app.includes("Forecast-led public report"), "saved PDF must include current public report positioning");
+      assertCheck(app.includes("M&A Post-Deal Behavior Forecast"), "saved PDF must include current public report product marker");
       assertCheck(app.includes("economics: buildDealEconomicsReport(session)"), "public final report must map Deal Economics from session");
       assertCheck(app.includes("report.economics.lines.map"), "HTML Deal Economics must render report.economics.lines");
       assertCheck(app.includes("for (const line of report.economics.lines)"), "PDF Deal Economics must render report.economics.lines");
