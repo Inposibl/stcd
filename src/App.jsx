@@ -4947,10 +4947,512 @@ function FinalReportStructureBlock({ session, deliverable }) {
   );
 }
 
+const FORECAST_REPORT_UNAVAILABLE_TEXT = "Not available in this preliminary sample.";
+const ROLE_LEVEL_FORECAST_UNAVAILABLE_TEXT = "Role-level forecast preview is not available in this preliminary sample. Full engagement confirms named leadership fit, transition windows, and role-specific recommendations.";
+const DEAL_ECONOMICS_UNAVAILABLE_TEXT = "Financial exposure is not calculated in this preliminary sample because deal value and compensation inputs are not confirmed.";
+const DEAL_ECONOMICS_INPUT_PROMPT_TEXT = "Provide EV and confirmed compensation inputs to calculate a structure-based risk envelope.";
+const FORECAST_REPORT_LIMITATIONS_TEXT = "This is a preliminary, structure-based forecast with medium confidence. Confirm individual leadership fit before final sequencing.";
+const FORECAST_REPORT_FORBIDDEN_PATTERNS = Object.freeze([
+  /\bMBTI\b/i,
+  /\bVarna\b/i,
+  /\bNeurosis\b/i,
+  /\bPersona\b/i,
+  /\bShadow\b/i,
+  /\braw function stack\b/i,
+  /\bconsciousness\b/i,
+  /\bspiritual\b/i,
+  /\bkarma\b/i,
+]);
+const FORECAST_REPORT_FORBIDDEN_LEVEL_PATTERNS = Object.freeze([
+  /\bLevel\s*\d+\b/i,
+  /\b(?:diagnostic|internal|methodology|hierarchy|structural)\s+level\b/i,
+  /\blevel\s+of\s+(?:evidence|hierarchy|diagnosis|methodology|structure)\b/i,
+]);
+
+function containsForbiddenForecastTerm(value) {
+  const text = String(value ?? "")
+    .replace(/\bRole-Level Forecast Snapshot\b/gi, "")
+    .replace(/\brole-level\b/gi, "");
+  return FORECAST_REPORT_FORBIDDEN_PATTERNS.some((pattern) => pattern.test(text))
+    || FORECAST_REPORT_FORBIDDEN_LEVEL_PATTERNS.some((pattern) => pattern.test(text));
+}
+
+function normalizeForecastClientText(value) {
+  return String(value ?? "").replace(/\s+/g, " ").trim();
+}
+
+function isInvalidForecastClientText(value) {
+  const text = normalizeForecastClientText(value);
+  return !text
+    || text === "[object Object]"
+    || /(?:^|\s)(?:undefined|null|NaN)(?:\s|$)/i.test(text)
+    || /^[{[]/.test(text);
+}
+
+function forecastSourceValueToText(value, fallback = FORECAST_REPORT_UNAVAILABLE_TEXT) {
+  if (value == null) return fallback;
+  if (Array.isArray(value)) {
+    return value.map((item) => forecastSourceValueToText(item, "")).filter(Boolean).join(" ");
+  }
+  if (typeof value === "object") {
+    const preferred = value.text ?? value.copy ?? value.summary ?? value.description ?? value.title ?? value.label ?? value.headline ?? value.body;
+    return preferred == null ? fallback : forecastSourceValueToText(preferred, fallback);
+  }
+  return String(value);
+}
+
+function forecastReportText(value, fallback = FORECAST_REPORT_UNAVAILABLE_TEXT, options = {}) {
+  const fallbackText = normalizeForecastClientText(fallback);
+  const candidate = normalizeForecastClientText(forecastSourceValueToText(value, fallbackText));
+  if (isInvalidForecastClientText(candidate)) return fallbackText;
+
+  const publicCandidate = normalizeForecastClientText(pdfLayerAText(candidate));
+  if (isInvalidForecastClientText(publicCandidate)) return fallbackText;
+  if (options.noMoney && /\$\s*\d|\b(?:USD|EUR|GBP)\b/i.test(publicCandidate)) return fallbackText;
+  if (!options.allowForbiddenTerms && containsForbiddenForecastTerm(publicCandidate)) return fallbackText;
+  return publicCandidate;
+}
+
+function forecastList(values, fallbackItems = [], limit = 3, options = {}) {
+  const sourceItems = Array.isArray(values) ? values : [values];
+  const fallbackSource = Array.isArray(fallbackItems) ? fallbackItems : [fallbackItems];
+  const normalized = [];
+  const seen = new Set();
+
+  for (const item of [...sourceItems, ...fallbackSource]) {
+    const text = forecastReportText(item, "", options);
+    const key = normalizeForecastClientText(text).toLowerCase();
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    normalized.push(text);
+    if (normalized.length >= limit) break;
+  }
+
+  return normalized.length > 0 ? normalized : [FORECAST_REPORT_UNAVAILABLE_TEXT];
+}
+
+function forecastTimelinePhase(index) {
+  return `FP${index + 1}`;
+}
+
+function forecastWatchPrompt(timelineRow, prompt) {
+  const window = forecastReportText(timelineRow?.window, "the relevant post-close window");
+  const phase = forecastReportText(timelineRow?.phase, "the forecast phase");
+  return `During ${window}, check whether ${phase} ${prompt}.`;
+}
+
+function buildForecastLedPublicReport(deliverable, session) {
+  const dealContext = session?.dealContext?.data ?? {};
+  const acquirerEnvironment = pdfEnvironmentSummary(deliverable?.acquirerEnvironmentCode);
+  const targetEnvironment = pdfEnvironmentSummary(deliverable?.targetEnvironmentCode);
+  const acquirerName = forecastReportText(pdfPartyName(dealContext.acquirerName, "your organisation"));
+  const targetName = forecastReportText(pdfPartyName(dealContext.targetName, "your target"));
+  const score = pdfRoundedCompatibilityScore(deliverable);
+  const riskBand = forecastReportText(deliverable?.riskBand, "Risk band pending");
+  const narrative = deliverable?.narrative ?? {};
+  const anchors = deliverable?.anchors ?? [];
+  const friction = deliverable?.friction ?? {};
+  const generatedDate = new Date().toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+  const timelineRows = pdfTimelineRows(deliverable).map(([window, whatSurfaces, inTheRoom], index) => {
+    const whatText = forecastReportText(whatSurfaces);
+    const roomText = forecastReportText(inTheRoom);
+    const duplicate = normalizeForecastClientText(whatText) === normalizeForecastClientText(roomText);
+    return {
+      phase: forecastTimelinePhase(index),
+      window: forecastReportText(window),
+      whatSurfaces: whatText,
+      inTheRoom: duplicate ? "" : roomText,
+    };
+  });
+  const forecastSignalSource = friction.earlyWarningSignal || anchors[0]?.text || narrative.prediction;
+  const decisiveSignal = forecastWatchPrompt(timelineRows[0], "is observable in current integration behavior");
+  const ninetyDayChecks = Object.freeze([
+    forecastWatchPrompt(timelineRows[1], "is recurring rather than isolated"),
+  ]);
+  const oneEightyDayChecks = Object.freeze([
+    forecastWatchPrompt(timelineRows[2], "still requires sequencing review"),
+  ]);
+  const actions = pdfRecommendedActions(deliverable);
+
+  return Object.freeze({
+    generatedDate,
+    scenario: `${acquirerName} acquiring ${targetName}`,
+    coverHeadline: forecastReportText(
+      narrative.prediction || forecastSignalSource || deliverable?.headline || deliverable?.body,
+      "No forecast event is available in this preliminary sample.",
+    ),
+    decisionImplication: forecastReportText(
+      narrative.implication || deliverable?.caveat,
+      "Decision implication is not available in this preliminary sample.",
+    ),
+    executive: Object.freeze({
+      headline: forecastReportText(narrative.headline || deliverable?.headline, "Executive Decision Summary"),
+      situation: forecastReportText(
+        deliverable?.screen === "screen-10b" ? deliverable?.body : narrative.situation || deliverable?.body,
+        "This preliminary sample uses the current environment pair and available forecast fields.",
+      ),
+      implication: forecastReportText(
+        narrative.implication || deliverable?.caveat,
+        "The implication is not available in this preliminary sample.",
+      ),
+    }),
+    dealScenario: Object.freeze({
+      rows: Object.freeze([
+        ["Acquirer side", acquirerName],
+        ["Target side", targetName],
+        ["Canonical deal type", forecastReportText(pdfOptionText(DEAL_TYPE_OPTIONS, dealContext.dealType))],
+        ["Acquisition motive context", forecastReportText(pdfOptionText(ACQUISITION_MOTIVE_OPTIONS, dealContext.acquisitionMotive))],
+      ]),
+    }),
+    environments: Object.freeze({
+      acquirer: Object.freeze({
+        title: forecastReportText(acquirerEnvironment.displayName),
+        body: forecastReportText(pdfAcquirerEnvironmentExplanation(acquirerEnvironment)),
+      }),
+      target: Object.freeze({
+        title: forecastReportText(targetEnvironment.displayName),
+        body: forecastReportText(pdfTargetEnvironmentExplanation(targetEnvironment)),
+      }),
+    }),
+    collisionRows: Object.freeze(pdfCollisionRows(deliverable, acquirerEnvironment, targetEnvironment).map(([point, interpretation]) => Object.freeze({
+      point: forecastReportText(point),
+      interpretation: forecastReportText(interpretation),
+    }))),
+    roleLevelForecast: Object.freeze({
+      available: false,
+      text: forecastReportText(ROLE_LEVEL_FORECAST_UNAVAILABLE_TEXT, ROLE_LEVEL_FORECAST_UNAVAILABLE_TEXT, { allowForbiddenTerms: true }),
+    }),
+    sealedPredictionPreview: Object.freeze({
+      title: "Sealed Prediction Preview — display-only, not ledger-recorded",
+      anchors: Object.freeze(anchors.map((anchor) => Object.freeze({
+        label: forecastReportText(anchor.label, "Forecast anchor"),
+        text: forecastReportText(anchor.text),
+      }))),
+      caveat: forecastReportText(deliverable?.caveat, "This preview is not ledger-recorded in the preliminary sample."),
+    }),
+    compatibility: Object.freeze({
+      score,
+      riskBand,
+      note: forecastReportText(pdfBandInterpretation(score, riskBand)),
+      demotedNote: `${score} / ${riskBand}: a specification, not a verdict.`,
+    }),
+    timelineRows: Object.freeze(timelineRows.map((row) => Object.freeze(row))),
+    watch: Object.freeze({
+      decisiveSignal,
+      ninetyDayChecks: Object.freeze(ninetyDayChecks),
+      oneEightyDayChecks: Object.freeze(oneEightyDayChecks),
+    }),
+    economics: Object.freeze({
+      available: false,
+      text: forecastReportText(DEAL_ECONOMICS_UNAVAILABLE_TEXT, DEAL_ECONOMICS_UNAVAILABLE_TEXT, { noMoney: true }),
+      prompt: forecastReportText(DEAL_ECONOMICS_INPUT_PROMPT_TEXT, DEAL_ECONOMICS_INPUT_PROMPT_TEXT, { noMoney: true }),
+    }),
+    actions: Object.freeze({
+      beforeClose: Object.freeze(forecastList(actions.beforeClose, [], 3)),
+      afterClose: Object.freeze(forecastList(actions.afterClose, [], 3)),
+    }),
+    fullEngagement: Object.freeze([
+      Object.freeze(["Confirmation", "The preliminary forecast is checked against the full evidence record and leadership context of the actual deal."]),
+      Object.freeze(["Named people", "The forecast is translated into which leaders are likely to thrive, stall, resist, or leave under the planned operating model."]),
+      Object.freeze(["Protocol", "The forecast becomes sequencing, decision rights, escalation rules, and monitoring cadence for the first integration cycle."]),
+    ]),
+    limitations: forecastReportText(FORECAST_REPORT_LIMITATIONS_TEXT),
+  });
+}
+
+const FORECAST_REPORT_STYLES = Object.freeze({
+  document: {
+    display: "grid",
+    gap: "18px",
+    fontFamily: 'Helvetica, "Helvetica Neue", Arial, sans-serif',
+  },
+  cover: {
+    background: "#FAFAF8",
+    border: "1px solid rgba(26,35,50,.14)",
+    boxShadow: "0 18px 44px rgba(26,35,50,.08)",
+    padding: "clamp(28px, 5vw, 56px)",
+  },
+  coverEyebrow: {
+    color: "#6B7178",
+    letterSpacing: ".14em",
+    textTransform: "uppercase",
+  },
+  coverTitle: {
+    color: "#1A2332",
+    fontSize: "clamp(2rem, 5vw, 4.1rem)",
+    lineHeight: 1.02,
+    letterSpacing: 0,
+    margin: "0 0 18px",
+    maxWidth: "820px",
+  },
+  coverMeta: {
+    borderTop: "1px solid rgba(26,35,50,.16)",
+    display: "grid",
+    gap: "18px",
+    marginTop: "28px",
+    paddingTop: "24px",
+  },
+  coverLead: {
+    color: "#23262B",
+    fontSize: "1.08rem",
+    lineHeight: 1.65,
+    maxWidth: "72ch",
+  },
+  scoreChip: {
+    alignItems: "center",
+    border: "1px solid rgba(26,35,50,.16)",
+    borderRadius: "999px",
+    color: "#1A2332",
+    display: "inline-flex",
+    fontSize: ".92rem",
+    fontWeight: 700,
+    gap: "8px",
+    padding: "8px 14px",
+    width: "fit-content",
+  },
+  section: {
+    background: "#FFFFFF",
+    border: "1px solid rgba(26,35,50,.12)",
+    padding: "clamp(22px, 4vw, 34px)",
+  },
+  sectionEyebrow: {
+    color: "#6B7178",
+    letterSpacing: ".14em",
+    textTransform: "uppercase",
+  },
+  sectionTitle: {
+    color: "#1A2332",
+    fontSize: "clamp(1.35rem, 3vw, 2rem)",
+    letterSpacing: 0,
+    margin: "0 0 18px",
+  },
+  twoColumn: {
+    display: "grid",
+    gap: "16px",
+    gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+  },
+  soberCard: {
+    background: "#FAFAF8",
+    border: "1px solid rgba(26,35,50,.14)",
+    padding: "18px",
+  },
+  dashedCard: {
+    background: "#FFFFFF",
+    border: "1px dashed rgba(26,35,50,.34)",
+    padding: "18px",
+  },
+  watchBlock: {
+    background: "#F4ECDD",
+    border: "1px solid rgba(154,106,18,.24)",
+    padding: "18px",
+  },
+  economicsBlock: {
+    background: "#FAFAF8",
+    border: "1px solid rgba(26,35,50,.14)",
+    padding: "18px",
+  },
+  premiumBlock: {
+    background: "#1A2332",
+    border: "1px solid rgba(26,35,50,.18)",
+    color: "#FFFFFF",
+    padding: "18px",
+  },
+  muted: {
+    color: "#6B7178",
+  },
+});
+
+function ForecastReportSection({ number, title, children, variant = "standard" }) {
+  const sectionStyle = {
+    ...FORECAST_REPORT_STYLES.section,
+    ...(variant === "dashed" ? FORECAST_REPORT_STYLES.dashedCard : null),
+    ...(variant === "economics" ? FORECAST_REPORT_STYLES.economicsBlock : null),
+    ...(variant === "premium" ? FORECAST_REPORT_STYLES.premiumBlock : null),
+  };
+  const titleStyle = {
+    ...FORECAST_REPORT_STYLES.sectionTitle,
+    ...(variant === "premium" ? { color: "#FFFFFF" } : null),
+  };
+  const eyebrowStyle = {
+    ...FORECAST_REPORT_STYLES.sectionEyebrow,
+    ...(variant === "premium" ? { color: "rgba(255,255,255,.72)" } : null),
+  };
+
+  return (
+    <section className="reveal-block forecast-report-section" style={sectionStyle}>
+      <p className="eyebrow" style={eyebrowStyle}>{String(number).padStart(2, "0")}</p>
+      <h2 style={titleStyle}>{title}</h2>
+      {children}
+    </section>
+  );
+}
+
+function ForecastFieldRows({ rows }) {
+  return (
+    <div className="range-table">
+      {rows.map(([label, value]) => (
+        <div className="range-row" key={label}>
+          <span>{label}</span>
+          <strong>{value}</strong>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ForecastBulletList({ items }) {
+  return (
+    <ul>
+      {items.map((item) => (
+        <li key={item}>{item}</li>
+      ))}
+    </ul>
+  );
+}
+
+function ForecastLedPublicReport({ report }) {
+  return (
+    <div className="forecast-report-document" style={FORECAST_REPORT_STYLES.document}>
+      <section className="reveal-block forecast-cover-block" style={FORECAST_REPORT_STYLES.cover}>
+        <p className="eyebrow" style={FORECAST_REPORT_STYLES.coverEyebrow}>Public report</p>
+        <h2 style={FORECAST_REPORT_STYLES.coverTitle}>Preliminary Forecast Brief</h2>
+        <div style={FORECAST_REPORT_STYLES.coverMeta}>
+          <p style={FORECAST_REPORT_STYLES.coverLead}>{report.scenario}</p>
+          <p style={FORECAST_REPORT_STYLES.coverLead}><strong>Role-voice scenario:</strong> {report.coverHeadline}</p>
+          <p style={FORECAST_REPORT_STYLES.coverLead}><strong>Decision implication:</strong> {report.decisionImplication}</p>
+          <p style={FORECAST_REPORT_STYLES.scoreChip}><span>Compatibility score</span><span>{report.compatibility.demotedNote}</span></p>
+        </div>
+        <p className="source-note" style={FORECAST_REPORT_STYLES.muted}>Public Final Deliverables Report / M&amp;A Post-Deal Behavior Forecast / {report.generatedDate}</p>
+      </section>
+
+      <ForecastReportSection number={1} title="Executive Decision Summary">
+        <p><strong>{report.executive.headline}</strong></p>
+        <p>{report.executive.situation}</p>
+        <p>{report.executive.implication}</p>
+      </ForecastReportSection>
+
+      <ForecastReportSection number={2} title="Deal Scenario">
+        <ForecastFieldRows rows={report.dealScenario.rows} />
+      </ForecastReportSection>
+
+      <ForecastReportSection number={3} title="The Two Environments">
+        <div className="protocol-insight-grid" style={FORECAST_REPORT_STYLES.twoColumn}>
+          <article style={FORECAST_REPORT_STYLES.soberCard}>
+            <strong>Acquirer environment: {report.environments.acquirer.title}</strong>
+            <p>{report.environments.acquirer.body}</p>
+          </article>
+          <article style={FORECAST_REPORT_STYLES.soberCard}>
+            <strong>Target environment: {report.environments.target.title}</strong>
+            <p>{report.environments.target.body}</p>
+          </article>
+        </div>
+      </ForecastReportSection>
+
+      <ForecastReportSection number={4} title="Collision Thesis">
+        <div className="client-output-stack">
+          {report.collisionRows.map((row) => (
+            <article key={row.point}>
+              <strong>{row.point}</strong>
+              <p>{row.interpretation}</p>
+            </article>
+          ))}
+        </div>
+      </ForecastReportSection>
+
+      <ForecastReportSection number={5} title="Role-Level Forecast Snapshot">
+        <article style={FORECAST_REPORT_STYLES.soberCard}>
+          <p>{report.roleLevelForecast.text}</p>
+        </article>
+      </ForecastReportSection>
+
+      <ForecastReportSection number={6} title={report.sealedPredictionPreview.title} variant="dashed">
+        {report.sealedPredictionPreview.anchors.length > 0 ? (
+          <div className="anchor-list">
+            {report.sealedPredictionPreview.anchors.map((anchor) => (
+              <article key={anchor.label}>
+                <strong>{anchor.label}</strong>
+                <p>{anchor.text}</p>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <p>No sealed prediction preview anchors are available in this preliminary sample.</p>
+        )}
+        <p className="sealed-caveat"><em>{report.sealedPredictionPreview.caveat}</em></p>
+      </ForecastReportSection>
+
+      <ForecastReportSection number={7} title="Compatibility Score">
+        <p><strong>{report.compatibility.score}</strong> / {report.compatibility.riskBand}</p>
+        <p>{report.compatibility.note}</p>
+      </ForecastReportSection>
+
+      <ForecastReportSection number={8} title="Timeline of Expected Friction">
+        <div className="anchor-list compact-anchors">
+          {report.timelineRows.map((row) => (
+            <article key={row.phase}>
+              <strong>{row.phase} / {row.window}</strong>
+              <p><strong>What surfaces:</strong> {row.whatSurfaces}</p>
+              {row.inTheRoom ? <p><strong>In the room:</strong> {row.inTheRoom}</p> : null}
+            </article>
+          ))}
+        </div>
+      </ForecastReportSection>
+
+      <ForecastReportSection number={9} title="What to Watch">
+        <article style={FORECAST_REPORT_STYLES.watchBlock}>
+          <strong>30-day observation prompt</strong>
+          <p>{report.watch.decisiveSignal}</p>
+        </article>
+        <div className="protocol-insight-grid" style={FORECAST_REPORT_STYLES.twoColumn}>
+          <article style={FORECAST_REPORT_STYLES.soberCard}>
+            <strong>90-day checks</strong>
+            <ForecastBulletList items={report.watch.ninetyDayChecks} />
+          </article>
+          <article style={FORECAST_REPORT_STYLES.soberCard}>
+            <strong>180-day checks</strong>
+            <ForecastBulletList items={report.watch.oneEightyDayChecks} />
+          </article>
+        </div>
+      </ForecastReportSection>
+
+      <ForecastReportSection number={10} title="Deal Economics" variant="economics">
+        <p>{report.economics.text}</p>
+        <p>{report.economics.prompt}</p>
+      </ForecastReportSection>
+
+      <ForecastReportSection number={11} title="Recommended Actions">
+        <div className="protocol-insight-grid" style={FORECAST_REPORT_STYLES.twoColumn}>
+          <article style={FORECAST_REPORT_STYLES.soberCard}>
+            <strong>Before close</strong>
+            <ForecastBulletList items={report.actions.beforeClose} />
+          </article>
+          <article style={FORECAST_REPORT_STYLES.soberCard}>
+            <strong>After close</strong>
+            <ForecastBulletList items={report.actions.afterClose} />
+          </article>
+        </div>
+      </ForecastReportSection>
+
+      <ForecastReportSection number={12} title="What the Full Engagement Adds" variant="premium">
+        <ForecastFieldRows rows={report.fullEngagement} />
+      </ForecastReportSection>
+
+      <ForecastReportSection number={13} title="Limitations Footer">
+        <p>{report.limitations}</p>
+      </ForecastReportSection>
+    </div>
+  );
+}
+
 function HeterogeneousRevealScreen({ session, setSession, deliverable }) {
   const [downloadState, setDownloadState] = useState("");
   const [savingReport, setSavingReport] = useState(false);
   const offer = buildPaidOffer("heterogeneous", { deliverable });
+  const forecastReport = buildForecastLedPublicReport(deliverable, session);
 
   async function saveReportPdf() {
     if (savingReport) return;
@@ -4974,7 +5476,7 @@ function HeterogeneousRevealScreen({ session, setSession, deliverable }) {
   return (
     <main className="screen-shell reveal-screen">
       <p className="eyebrow">Screen 10 / Reveal sequence</p>
-      <h1>Your deal: {deliverable.acquirerAlias} acquiring {deliverable.targetAlias}.</h1>
+      <h1>Preliminary Forecast Brief</h1>
       <section className={`outcome-banner outcome-${deliverable.outcomeLetter.toLowerCase()}`}>
         <strong>{publicText(deliverable.outcomeGuide.title)}</strong>
         {deliverable.outcomeGuide.condition ? <span>{publicText(deliverable.outcomeGuide.condition)}</span> : null}
@@ -4986,24 +5488,7 @@ function HeterogeneousRevealScreen({ session, setSession, deliverable }) {
 
       {deliverable.narrative && deliverable.outcomeLetter !== "D" ? (
         <>
-          <section className="reveal-block">
-            <p className="eyebrow">Block 2</p>
-            <h2>{publicText(deliverable.narrative.headline)}</h2>
-          </section>
-          <section className="reveal-block compatibility-block">
-            <p className="eyebrow">Block 3</p>
-            <h2>Compatibility {deliverable.compatibilityRange}</h2>
-            <strong>{deliverable.riskBand}</strong>
-          </section>
-          <section className="reveal-block narrative-block">
-            <p className="eyebrow">Block 4</p>
-            <Paragraphs text={deliverable.narrative.situation} />
-            <p><strong>If the signal appears:</strong> {publicText(deliverable.narrative.implication)}</p>
-          </section>
-          <SealedPredictionBlock deliverable={deliverable} session={session} />
-          <FinalRiskOutputBlock session={session} />
-          <FinalReportStructureBlock session={session} deliverable={deliverable} />
-          <ProtocolDealInsightsBlock deliverable={deliverable} />
+          <ForecastLedPublicReport report={forecastReport} />
           <section className="reveal-block cta-block">
             <p className="eyebrow">Block 7</p>
             <TalkToUsParagraphs text={deliverable.cta} />
@@ -5025,6 +5510,7 @@ function HomogeneousRevealScreen({ session, deliverable }) {
   const [downloadState, setDownloadState] = useState("");
   const [savingReport, setSavingReport] = useState(false);
   const offer = buildPaidOffer("homogeneous", { alias: deliverable.acquirerAlias, deliverable });
+  const forecastReport = buildForecastLedPublicReport(deliverable, session);
 
   async function saveReportPdf() {
     if (savingReport) return;
@@ -5048,19 +5534,9 @@ function HomogeneousRevealScreen({ session, deliverable }) {
   return (
     <main className="screen-shell reveal-screen homogeneous-screen">
       <p className="eyebrow">Screen 10b / Homogeneous Integration</p>
-      <h1>{deliverable.headline}</h1>
+      <h1>Preliminary Forecast Brief</h1>
       <EstimationAccuracyNotice session={session} />
-      <section className="reveal-block compatibility-block high-compatibility">
-        <p className="eyebrow">Block 3</p>
-        <h2>Compatibility {deliverable.compatibilityRange}</h2>
-        <strong>{deliverable.riskBand}</strong>
-      </section>
-      <section className="reveal-block narrative-block">
-        <Paragraphs text={deliverable.body} />
-      </section>
-      <SealedPredictionBlock deliverable={deliverable} session={session} />
-      <FinalRiskOutputBlock session={session} />
-      <FinalReportStructureBlock session={session} deliverable={deliverable} />
+      <ForecastLedPublicReport report={forecastReport} />
       <section className="reveal-block cta-block">
         <p className="eyebrow">Block 7</p>
         <TalkToUsParagraphs text={deliverable.cta} />
@@ -5842,37 +6318,18 @@ function buildFinalDeliverablesReportLines(deliverable, session) {
   if (!deliverable?.ready) {
     return [
       { text: "ACADEMY OF STRUCTURAL TYPOLOGY", size: 9, bold: true, align: "center", color: PDF_BRAND.accent, after: 20, maxCharacters: 90 },
-      { text: "FINAL DELIVERABLES REPORT", size: 26, bold: true, align: "center", color: PDF_BRAND.navy, after: 12, maxCharacters: 44 },
+      { text: "PRELIMINARY FORECAST BRIEF", size: 26, bold: true, align: "center", color: PDF_BRAND.navy, after: 12, maxCharacters: 44 },
       { text: "The report is not ready for this session.", size: 12, align: "center", color: PDF_BRAND.muted },
     ];
   }
 
-  const dealContext = session?.dealContext?.data ?? {};
-  const resourceRows = deliverable.resourceConflictProfile?.highProbabilityConflicts?.slice(0, 3) ?? [];
-  const generatedDate = new Date().toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-  const acquirerEnvironment = pdfEnvironmentSummary(deliverable.acquirerEnvironmentCode);
-  const targetEnvironment = pdfEnvironmentSummary(deliverable.targetEnvironmentCode);
-  const acquirerName = pdfPartyName(dealContext.acquirerName, "your organisation");
-  const targetName = pdfPartyName(dealContext.targetName, "your target");
-  const coverTitle = `${acquirerEnvironment.alias} acquiring ${targetEnvironment.alias}`;
-  const score = pdfRoundedCompatibilityScore(deliverable);
-  const bandColor = pdfBandColor(deliverable.riskBand);
-  const narrative = deliverable.narrative ?? {};
-  const actions = pdfRecommendedActions(deliverable);
-  const collisionRows = pdfCollisionRows(deliverable, acquirerEnvironment, targetEnvironment);
-  const timelineRows = pdfTimelineRows(deliverable);
-  const decisiveSignal = deliverable.friction?.earlyWarningSignal || deliverable.anchors?.[0]?.text || narrative.prediction;
-  const ninetyDayChecks = pdfBulletSentences(deliverable.friction?.fp2 || deliverable.anchors?.[1]?.text, "Check whether the first conflict pattern has become a recurring operating routine.");
-  const oneEightyDayChecks = pdfBulletSentences(deliverable.friction?.fp3 || deliverable.anchors?.[2]?.text, "Check whether the target's strongest people and routines still recognise the combined operating system as workable.");
+  const report = buildForecastLedPublicReport(deliverable, session);
+  const bandColor = pdfBandColor(report.compatibility.riskBand);
 
   const items = [
     { text: "ACADEMY OF STRUCTURAL TYPOLOGY", size: 9, bold: true, align: "center", color: PDF_BRAND.accent, after: 18, maxCharacters: 90 },
     {
-      text: coverTitle,
+      text: "Preliminary Forecast Brief",
       size: 20,
       bold: true,
       align: "center",
@@ -5889,7 +6346,7 @@ function buildFinalDeliverablesReportLines(deliverable, session) {
       maxCharacters: 58,
     },
     {
-      text: `M&A Post-Deal Behavior Forecast  \u00b7  ${generatedDate}`,
+      text: `M&A Post-Deal Behavior Forecast  \u00b7  ${report.generatedDate}`,
       size: 11,
       align: "center",
       color: PDF_BRAND.muted,
@@ -5897,7 +6354,23 @@ function buildFinalDeliverablesReportLines(deliverable, session) {
       maxCharacters: 78,
     },
     {
-      text: `${acquirerName} acquiring ${targetName}`,
+      text: report.scenario,
+      size: 11,
+      align: "center",
+      color: PDF_BRAND.body,
+      after: 10,
+      maxCharacters: 78,
+    },
+    {
+      text: `Role-voice scenario: ${report.coverHeadline}`,
+      size: 11,
+      align: "center",
+      color: PDF_BRAND.body,
+      after: 8,
+      maxCharacters: 78,
+    },
+    {
+      text: `Decision implication: ${report.decisionImplication}`,
       size: 11,
       align: "center",
       color: PDF_BRAND.body,
@@ -5905,7 +6378,7 @@ function buildFinalDeliverablesReportLines(deliverable, session) {
       maxCharacters: 78,
     },
     {
-      text: String(score),
+      text: String(report.compatibility.score),
       size: 28,
       bold: true,
       align: "center",
@@ -5914,13 +6387,21 @@ function buildFinalDeliverablesReportLines(deliverable, session) {
       maxCharacters: 20,
     },
     {
-      text: deliverable.riskBand,
+      text: report.compatibility.riskBand,
       size: 12,
       bold: true,
       align: "center",
       color: bandColor,
       after: 18,
       maxCharacters: 44,
+    },
+    {
+      text: "A specification, not a verdict.",
+      size: 10,
+      align: "center",
+      color: PDF_BRAND.muted,
+      after: 18,
+      maxCharacters: 58,
     },
     {
       text: "structural-typology.com  \u00b7  info@structural-typology.academy",
@@ -5940,62 +6421,60 @@ function buildFinalDeliverablesReportLines(deliverable, session) {
     { type: "pageBreak" },
   ];
 
-  addCaseStudyPdfSection(items, 1, "Executive Summary");
+  addCaseStudyPdfSection(items, 1, "Executive Decision Summary");
   addCaseStudyPdfParagraph(
     items,
-    narrative.headline ?? deliverable.headline,
+    report.executive.headline,
     { size: 11, bold: true, color: PDF_BRAND.body, after: 10 },
   );
-  addCaseStudyPdfParagraph(
-    items,
-    deliverable.screen === "screen-10b"
-      ? deliverable.body
-      : narrative.situation,
-  );
-  addCaseStudyPdfParagraph(items, `The one thing to watch: ${narrative.prediction || decisiveSignal || deliverable.anchors?.[0]?.text}`, {
-    fill: PDF_BRAND.panelFill,
-    stroke: PDF_BRAND.green,
-    strokeWidth: 1.2,
-    paddingY: 10,
-    after: 10,
-  });
-  addCaseStudyPdfParagraph(items, narrative.implication || "The integration outcome will depend on whether leadership notices the first behavioural signal early enough to adjust sequencing.");
+  addCaseStudyPdfParagraph(items, report.executive.situation);
+  addCaseStudyPdfParagraph(items, report.executive.implication);
 
   addCaseStudyPdfSection(items, 2, "Deal Scenario");
   items.push({
     type: "table",
     columns: [156, 312],
     rows: [
-      ["Deal field", "Plain-language read"],
-      ["Acquirer", acquirerName],
-      ["Target", targetName],
-      ["Deal type", pdfOptionText(DEAL_TYPE_OPTIONS, dealContext.dealType)],
-      ["Acquisition motive", pdfOptionText(ACQUISITION_MOTIVE_OPTIONS, dealContext.acquisitionMotive)],
-      ["Why this matters", `The deal depends on whether ${acquirerName} can preserve the target capability while changing the operating environment around it.`],
+      ["Deal field", "Public report value"],
+      ...report.dealScenario.rows,
     ],
   });
 
   addCaseStudyPdfSection(items, 3, "The Two Environments");
   addCaseStudyPdfSubsection(items, "3.1 Acquirer environment");
-  addCaseStudyPdfParagraph(items, `${acquirerEnvironment.displayName}: ${pdfAcquirerEnvironmentExplanation(acquirerEnvironment)}`);
+  addCaseStudyPdfParagraph(items, `${report.environments.acquirer.title}: ${report.environments.acquirer.body}`);
   addCaseStudyPdfSubsection(items, "3.2 Target environment");
-  addCaseStudyPdfParagraph(items, `${targetEnvironment.displayName}: ${pdfTargetEnvironmentExplanation(targetEnvironment)}`);
+  addCaseStudyPdfParagraph(items, `${report.environments.target.title}: ${report.environments.target.body}`);
 
-  addCaseStudyPdfSection(items, 4, "Why These Two Environments Collide");
+  addCaseStudyPdfSection(items, 4, "Collision Thesis");
   items.push({
     type: "table",
     columns: [156, 312],
     preserveEnvironmentCodes: true,
-    rows: [["Collision point", "Buyer-facing interpretation"], ...collisionRows],
+    rows: [["Collision point", "Interpretation"], ...report.collisionRows.map((row) => [row.point, row.interpretation])],
   });
 
-  addCaseStudyPdfSection(items, 5, "Compatibility Score");
+  addCaseStudyPdfSection(items, 5, "Role-Level Forecast Snapshot");
+  addCaseStudyPdfParagraph(items, report.roleLevelForecast.text);
+
+  addCaseStudyPdfSection(items, 6, report.sealedPredictionPreview.title);
+  if (report.sealedPredictionPreview.anchors.length > 0) {
+    for (const anchor of report.sealedPredictionPreview.anchors) {
+      addCaseStudyPdfSubsection(items, anchor.label);
+      addCaseStudyPdfParagraph(items, anchor.text);
+    }
+  } else {
+    addCaseStudyPdfParagraph(items, "No sealed prediction preview anchors are available in this preliminary sample.");
+  }
+  addCaseStudyPdfParagraph(items, report.sealedPredictionPreview.caveat, { size: 10, color: PDF_BRAND.muted });
+
+  addCaseStudyPdfSection(items, 7, "Compatibility Score");
   addCaseStudyPdfParagraph(
     items,
-    String(score),
+    String(report.compatibility.score),
     { size: 28, bold: true, color: bandColor, align: "center", after: 0, maxCharacters: 20 },
   );
-  addCaseStudyPdfParagraph(items, deliverable.riskBand, {
+  addCaseStudyPdfParagraph(items, report.compatibility.riskBand, {
     size: 12,
     bold: true,
     color: bandColor,
@@ -6003,20 +6482,19 @@ function buildFinalDeliverablesReportLines(deliverable, session) {
     after: 8,
     maxCharacters: 44,
   });
-  addCaseStudyPdfParagraph(
-    items,
-    pdfBandInterpretation(score, deliverable.riskBand),
-  );
+  addCaseStudyPdfParagraph(items, report.compatibility.note);
 
-  addCaseStudyPdfSection(items, 6, "What Will Happen After Close");
-  items.push({
-    type: "table",
-    columns: [92, 188, 188],
-    rows: [["Window", "What surfaces", "What it looks like in the room"], ...timelineRows],
-  });
+  addCaseStudyPdfSection(items, 8, "Timeline of Expected Friction");
+  for (const row of report.timelineRows) {
+    addCaseStudyPdfSubsection(items, `${row.phase} / ${row.window}`);
+    addCaseStudyPdfParagraph(items, `What surfaces: ${row.whatSurfaces}`);
+    if (row.inTheRoom) {
+      addCaseStudyPdfParagraph(items, `In the room: ${row.inTheRoom}`);
+    }
+  }
 
-  addCaseStudyPdfSection(items, 7, "What to Watch — and When");
-  addCaseStudyPdfParagraph(items, `30-day decisive signal: ${decisiveSignal}`, {
+  addCaseStudyPdfSection(items, 9, "What to Watch");
+  addCaseStudyPdfParagraph(items, `30-day observation prompt: ${report.watch.decisiveSignal}`, {
     fill: PDF_BRAND.warningFill,
     stroke: PDF_BRAND.warningStroke,
     strokeWidth: 1.2,
@@ -6024,30 +6502,33 @@ function buildFinalDeliverablesReportLines(deliverable, session) {
     after: 10,
   });
   addCaseStudyPdfSubsection(items, "90-day checks");
-  addCaseStudyPdfBulletList(items, ninetyDayChecks);
+  addCaseStudyPdfBulletList(items, report.watch.ninetyDayChecks);
   addCaseStudyPdfSubsection(items, "180-day checks");
-  addCaseStudyPdfBulletList(items, oneEightyDayChecks);
+  addCaseStudyPdfBulletList(items, report.watch.oneEightyDayChecks);
 
-  addCaseStudyPdfSection(items, 8, "Recommended Actions");
+  addCaseStudyPdfSection(items, 10, "Deal Economics");
+  addCaseStudyPdfParagraph(items, report.economics.text);
+  addCaseStudyPdfParagraph(items, report.economics.prompt);
+
+  addCaseStudyPdfSection(items, 11, "Recommended Actions");
   addCaseStudyPdfSubsection(items, "Before close");
-  addCaseStudyPdfBulletList(items, actions.beforeClose);
+  addCaseStudyPdfBulletList(items, report.actions.beforeClose);
   addCaseStudyPdfSubsection(items, "After close");
-  addCaseStudyPdfBulletList(items, actions.afterClose);
+  addCaseStudyPdfBulletList(items, report.actions.afterClose);
 
-  addCaseStudyPdfSection(items, 9, "What the Full Engagement Adds");
+  addCaseStudyPdfSection(items, 12, "What the Full Engagement Adds");
   items.push({
     type: "table",
     columns: [130, 338],
     rows: [
       ["Addition", "What changes"],
-      ["Confirmation", "The environment read is confirmed against the full evidence record and the leadership context of the actual deal."],
-      ["Named people", "The forecast is translated into which leaders are likely to thrive, stall, resist, or leave under the planned operating model."],
-      ["A protocol", "The forecast becomes sequencing, decision rights, escalation rules, and monitoring cadence for the first integration cycle."],
+      ...report.fullEngagement,
     ],
   });
   addCaseStudyPdfParagraph(items, "The logical next step is to confirm the forecast against named leadership roles before final sequencing.", { after: 10 });
+  addCaseStudyPdfSection(items, 13, "Limitations Footer");
   items.push({
-    text: "Preliminary, structure-based forecast; medium confidence; confirm individual leadership fit before final sequencing.",
+    text: report.limitations,
     size: 9,
     color: PDF_BRAND.muted,
     fill: "F2F2F2",
