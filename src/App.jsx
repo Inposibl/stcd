@@ -5305,6 +5305,13 @@ function forecastDealScenarioCompanyName(session, key) {
   return DEAL_SCENARIO_COMPANY_NAME_FALLBACK;
 }
 
+function forecastDealScenarioPublicValue(deliverable, side) {
+  const environmentCode = side === "acquirer"
+    ? deliverable?.acquirerEnvironmentCode
+    : deliverable?.targetEnvironmentCode;
+  return forecastReportText(pdfEnvironmentSummary(environmentCode).displayName, "Pending");
+}
+
 function buildForecastLedPublicReport(deliverable, session) {
   const dealContext = session?.dealContext?.data ?? {};
   const acquirerEnvironment = pdfEnvironmentSummary(deliverable?.acquirerEnvironmentCode);
@@ -5313,6 +5320,8 @@ function buildForecastLedPublicReport(deliverable, session) {
   const targetName = forecastPartyName(session, deliverable, "target");
   const acquirerCompanyName = forecastDealScenarioCompanyName(session, "acquirerName");
   const targetCompanyName = forecastDealScenarioCompanyName(session, "targetName");
+  const acquirerPublicReportValue = forecastDealScenarioPublicValue(deliverable, "acquirer");
+  const targetPublicReportValue = forecastDealScenarioPublicValue(deliverable, "target");
   const score = pdfRoundedCompatibilityScore(deliverable);
   const riskBand = forecastReportText(deliverable?.riskBand, "Risk band pending");
   const narrative = deliverable?.narrative ?? {};
@@ -5372,8 +5381,8 @@ function buildForecastLedPublicReport(deliverable, session) {
     }),
     dealScenario: Object.freeze({
       rows: Object.freeze([
-        Object.freeze({ field: "Acquirer side", companyName: acquirerCompanyName, value: acquirerName }),
-        Object.freeze({ field: "Target side", companyName: targetCompanyName, value: targetName }),
+        Object.freeze({ field: "Acquirer side", companyName: acquirerCompanyName, value: acquirerPublicReportValue }),
+        Object.freeze({ field: "Target side", companyName: targetCompanyName, value: targetPublicReportValue }),
         Object.freeze({ field: "Canonical deal type", companyName: DEAL_SCENARIO_COMPANY_NAME_FALLBACK, value: forecastReportText(pdfOptionText(DEAL_TYPE_OPTIONS, dealContext.dealType)) }),
         Object.freeze({ field: "Acquisition motive context", companyName: DEAL_SCENARIO_COMPANY_NAME_FALLBACK, value: forecastReportText(pdfOptionText(ACQUISITION_MOTIVE_OPTIONS, dealContext.acquisitionMotive)) }),
       ]),

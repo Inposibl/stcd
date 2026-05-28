@@ -11,6 +11,10 @@ import {
   buildFinalReportStructure,
 } from "../src/flow/finalReportEngine.js";
 import {
+  ACQUISITION_MOTIVE_OPTIONS,
+  DEAL_TYPE_OPTIONS,
+} from "../src/flow/acquirerTrackFlow.js";
+import {
   DEAL_ECONOMICS_DISCLAIMER,
   DEAL_ECONOMICS_FORMULA_DETAILS,
   DEAL_ECONOMICS_FORMULA_SCHEMA,
@@ -556,6 +560,27 @@ return forecastDealScenarioCompanyName;`,
   )("\u2014", placeholderResolver, pdfPartyName, forecastReportText);
 }
 
+function buildDealScenarioPublicValueResolver(appSource) {
+  const pdfEnvironmentSummary = (code) => Object.freeze({
+    displayName: {
+      "STJ/STP": "Enforcement-Dominance Operating Pattern",
+      "NT/STP": "The Disruption Lab",
+    }[code] ?? "Pending",
+  });
+  const forecastReportText = (value, fallback) => String(value ?? fallback).replace(/\s+/g, " ").trim() || fallback;
+
+  return new Function(
+    "pdfEnvironmentSummary",
+    "forecastReportText",
+    `${extractFunctionSource(appSource, "forecastDealScenarioPublicValue")}
+return forecastDealScenarioPublicValue;`,
+  )(pdfEnvironmentSummary, forecastReportText);
+}
+
+function optionTitle(options, value) {
+  return options.find((option) => option.value === value)?.title ?? value ?? "Pending";
+}
+
 const appSource = readFileSync(new URL("../src/App.jsx", import.meta.url), "utf8");
 assert.ok(appSource.includes("report.economics.lines.map"), "HTML Deal Economics must render report.economics.lines");
 assert.ok(appSource.includes("for (const line of report.economics.lines)"), "PDF Deal Economics must render report.economics.lines");
@@ -591,5 +616,74 @@ assert.deepEqual(resolveDealScenarioCompanyNames({
 assert.deepEqual(resolveDealScenarioCompanyNames({
   dealContext: { data: { acquirerName: "Acquirer Holdings", targetName: "Target Global Ltd" } },
 }), { acquirer: "Acquirer Holdings", target: "Target Global Ltd" });
+
+const dealScenarioPublicValueSource = extractFunctionSource(appSource, "forecastDealScenarioPublicValue");
+assert.ok(dealScenarioPublicValueSource.includes("pdfEnvironmentSummary(environmentCode).displayName"), "Deal Scenario public value must resolve from environment display name.");
+assert.ok(!dealScenarioPublicValueSource.includes("dealContext"), "Deal Scenario public value must not read Deal Context company names.");
+assert.ok(!dealScenarioPublicValueSource.includes("targetInvite"), "Deal Scenario public value must not read target invite company names.");
+assert.ok(appSource.includes("value: acquirerPublicReportValue"), "Acquirer Deal Scenario value must use canonical public report value.");
+assert.ok(appSource.includes("value: targetPublicReportValue"), "Target Deal Scenario value must use canonical public report value.");
+assert.ok(appSource.includes('field: "Canonical deal type", companyName: DEAL_SCENARIO_COMPANY_NAME_FALLBACK, value: forecastReportText(pdfOptionText(DEAL_TYPE_OPTIONS, dealContext.dealType))'), "Canonical deal type row source must remain unchanged.");
+assert.ok(appSource.includes('field: "Acquisition motive context", companyName: DEAL_SCENARIO_COMPANY_NAME_FALLBACK, value: forecastReportText(pdfOptionText(ACQUISITION_MOTIVE_OPTIONS, dealContext.acquisitionMotive))'), "Acquisition motive context row source must remain unchanged.");
+
+const resolveDealScenarioPublicValue = buildDealScenarioPublicValueResolver(appSource);
+const teslaVolkswagenSession = Object.freeze({
+  dealContext: Object.freeze({
+    data: Object.freeze({
+      acquirerName: "Tesla",
+      targetName: "Volkswagen",
+      dealType: "market_entry",
+      acquisitionMotive: "cross_border_integration",
+    }),
+  }),
+});
+const teslaVolkswagenDeliverable = Object.freeze({
+  acquirerEnvironmentCode: "STJ/STP",
+  targetEnvironmentCode: "NT/STP",
+});
+const teslaVolkswagenDealScenarioRows = Object.freeze([
+  Object.freeze({
+    field: "Acquirer side",
+    companyName: resolveDealScenarioCompanyName(teslaVolkswagenSession, "acquirerName"),
+    value: resolveDealScenarioPublicValue(teslaVolkswagenDeliverable, "acquirer"),
+  }),
+  Object.freeze({
+    field: "Target side",
+    companyName: resolveDealScenarioCompanyName(teslaVolkswagenSession, "targetName"),
+    value: resolveDealScenarioPublicValue(teslaVolkswagenDeliverable, "target"),
+  }),
+  Object.freeze({
+    field: "Canonical deal type",
+    companyName: "\u2014",
+    value: optionTitle(DEAL_TYPE_OPTIONS, teslaVolkswagenSession.dealContext.data.dealType),
+  }),
+  Object.freeze({
+    field: "Acquisition motive context",
+    companyName: "\u2014",
+    value: optionTitle(ACQUISITION_MOTIVE_OPTIONS, teslaVolkswagenSession.dealContext.data.acquisitionMotive),
+  }),
+]);
+assert.deepEqual(teslaVolkswagenDealScenarioRows[0], {
+  field: "Acquirer side",
+  companyName: "Tesla",
+  value: "Enforcement-Dominance Operating Pattern",
+});
+assert.deepEqual(teslaVolkswagenDealScenarioRows[1], {
+  field: "Target side",
+  companyName: "Volkswagen",
+  value: "The Disruption Lab",
+});
+assert.notEqual(teslaVolkswagenDealScenarioRows[0].value, "Tesla");
+assert.notEqual(teslaVolkswagenDealScenarioRows[1].value, "Volkswagen");
+assert.deepEqual(teslaVolkswagenDealScenarioRows[2], {
+  field: "Canonical deal type",
+  companyName: "\u2014",
+  value: "Enter a new market",
+});
+assert.deepEqual(teslaVolkswagenDealScenarioRows[3], {
+  field: "Acquisition motive context",
+  companyName: "\u2014",
+  value: "Enter a New Market",
+});
 
 console.log("Final report structure smoke test passed");
