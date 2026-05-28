@@ -1417,6 +1417,54 @@ h1 {
   min-height: 76px;
 }
 
+.deal-economics-blocks {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.deal-economics-card {
+  background: #ffffff;
+  border: 1px solid #d9dee8;
+  border-radius: 8px;
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+}
+
+.deal-economics-currency-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.deal-economics-currency-button {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  color: #121826;
+  display: inline-flex;
+  font: inherit;
+  font-weight: 800;
+  height: 44px;
+  justify-content: center;
+  padding: 0 14px;
+  width: 72px;
+}
+
+.deal-economics-currency-button:hover,
+.deal-economics-currency-button:focus-visible {
+  border-color: #0f766e;
+  outline: none;
+}
+
+.deal-economics-currency-button.active {
+  background: #0f766e;
+  border-color: #0f766e;
+  color: #ffffff;
+}
+
 .setup-choice-panel {
   display: grid;
   gap: 14px;
@@ -3317,6 +3365,7 @@ textarea {
 
   .motive-grid,
   .deal-identity-grid,
+  .deal-economics-blocks,
   .preservation-grid,
   .transaction-option-grid {
     grid-template-columns: 1fr;

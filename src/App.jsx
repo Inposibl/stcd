@@ -8,7 +8,6 @@ import { TARGET_OBSERVATION_DIAGNOSTIC } from "./data/targetObservedEnvironmentD
 import { TARGET_SELF_ASSESSMENT_DATA } from "./data/targetSelfAssessmentData.js";
 import {
   ACQUISITION_MOTIVE_OPTIONS,
-  DEAL_ECONOMICS_CURRENCY_OPTIONS,
   DEAL_ECONOMICS_STATUS_OPTIONS,
   DEAL_TYPE_OPTIONS,
   RESPONDENT_ACCESS_LEVEL_OPTIONS,
@@ -1204,10 +1203,10 @@ function TransactionDetailsScreen({ session, setSession }) {
   const [form, setForm] = useState(() => ({
     ...Object.fromEntries(TRANSACTION_DETAIL_SECTIONS.map((section) => [section.id, existingContext[section.id] ?? ""])),
     enterpriseValue: existingContext.enterpriseValue ?? "",
-    enterpriseValueCurrency: existingContext.enterpriseValueCurrency ?? "USD",
+    enterpriseValueCurrency: existingContext.enterpriseValueCurrency || "USD",
     enterpriseValueStatus: existingContext.enterpriseValueStatus ?? "not_available",
     compensationAssumptions: existingContext.compensationAssumptions ?? "",
-    compensationCurrency: existingContext.compensationCurrency ?? "USD",
+    compensationCurrency: existingContext.compensationCurrency || "USD",
     compensationStatus: existingContext.compensationStatus ?? "not_available",
   }));
   const [error, setError] = useState("");
@@ -1219,6 +1218,10 @@ function TransactionDetailsScreen({ session, setSession }) {
     ["Deal type", optionTitle(DEAL_TYPE_OPTIONS, existingContext.dealType)],
     ["Respondent side", optionTitle(RESPONDENT_SIDE_OPTIONS, existingContext.respondentSide)],
     ["Respondent role", optionTitle(RESPONDENT_ROLE_OPTIONS, existingContext.respondentRole)],
+  ];
+  const DEAL_ECONOMICS_CURRENCIES = [
+    { value: "USD", label: "USD" },
+    { value: "EUR", label: "EUR" },
   ];
 
   function updateDetail(sectionId, value) {
@@ -1241,6 +1244,27 @@ function TransactionDetailsScreen({ session, setSession }) {
       return next;
     });
     setError("");
+  }
+
+  function renderDealCurrencyButtons(fieldName) {
+    return (
+      <div className="deal-economics-currency-buttons" role="group" aria-label="Currency">
+        {DEAL_ECONOMICS_CURRENCIES.map((currency) => {
+          const selected = form[fieldName] === currency.value;
+          return (
+            <button
+              aria-pressed={selected}
+              className={selected ? "deal-economics-currency-button active" : "deal-economics-currency-button"}
+              key={`${fieldName}-${currency.value}`}
+              onClick={() => updateDetail(fieldName, currency.value)}
+              type="button"
+            >
+              {currency.label}
+            </button>
+          );
+        })}
+      </div>
+    );
   }
 
   function submit(event) {
@@ -1307,59 +1331,55 @@ function TransactionDetailsScreen({ session, setSession }) {
 
         <section className="transaction-section" aria-label="Deal Economics">
           <h2>DEAL ECONOMICS</h2>
-          <div className="deal-identity-grid">
-            <label className="field-block">
-              <span>Estimated deal value / enterprise value <small>Used only to estimate the structure-based risk envelope in the preliminary forecast.</small></span>
-              <input
-                min="0"
-                onChange={(event) => updateDetail("enterpriseValue", event.target.value)}
-                step="any"
-                type="number"
-                value={form.enterpriseValue}
-              />
-            </label>
-            <label className="field-block">
-              <span>Currency</span>
-              <select value={form.enterpriseValueCurrency} onChange={(event) => updateDetail("enterpriseValueCurrency", event.target.value)}>
-                {DEAL_ECONOMICS_CURRENCY_OPTIONS.map((currency) => (
-                  <option key={currency} value={currency}>{currency}</option>
-                ))}
-              </select>
-            </label>
-            <label className="field-block">
-              <span>Status</span>
-              <select value={form.enterpriseValueStatus} onChange={(event) => updateDetail("enterpriseValueStatus", event.target.value)}>
-                {DEAL_ECONOMICS_STATUS_OPTIONS.map((status) => (
-                  <option key={status.value} value={status.value}>{status.title}</option>
-                ))}
-              </select>
-            </label>
-            <label className="field-block">
-              <span>Management compensation / retention assumptions <small>Used to estimate exposure linked to leadership retention, resistance, or post-close underperformance.</small></span>
-              <input
-                min="0"
-                onChange={(event) => updateDetail("compensationAssumptions", event.target.value)}
-                step="any"
-                type="number"
-                value={form.compensationAssumptions}
-              />
-            </label>
-            <label className="field-block">
-              <span>Currency</span>
-              <select value={form.compensationCurrency} onChange={(event) => updateDetail("compensationCurrency", event.target.value)}>
-                {DEAL_ECONOMICS_CURRENCY_OPTIONS.map((currency) => (
-                  <option key={currency} value={currency}>{currency}</option>
-                ))}
-              </select>
-            </label>
-            <label className="field-block">
-              <span>Status</span>
-              <select value={form.compensationStatus} onChange={(event) => updateDetail("compensationStatus", event.target.value)}>
-                {DEAL_ECONOMICS_STATUS_OPTIONS.map((status) => (
-                  <option key={status.value} value={status.value}>{status.title}</option>
-                ))}
-              </select>
-            </label>
+          <div className="deal-economics-blocks">
+            <div className="deal-economics-card">
+              <label className="field-block">
+                <span>Estimated deal value / enterprise value <small>Used only to estimate the structure-based risk envelope in the preliminary forecast.</small></span>
+                <input
+                  min="0"
+                  onChange={(event) => updateDetail("enterpriseValue", event.target.value)}
+                  step="any"
+                  type="number"
+                  value={form.enterpriseValue}
+                />
+              </label>
+              <label className="field-block">
+                <span>Currency</span>
+                {renderDealCurrencyButtons("enterpriseValueCurrency")}
+              </label>
+              <label className="field-block">
+                <span>Status</span>
+                <select value={form.enterpriseValueStatus} onChange={(event) => updateDetail("enterpriseValueStatus", event.target.value)}>
+                  {DEAL_ECONOMICS_STATUS_OPTIONS.map((status) => (
+                    <option key={status.value} value={status.value}>{status.title}</option>
+                  ))}
+                </select>
+              </label>
+            </div>
+            <div className="deal-economics-card">
+              <label className="field-block">
+                <span>Management compensation / retention assumptions <small>Used to estimate exposure linked to leadership retention, resistance, or post-close underperformance.</small></span>
+                <input
+                  min="0"
+                  onChange={(event) => updateDetail("compensationAssumptions", event.target.value)}
+                  step="any"
+                  type="number"
+                  value={form.compensationAssumptions}
+                />
+              </label>
+              <label className="field-block">
+                <span>Currency</span>
+                {renderDealCurrencyButtons("compensationCurrency")}
+              </label>
+              <label className="field-block">
+                <span>Status</span>
+                <select value={form.compensationStatus} onChange={(event) => updateDetail("compensationStatus", event.target.value)}>
+                  {DEAL_ECONOMICS_STATUS_OPTIONS.map((status) => (
+                    <option key={status.value} value={status.value}>{status.title}</option>
+                  ))}
+                </select>
+              </label>
+            </div>
           </div>
         </section>
 
