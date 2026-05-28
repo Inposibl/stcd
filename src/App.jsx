@@ -123,6 +123,7 @@ import {
   publicText,
 } from "./flow/finalDeliverableFlow.js";
 import { buildDealEconomicsReport, buildFinalReportStructure } from "./flow/finalReportEngine.js";
+import { calculateDealEconomicsRiskEnvelope } from "./flow/dealEconomicsRiskEnvelope.js";
 import { screenByRoute } from "./screenRegistry.js";
 import "./styles.css";
 
@@ -6464,6 +6465,271 @@ function addCaseStudyPdfParagraph(items, text, options = {}) {
   });
 }
 
+const ECONOMIC_RISK_TRANSLATION_INTRO = "This section translates the behavioural integration risk into an approximate financial exposure range. It does not estimate the fair value of the company and should not be read as financial advice. Its purpose is to show how much deal value may need active protection if the identified post-deal behavioural pattern is not managed.";
+const ECONOMIC_RISK_TRANSLATION_LIMIT = "Order-of-magnitude estimates only. Not financial advice.";
+const ECONOMIC_RISK_TRANSLATION_MISSING_EV = "Financial translation unavailable — enterprise / deal value was not provided.";
+const ECONOMIC_RISK_TRANSLATION_MISSING_ECS = "Financial translation unavailable — compatibility score or valuation band is missing.";
+const ECONOMIC_RISK_TRANSLATION_MISSING_TALENT = "Key talent cost is not included because headcount and compensation inputs were not provided.";
+const ECONOMIC_RISK_TRANSLATION_UNSUPPORTED_CURRENCY = "Financial translation unavailable — supported calculation currency was not provided.";
+const ECONOMIC_RISK_TRANSLATION_TOLERANCE_MILLIONS = 1;
+
+function economicRiskPdfNumber(value) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
+}
+
+function economicRiskPdfPositiveNumber(value) {
+  const number = economicRiskPdfNumber(value);
+  return number !== null && number > 0 ? number : null;
+}
+
+function economicRiskPdfProvidedPositiveAmount(input) {
+  if (!input?.provided) return null;
+  return economicRiskPdfPositiveNumber(input.amount);
+}
+
+function economicRiskPdfScore(report) {
+  const calculationScore = economicRiskPdfNumber(report?.economics?.calculation?.baseEcsScore);
+  const reportScore = economicRiskPdfNumber(report?.compatibility?.score);
+  const score = calculationScore ?? reportScore;
+  return score === null ? null : Math.round(score);
+}
+
+function economicRiskPdfBand(report) {
+  const band = String(
+    report?.economics?.calculation?.bandName
+    ?? report?.economics?.bandName
+    ?? report?.compatibility?.riskBand
+    ?? "",
+  ).trim();
+  return band && !/^pending$/i.test(band) && !/^risk band pending$/i.test(band) ? band : "";
+}
+
+function economicRiskPdfCurrency(economics) {
+  return String(economics?.enterpriseValue?.currency || economics?.compensation?.currency || "").trim();
+}
+
+function economicRiskPdfHasCurrencyConflict(economics) {
+  const enterpriseCurrency = String(economics?.enterpriseValue?.currency ?? "").trim();
+  const compensationCurrency = String(economics?.compensation?.currency ?? "").trim();
+  return Boolean(enterpriseCurrency && compensationCurrency && enterpriseCurrency !== compensationCurrency);
+}
+
+function economicRiskPdfCurrencySupported(currency) {
+  return currency === "USD" || currency === "EUR";
+}
+
+function economicRiskPdfHasTalentInputs(economics) {
+  const keyPeople = economicRiskPdfNumber(economics?.keyPersonnelAtRisk);
+  const compensation = economicRiskPdfProvidedPositiveAmount(economics?.compensation);
+  return Number.isSafeInteger(keyPeople) && keyPeople > 0 && compensation !== null;
+}
+
+function economicRiskPdfBillionFractionDigits(billions, options = {}) {
+  const roundedHundredth = Math.round(billions * 100) / 100;
+  const roundedTenth = Math.round(billions * 10) / 10;
+  if (options.forceOneDecimalForBillions || Math.abs(roundedHundredth - Math.round(roundedHundredth)) > 0.000001) {
+    return Math.abs(roundedHundredth - roundedTenth) < 0.000001 ? 1 : 2;
+  }
+  return 0;
+}
+
+function formatEconomicRiskPdfMillions(value, currency, options = {}) {
+  const amount = economicRiskPdfNumber(value);
+  if (amount === null || amount < 0) return `${currency} 0M`;
+  if (amount >= 1000) {
+    const billions = amount / 1000;
+    const fractionDigits = economicRiskPdfBillionFractionDigits(billions, options);
+    return `${currency} ${billions.toLocaleString("en-US", {
+      minimumFractionDigits: fractionDigits,
+      maximumFractionDigits: fractionDigits,
+    })}B`;
+  }
+  return `${currency} ${Math.round(amount).toLocaleString("en-US")}M`;
+}
+
+function formatEconomicRiskPdfAmount(value, currency) {
+  const amount = economicRiskPdfPositiveNumber(value);
+  if (amount === null) return "";
+  if (amount < 1000000) return `${currency} ${Math.round(amount).toLocaleString("en-US")}`;
+  return formatEconomicRiskPdfMillions(amount / 1000000, currency, { forceOneDecimalForBillions: true });
+}
+
+function formatEconomicRiskPdfHigh(value, currency, isOpenEnded) {
+  const formatted = formatEconomicRiskPdfMillions(value, currency);
+  return isOpenEnded ? `${formatted}+` : formatted;
+}
+
+function formatEconomicRiskPdfRange(low, high, currency, highOpenEnded = false) {
+  return `${formatEconomicRiskPdfMillions(low, currency)} – ${formatEconomicRiskPdfHigh(high, currency, highOpenEnded)}`;
+}
+
+function economicRiskPdfDisplayedMillions(value) {
+  const amount = economicRiskPdfNumber(value);
+  if (amount === null) return 0;
+  if (amount >= 1000) {
+    const billions = amount / 1000;
+    const fractionDigits = economicRiskPdfBillionFractionDigits(billions);
+    return Number((Number(billions.toFixed(fractionDigits)) * 1000).toFixed(6));
+  }
+  return Math.round(amount);
+}
+
+function assertEconomicRiskPdfReconciliation(values) {
+  const lowParts = [values.evDiscountLow, values.earnOutExposureLow];
+  const highParts = [values.evDiscountHigh, values.earnOutExposureHigh];
+  if (values.includeTalent) {
+    lowParts.push(values.talentCostLow);
+    highParts.push(values.talentCostHigh);
+  }
+
+  const displayedLow = economicRiskPdfDisplayedMillions(values.totalLow);
+  const displayedHigh = economicRiskPdfDisplayedMillions(values.totalHigh);
+  const componentLow = lowParts.reduce((sum, value) => sum + economicRiskPdfDisplayedMillions(value), 0);
+  const componentHigh = highParts.reduce((sum, value) => sum + economicRiskPdfDisplayedMillions(value), 0);
+  const lowDelta = Math.abs(displayedLow - componentLow);
+  const highDelta = Math.abs(displayedHigh - componentHigh);
+
+  if (lowDelta > ECONOMIC_RISK_TRANSLATION_TOLERANCE_MILLIONS || highDelta > ECONOMIC_RISK_TRANSLATION_TOLERANCE_MILLIONS) {
+    console.error("Economic Risk Translation reconciliation failed.", {
+      displayedLow,
+      componentLow,
+      lowDelta,
+      displayedHigh,
+      componentHigh,
+      highDelta,
+    });
+    throw new Error("Economic Risk Translation reconciliation failed.");
+  }
+}
+
+function economicRiskTranslationPdfItems(report) {
+  const economics = report?.economics ?? {};
+  const items = [
+    { text: ECONOMIC_RISK_TRANSLATION_INTRO, options: { after: 8 } },
+  ];
+  const enterpriseValue = economicRiskPdfProvidedPositiveAmount(economics?.enterpriseValue);
+
+  if (enterpriseValue === null) {
+    items.push({ text: ECONOMIC_RISK_TRANSLATION_MISSING_EV, options: { bold: true } });
+    return Object.freeze(items);
+  }
+
+  const score = economicRiskPdfScore(report);
+  const band = economicRiskPdfBand(report);
+  if (score === null || !band) {
+    items.push({ text: ECONOMIC_RISK_TRANSLATION_MISSING_ECS, options: { bold: true } });
+    return Object.freeze(items);
+  }
+
+  const currency = economicRiskPdfCurrency(economics);
+  if (!economicRiskPdfCurrencySupported(currency) || economicRiskPdfHasCurrencyConflict(economics)) {
+    items.push({ text: ECONOMIC_RISK_TRANSLATION_UNSUPPORTED_CURRENCY, options: { bold: true } });
+    return Object.freeze(items);
+  }
+
+  const includeTalent = economicRiskPdfHasTalentInputs(economics);
+  const keyPeople = includeTalent ? economicRiskPdfNumber(economics.keyPersonnelAtRisk) : 0;
+  const compensation = includeTalent ? economicRiskPdfProvidedPositiveAmount(economics?.compensation) : 0;
+  const calculation = includeTalent && economics?.calculation?.calculated
+    ? economics.calculation
+    : calculateDealEconomicsRiskEnvelope({
+      enterpriseValue,
+      keyPersonnelAtRisk: keyPeople,
+      averageAnnualCompensationPerKeyPerson: compensation,
+      baseEcsScore: score,
+    });
+
+  if (!calculation?.calculated) {
+    items.push({ text: ECONOMIC_RISK_TRANSLATION_MISSING_ECS, options: { bold: true } });
+    return Object.freeze(items);
+  }
+
+  const talentCostLow = includeTalent ? calculation.talentCostLow : 0;
+  const talentCostHigh = includeTalent ? calculation.talentCostHigh : 0;
+  const totalLow = calculation.evDiscountLow + calculation.earnOutExposureLow + talentCostLow;
+  const totalHigh = calculation.evDiscountHigh + calculation.earnOutExposureHigh + talentCostHigh;
+  const totalHighOpenEnded = calculation.evDiscountHighOpenEnded
+    || calculation.earnOutExposureHighOpenEnded
+    || (includeTalent && (calculation.costPerDepartureHighOpenEnded || calculation.estimatedTalentLossHighOpenEnded));
+
+  assertEconomicRiskPdfReconciliation({
+    evDiscountLow: calculation.evDiscountLow,
+    evDiscountHigh: calculation.evDiscountHigh,
+    earnOutExposureLow: calculation.earnOutExposureLow,
+    earnOutExposureHigh: calculation.earnOutExposureHigh,
+    talentCostLow,
+    talentCostHigh,
+    totalLow,
+    totalHigh,
+    includeTalent,
+  });
+
+  const evDisplay = formatEconomicRiskPdfAmount(enterpriseValue, currency);
+  const totalRange = formatEconomicRiskPdfRange(totalLow, totalHigh, currency, totalHighOpenEnded);
+  items.push({
+    text: `The reported enterprise / deal value is ${evDisplay}. Based on a ${band} environment compatibility score of ${score}, the model estimates that unmanaged behavioural friction may create an indicative value exposure in the range of ${formatEconomicRiskPdfMillions(totalLow, currency)} to ${formatEconomicRiskPdfHigh(totalHigh, currency, totalHighOpenEnded)}.`,
+    options: { after: 8 },
+  });
+  items.push({
+    text: includeTalent
+      ? "This exposure is composed of three management-relevant categories:"
+      : "This exposure is composed of the available management-relevant categories:",
+    options: { after: 5 },
+  });
+  items.push({
+    text: `Enterprise Value Discount: ${formatEconomicRiskPdfRange(calculation.evDiscountLow, calculation.evDiscountHigh, currency, calculation.evDiscountHighOpenEnded)}`,
+    options: { bold: true, after: 4 },
+  });
+  items.push({
+    text: "Potential reduction in deal value caused by slower integration, weaker governance penetration, operational drag, or reduced confidence in the combined entity’s post-deal performance.",
+    options: { after: 8 },
+  });
+  items.push({
+    text: `Earn-Out Exposure: ${formatEconomicRiskPdfRange(calculation.earnOutExposureLow, calculation.earnOutExposureHigh, currency, calculation.earnOutExposureHighOpenEnded)}`,
+    options: { bold: true, after: 4 },
+  });
+  items.push({
+    text: "Potential value at risk in deferred or performance-linked payments if the target environment resists the acquirer’s governance logic or underperforms against post-close expectations.",
+    options: { after: 8 },
+  });
+
+  if (includeTalent) {
+    items.push({
+      text: `Key Talent Cost: ${formatEconomicRiskPdfRange(calculation.talentCostLow, calculation.talentCostHigh, currency, calculation.costPerDepartureHighOpenEnded || calculation.estimatedTalentLossHighOpenEnded)}`,
+      options: { bold: true, after: 4 },
+    });
+    items.push({
+      text: `Estimated replacement, retention, disruption, and productivity cost connected to ${keyPeople} key people at risk, using an estimated average annual compensation of ${formatEconomicRiskPdfAmount(compensation, currency)}.`,
+      options: { after: 8 },
+    });
+  } else {
+    items.push({ text: ECONOMIC_RISK_TRANSLATION_MISSING_TALENT, options: { after: 8 } });
+  }
+
+  items.push({
+    text: `Indicative Total Risk Envelope: ${totalRange}.`,
+    options: { bold: true, after: 8 },
+  });
+  items.push({
+    text: "Management implication: this is not a prediction that the deal will lose this amount. It is a decision range showing how much economic value should be protected through integration design, governance control, retention planning, and behavioural monitoring during the first 30–180 days after close.",
+    options: { after: 8 },
+  });
+  items.push({
+    text: ECONOMIC_RISK_TRANSLATION_LIMIT,
+    options: { size: 9, color: PDF_BRAND.muted, after: 10 },
+  });
+
+  return Object.freeze(items);
+}
+
+function addEconomicRiskTranslationPdfSection(items, report, sectionNumber) {
+  addCaseStudyPdfSection(items, sectionNumber, "Economic Risk Translation");
+  for (const item of economicRiskTranslationPdfItems(report)) {
+    addCaseStudyPdfParagraph(items, item.text, item.options);
+  }
+}
+
 const EXECUTIVE_SUMMARY_PDF_BREAK_PATTERN = /\s+:\s+(?=[A-Z])|\s+(?=SEALED PREDICTION\b)|\s+(?=(?:Within 30 days|Months 2(?:-|\u2013)6|Months 6(?:-|\u2013)18):)/g;
 
 function splitExecutiveSummaryPdfParagraphs(text) {
@@ -6943,10 +7209,7 @@ function buildFinalDeliverablesReportLines(deliverable, session) {
     addCaseStudyPdfBulletList(items, report.watch.oneEightyDayChecks);
   }
 
-  addCaseStudyPdfSection(items, nextSectionNumber(), "Deal Economics");
-  for (const line of report.economics.lines) {
-    addCaseStudyPdfParagraph(items, line);
-  }
+  addEconomicRiskTranslationPdfSection(items, report, nextSectionNumber());
 
   addCaseStudyPdfSection(items, nextSectionNumber(), "Recommended Actions");
   addCaseStudyPdfSubsection(items, "Before close");

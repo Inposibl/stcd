@@ -577,18 +577,169 @@ return forecastDealScenarioPublicValue;`,
   )(pdfEnvironmentSummary, forecastReportText);
 }
 
+function extractSourceBlock(source, startNeedle, endNeedle) {
+  const start = source.indexOf(startNeedle);
+  assert.notEqual(start, -1, `${startNeedle} block start must exist in App.jsx`);
+  const end = source.indexOf(endNeedle, start);
+  assert.notEqual(end, -1, `${endNeedle} block end must exist in App.jsx`);
+  return source.slice(start, end);
+}
+
+function buildEconomicRiskTranslationItemsResolver(appSource) {
+  const block = extractSourceBlock(
+    appSource,
+    "const ECONOMIC_RISK_TRANSLATION_INTRO",
+    "const EXECUTIVE_SUMMARY_PDF_BREAK_PATTERN",
+  );
+
+  return new Function(
+    "calculateDealEconomicsRiskEnvelope",
+    "PDF_BRAND",
+    `${block}
+return economicRiskTranslationPdfItems;`,
+  )(calculateDealEconomicsRiskEnvelope, { muted: "595959" });
+}
+
+function section8Text(items) {
+  return items.map((item) => item.text).join("\n");
+}
+
 function optionTitle(options, value) {
   return options.find((option) => option.value === value)?.title ?? value ?? "Pending";
 }
 
 const appSource = readFileSync(new URL("../src/App.jsx", import.meta.url), "utf8");
 assert.ok(appSource.includes("report.economics.lines.map"), "HTML Deal Economics must render report.economics.lines");
-assert.ok(appSource.includes("for (const line of report.economics.lines)"), "PDF Deal Economics must render report.economics.lines");
+assert.ok(appSource.includes("addEconomicRiskTranslationPdfSection(items, report, nextSectionNumber())"), "PDF Section 8 must render Economic Risk Translation from report economics.");
+assert.ok(appSource.includes("addCaseStudyPdfSection(items, sectionNumber, \"Economic Risk Translation\")"), "PDF Section 8 heading must be Economic Risk Translation.");
+assert.ok(!appSource.includes("addCaseStudyPdfSection(items, nextSectionNumber(), \"Deal Economics\")"), "PDF Section 8 must not keep the old Deal Economics heading.");
+assert.ok(!appSource.includes("for (const line of report.economics.lines)"), "PDF Section 8 must not render the terse Deal Economics line loop.");
 assert.ok(appSource.includes("economics: buildDealEconomicsReport(session, { baseEcsScore: score })"), "Public report must pass its displayed ECS score into Deal Economics.");
 assert.ok(appSource.includes("session?.dealContext?.data?.[key]"), "Deal Scenario company-name resolver must check Deal Context data.");
 assert.ok(appSource.includes("session?.preliminaryAssessment?.dealContext?.[key]"), "Deal Scenario company-name resolver must check Preliminary Assessment deal context.");
 assert.ok(appSource.includes("session?.targetInvite?.reportBinding?.dealContext?.[key]"), "Deal Scenario company-name resolver must check target invite report binding deal context.");
 assert.ok(appSource.includes("session?.targetInvite?.reportBinding?.[key]"), "Deal Scenario company-name resolver must check direct target invite report binding names.");
+
+const buildEconomicRiskTranslationItems = buildEconomicRiskTranslationItemsResolver(appSource);
+const demoEconomicRiskReport = buildDealEconomicsReport({
+  dealContext: {
+    data: {
+      enterpriseValue: 20000000000,
+      enterpriseValueCurrency: "USD",
+      enterpriseValueStatus: "confirmed",
+      keyPersonnelAtRisk: 150,
+      compensationAssumptions: 250000,
+      compensationCurrency: "USD",
+      compensationStatus: "estimated",
+    },
+  },
+}, { baseEcsScore: 77 });
+assert.equal(demoEconomicRiskReport.calculated, true);
+assert.equal(demoEconomicRiskReport.bandName, "MODERATE-HIGH");
+assert.equal(demoEconomicRiskReport.calculation.evDiscountLow, 400);
+assert.equal(Math.round(demoEconomicRiskReport.calculation.evDiscountHigh), 1400);
+assert.equal(demoEconomicRiskReport.calculation.earnOutExposureLow, 200);
+assert.equal(demoEconomicRiskReport.calculation.earnOutExposureHigh, 800);
+assert.equal(demoEconomicRiskReport.calculation.talentCostLow, 75);
+assert.equal(demoEconomicRiskReport.calculation.talentCostHigh, 150);
+assert.equal(demoEconomicRiskReport.calculation.riskEnvelopeLow, 675);
+assert.equal(demoEconomicRiskReport.calculation.riskEnvelopeHigh, 2350);
+
+const demoEconomicRiskText = section8Text(buildEconomicRiskTranslationItems({
+  compatibility: { score: 77, riskBand: "MODERATE-HIGH" },
+  economics: demoEconomicRiskReport,
+}));
+assert.ok(demoEconomicRiskText.includes("This section translates the behavioural integration risk into an approximate financial exposure range."), "Section 8 must include the plain-language explanation.");
+assert.ok(demoEconomicRiskText.includes("The reported enterprise / deal value is USD 20.0B."), "Section 8 must render compact EV display.");
+assert.ok(demoEconomicRiskText.includes("MODERATE-HIGH environment compatibility score of 77"), "Section 8 must render integer ECS score and band.");
+assert.ok(demoEconomicRiskText.includes("Enterprise Value Discount: USD 400M – USD 1.4B"), "Section 8 must render EV discount range.");
+assert.ok(demoEconomicRiskText.includes("Earn-Out Exposure: USD 200M – USD 800M"), "Section 8 must render earn-out exposure range.");
+assert.ok(demoEconomicRiskText.includes("Key Talent Cost: USD 75M – USD 150M"), "Section 8 must render key talent cost range.");
+assert.ok(demoEconomicRiskText.includes("Indicative Total Risk Envelope: USD 675M – USD 2.35B."), "Section 8 must render reconciled total risk envelope.");
+assert.ok(demoEconomicRiskText.includes("Order-of-magnitude estimates only. Not financial advice."), "Section 8 must include the honest-limit footer.");
+
+const missingTalentEconomicRiskReport = buildDealEconomicsReport({
+  dealContext: {
+    data: {
+      enterpriseValue: 20000000000,
+      enterpriseValueCurrency: "USD",
+      enterpriseValueStatus: "confirmed",
+      compensationAssumptions: 250000,
+      compensationCurrency: "USD",
+      compensationStatus: "estimated",
+    },
+  },
+}, { baseEcsScore: 77 });
+const missingTalentEconomicRiskText = section8Text(buildEconomicRiskTranslationItems({
+  compatibility: { score: 77, riskBand: "MODERATE-HIGH" },
+  economics: missingTalentEconomicRiskReport,
+}));
+assert.ok(!missingTalentEconomicRiskText.includes("Key Talent Cost:"), "Section 8 must drop Key Talent Cost when talent inputs are missing.");
+assert.ok(missingTalentEconomicRiskText.includes("Key talent cost is not included because headcount and compensation inputs were not provided."), "Section 8 must explain omitted talent cost.");
+assert.ok(missingTalentEconomicRiskText.includes("Indicative Total Risk Envelope: USD 600M – USD 2.2B."), "Section 8 total must exclude talent cost when talent inputs are missing.");
+
+const missingEvEconomicRiskReport = buildDealEconomicsReport({
+  dealContext: {
+    data: {
+      enterpriseValue: 0,
+      enterpriseValueCurrency: "USD",
+      enterpriseValueStatus: "confirmed",
+      keyPersonnelAtRisk: 150,
+      compensationAssumptions: 250000,
+      compensationCurrency: "USD",
+      compensationStatus: "estimated",
+    },
+  },
+}, { baseEcsScore: 77 });
+const missingEvEconomicRiskText = section8Text(buildEconomicRiskTranslationItems({
+  compatibility: { score: 77, riskBand: "MODERATE-HIGH" },
+  economics: missingEvEconomicRiskReport,
+}));
+assert.ok(missingEvEconomicRiskText.includes("This section translates the behavioural integration risk into an approximate financial exposure range."), "Missing-EV Section 8 must still render the opening explanation.");
+assert.ok(missingEvEconomicRiskText.includes("Financial translation unavailable — enterprise / deal value was not provided."), "Missing-EV Section 8 must render the unavailable message.");
+assert.ok(!missingEvEconomicRiskText.includes("Enterprise Value Discount:"), "Missing-EV Section 8 must not render the numeric breakdown.");
+assert.ok(!missingEvEconomicRiskText.includes("Indicative Total Risk Envelope:"), "Missing-EV Section 8 must not render total risk envelope.");
+
+const missingEcsEconomicRiskReport = buildDealEconomicsReport({
+  dealContext: {
+    data: {
+      enterpriseValue: 20000000000,
+      enterpriseValueCurrency: "USD",
+      enterpriseValueStatus: "confirmed",
+      keyPersonnelAtRisk: 150,
+      compensationAssumptions: 250000,
+      compensationCurrency: "USD",
+      compensationStatus: "estimated",
+    },
+  },
+}, { baseEcsScore: null });
+const missingEcsEconomicRiskText = section8Text(buildEconomicRiskTranslationItems({
+  compatibility: { score: null, riskBand: "" },
+  economics: missingEcsEconomicRiskReport,
+}));
+assert.ok(missingEcsEconomicRiskText.includes("Financial translation unavailable — compatibility score or valuation band is missing."), "Missing-ECS Section 8 must render the unavailable message.");
+assert.ok(!missingEcsEconomicRiskText.includes("Enterprise Value Discount:"), "Missing-ECS Section 8 must not render the numeric breakdown.");
+
+const section8BannedLanguage = [
+  "Deal Economics",
+  "EV Multiply",
+  "EV Multiple",
+  "Layer A",
+  "Layer B",
+  "Layer C",
+  "triage",
+  "RHQA",
+  "Ring-Fence",
+  "Ventyx",
+  "anchor case",
+  "PostSurvey",
+  "Block 1 output",
+  "spiritual",
+  "karmic",
+];
+for (const term of section8BannedLanguage) {
+  assert.equal(demoEconomicRiskText.includes(term), false, `Section 8 must not render banned language: ${term}`);
+}
 
 const resolveDealScenarioCompanyName = buildDealScenarioCompanyNameResolver(appSource);
 function resolveDealScenarioCompanyNames(session) {

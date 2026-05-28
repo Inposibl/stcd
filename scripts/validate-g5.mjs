@@ -503,9 +503,10 @@ const CHECKS = [
       assertCheck(app.includes("Preliminary Forecast Brief"), "saved PDF must include current public report title");
       assertCheck(app.includes("Forecast-led public report"), "saved PDF must include current public report positioning");
       assertCheck(app.includes("M&A Post-Deal Behavior Forecast"), "saved PDF must include current public report product marker");
-      assertCheck(app.includes("economics: buildDealEconomicsReport(session)"), "public final report must map Deal Economics from session");
+      assertCheck(app.includes("economics: buildDealEconomicsReport(session, { baseEcsScore: score })"), "public final report must map Deal Economics from displayed ECS score");
       assertCheck(app.includes("report.economics.lines.map"), "HTML Deal Economics must render report.economics.lines");
-      assertCheck(app.includes("for (const line of report.economics.lines)"), "PDF Deal Economics must render report.economics.lines");
+      assertCheck(app.includes("addEconomicRiskTranslationPdfSection(items, report, nextSectionNumber())"), "PDF Section 8 must render Economic Risk Translation");
+      assertCheck(!app.includes("addCaseStudyPdfSection(items, nextSectionNumber(), \"Deal Economics\")"), "PDF Section 8 must not keep old Deal Economics heading");
       assertCheck(!app.includes("Generated: ${new Date().toISOString()}"), "saved PDF must not expose generated timestamp technical line");
       assertCheck(!app.includes("Full Analysis Context"), "saved PDF must not include sales/comparison context");
       assertCheck(!app.includes("Free output:"), "saved PDF must not include free/paid comparison rows");
