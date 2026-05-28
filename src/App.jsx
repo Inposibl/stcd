@@ -5219,12 +5219,25 @@ function forecastPartyName(session, deliverable, side) {
   return forecastReportText(pdfPartyName(aliasFallback, fallback), fallback);
 }
 
+const DEAL_SCENARIO_COMPANY_NAME_FALLBACK = "\u2014";
+
+function forecastDealScenarioCompanyName(session, key) {
+  const companyName = session?.dealContext?.data?.[key];
+  if (isPlaceholderPartyName(companyName)) return DEAL_SCENARIO_COMPANY_NAME_FALLBACK;
+  return forecastReportText(
+    pdfPartyName(companyName, DEAL_SCENARIO_COMPANY_NAME_FALLBACK),
+    DEAL_SCENARIO_COMPANY_NAME_FALLBACK,
+  );
+}
+
 function buildForecastLedPublicReport(deliverable, session) {
   const dealContext = session?.dealContext?.data ?? {};
   const acquirerEnvironment = pdfEnvironmentSummary(deliverable?.acquirerEnvironmentCode);
   const targetEnvironment = pdfEnvironmentSummary(deliverable?.targetEnvironmentCode);
   const acquirerName = forecastPartyName(session, deliverable, "acquirer");
   const targetName = forecastPartyName(session, deliverable, "target");
+  const acquirerCompanyName = forecastDealScenarioCompanyName(session, "acquirerName");
+  const targetCompanyName = forecastDealScenarioCompanyName(session, "targetName");
   const score = pdfRoundedCompatibilityScore(deliverable);
   const riskBand = forecastReportText(deliverable?.riskBand, "Risk band pending");
   const narrative = deliverable?.narrative ?? {};
@@ -5284,10 +5297,10 @@ function buildForecastLedPublicReport(deliverable, session) {
     }),
     dealScenario: Object.freeze({
       rows: Object.freeze([
-        ["Acquirer side", acquirerName],
-        ["Target side", targetName],
-        ["Canonical deal type", forecastReportText(pdfOptionText(DEAL_TYPE_OPTIONS, dealContext.dealType))],
-        ["Acquisition motive context", forecastReportText(pdfOptionText(ACQUISITION_MOTIVE_OPTIONS, dealContext.acquisitionMotive))],
+        Object.freeze({ field: "Acquirer side", companyName: acquirerCompanyName, value: acquirerName }),
+        Object.freeze({ field: "Target side", companyName: targetCompanyName, value: targetName }),
+        Object.freeze({ field: "Canonical deal type", companyName: DEAL_SCENARIO_COMPANY_NAME_FALLBACK, value: forecastReportText(pdfOptionText(DEAL_TYPE_OPTIONS, dealContext.dealType)) }),
+        Object.freeze({ field: "Acquisition motive context", companyName: DEAL_SCENARIO_COMPANY_NAME_FALLBACK, value: forecastReportText(pdfOptionText(ACQUISITION_MOTIVE_OPTIONS, dealContext.acquisitionMotive)) }),
       ]),
     }),
     environments: Object.freeze({
@@ -5304,11 +5317,7 @@ function buildForecastLedPublicReport(deliverable, session) {
       point: forecastReportText(point),
       interpretation: forecastReportText(interpretation),
     }))),
-    roleLevelForecast: Object.freeze({
-      available: false,
-      text: forecastReportText(ROLE_LEVEL_FORECAST_UNAVAILABLE_TEXT, ROLE_LEVEL_FORECAST_UNAVAILABLE_TEXT, { allowForbiddenTerms: true }),
-      missingFields: ROLE_LEVEL_FORECAST_MISSING_FIELDS,
-    }),
+    roleLevelForecast: null,
     sealedPredictionPreview: Object.freeze({
       title: "Sealed Prediction Preview — display-only, not ledger-recorded",
       rows: Object.freeze([
@@ -5330,11 +5339,7 @@ function buildForecastLedPublicReport(deliverable, session) {
       demotedNote: `${score} / ${riskBand}: a specification, not a verdict.`,
     }),
     timelineRows: Object.freeze(timelineRows.map((row) => Object.freeze(row))),
-    watch: Object.freeze({
-      decisiveSignal,
-      ninetyDayChecks: Object.freeze(ninetyDayChecks),
-      oneEightyDayChecks: Object.freeze(oneEightyDayChecks),
-    }),
+    watch: null,
     economics: buildDealEconomicsReport(session),
     actions: Object.freeze({
       beforeClose: Object.freeze(forecastList(actions.beforeClose, [], 3).map(buyerFacingActionText)),
@@ -5489,6 +5494,25 @@ function ForecastFieldRows({ rows }) {
   );
 }
 
+function ForecastDealScenarioRows({ rows }) {
+  return (
+    <div className="range-table">
+      <div className="range-row">
+        <span>Deal field</span>
+        <em>Company name</em>
+        <strong>Public report value</strong>
+      </div>
+      {rows.map((row) => (
+        <div className="range-row" key={row.field}>
+          <span>{row.field}</span>
+          <em>{row.companyName}</em>
+          <strong>{row.value}</strong>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function ForecastBulletList({ items }) {
   return (
     <ul>
@@ -5499,7 +5523,71 @@ function ForecastBulletList({ items }) {
   );
 }
 
+const FULL_ASSESSMENT_SPECIFICATION_LABEL = "Full assessment specification:";
+const FULL_ASSESSMENT_SPECIFICATION_PATTERN = /\*Full assessment specification:\s*([^*]*)\*/gi;
+
+function cleanFullAssessmentSpecificationDetail(value) {
+  const detail = String(value ?? "").trim();
+  return detail === "." ? "" : detail;
+}
+
+function splitFullAssessmentSpecificationText(text) {
+  const source = String(text ?? "");
+  const parts = [];
+  let cursor = 0;
+  FULL_ASSESSMENT_SPECIFICATION_PATTERN.lastIndex = 0;
+
+  for (let match = FULL_ASSESSMENT_SPECIFICATION_PATTERN.exec(source); match; match = FULL_ASSESSMENT_SPECIFICATION_PATTERN.exec(source)) {
+    const before = source.slice(cursor, match.index).trim();
+    if (before) parts.push({ type: "text", text: before });
+    parts.push({
+      type: "assessmentSpecification",
+      detail: cleanFullAssessmentSpecificationDetail(match[1]),
+    });
+    cursor = FULL_ASSESSMENT_SPECIFICATION_PATTERN.lastIndex;
+  }
+
+  const after = source.slice(cursor).trim();
+  if (after) parts.push({ type: "text", text: after });
+  return parts.length ? parts : [{ type: "text", text: source }];
+}
+
+function splitExecutiveSummaryScreenParagraphs(text) {
+  const paragraphs = splitExecutiveSummaryPdfParagraphs(text);
+  return paragraphs.flatMap((paragraph) => splitFullAssessmentSpecificationText(paragraph.text));
+}
+
+function ForecastReportParagraphs({ text }) {
+  return (
+    <>
+      {splitExecutiveSummaryScreenParagraphs(text).map((part, index) => {
+        if (part.type === "assessmentSpecification") {
+          return (
+            <p key={`assessment-spec-${index}`}>
+              <strong>{FULL_ASSESSMENT_SPECIFICATION_LABEL}</strong>
+              {part.detail ? (
+                <>
+                  <br />
+                  {part.detail}
+                </>
+              ) : null}
+            </p>
+          );
+        }
+
+        return <p key={`report-text-${index}`}>{part.text}</p>;
+      })}
+    </>
+  );
+}
+
 function ForecastLedPublicReport({ report }) {
+  let sectionNumber = 0;
+  const nextSectionNumber = () => {
+    sectionNumber += 1;
+    return sectionNumber;
+  };
+
   return (
     <div className="forecast-report-document" style={FORECAST_REPORT_STYLES.document}>
       <section className="reveal-block forecast-cover-block" style={FORECAST_REPORT_STYLES.cover}>
@@ -5514,17 +5602,17 @@ function ForecastLedPublicReport({ report }) {
         <p className="source-note" style={FORECAST_REPORT_STYLES.muted}>M&amp;A Post-Deal Behavior Forecast / {report.generatedDate}</p>
       </section>
 
-      <ForecastReportSection number={1} title="Executive Decision Summary">
+      <ForecastReportSection number={nextSectionNumber()} title="Executive Decision Summary">
         <p><strong>{report.executive.headline}</strong></p>
-        <p>{report.executive.situation}</p>
-        <p>{report.executive.implication}</p>
+        <ForecastReportParagraphs text={report.executive.situation} />
+        <ForecastReportParagraphs text={report.executive.implication} />
       </ForecastReportSection>
 
-      <ForecastReportSection number={2} title="Deal Scenario">
-        <ForecastFieldRows rows={report.dealScenario.rows} />
+      <ForecastReportSection number={nextSectionNumber()} title="Deal Scenario">
+        <ForecastDealScenarioRows rows={report.dealScenario.rows} />
       </ForecastReportSection>
 
-      <ForecastReportSection number={3} title="The Two Environments">
+      <ForecastReportSection number={nextSectionNumber()} title="The Two Environments">
         <div className="protocol-insight-grid" style={FORECAST_REPORT_STYLES.twoColumn}>
           <article style={FORECAST_REPORT_STYLES.soberCard}>
             <strong>Acquirer environment: {report.environments.acquirer.title}</strong>
@@ -5537,7 +5625,7 @@ function ForecastLedPublicReport({ report }) {
         </div>
       </ForecastReportSection>
 
-      <ForecastReportSection number={4} title="Collision Thesis">
+      <ForecastReportSection number={nextSectionNumber()} title="Collision Thesis">
         <div className="client-output-stack">
           {report.collisionRows.map((row) => (
             <article key={row.point}>
@@ -5548,24 +5636,26 @@ function ForecastLedPublicReport({ report }) {
         </div>
       </ForecastReportSection>
 
-      <ForecastReportSection number={5} title="Role-Level Forecast Snapshot">
-        <article style={FORECAST_REPORT_STYLES.soberCard}>
-          <p>{report.roleLevelForecast.text}</p>
-          <ForecastBulletList items={report.roleLevelForecast.missingFields} />
-        </article>
-      </ForecastReportSection>
+      {report.roleLevelForecast ? (
+        <ForecastReportSection number={nextSectionNumber()} title="Role-Level Forecast Snapshot">
+          <article style={FORECAST_REPORT_STYLES.soberCard}>
+            <p>{report.roleLevelForecast.text}</p>
+            <ForecastBulletList items={report.roleLevelForecast.missingFields} />
+          </article>
+        </ForecastReportSection>
+      ) : null}
 
-      <ForecastReportSection number={6} title={report.sealedPredictionPreview.title} variant="dashed">
+      <ForecastReportSection number={nextSectionNumber()} title={report.sealedPredictionPreview.title} variant="dashed">
         <ForecastFieldRows rows={report.sealedPredictionPreview.rows} />
         <p className="sealed-caveat"><em>{report.sealedPredictionPreview.caveat}</em></p>
       </ForecastReportSection>
 
-      <ForecastReportSection number={7} title="Compatibility Score">
+      <ForecastReportSection number={nextSectionNumber()} title="Compatibility Score">
         <p><strong>{report.compatibility.score}</strong> / {report.compatibility.riskBand}</p>
         <p>{report.compatibility.note}</p>
       </ForecastReportSection>
 
-      <ForecastReportSection number={8} title="Timeline of Expected Friction">
+      <ForecastReportSection number={nextSectionNumber()} title="Timeline of Expected Friction">
         <div className="anchor-list compact-anchors">
           {report.timelineRows.map((row) => (
             <article key={row.phase}>
@@ -5577,30 +5667,32 @@ function ForecastLedPublicReport({ report }) {
         </div>
       </ForecastReportSection>
 
-      <ForecastReportSection number={9} title="What to Watch">
-        <article style={FORECAST_REPORT_STYLES.watchBlock}>
-          <strong>30-day observation prompt</strong>
-          <p>{report.watch.decisiveSignal}</p>
-        </article>
-        <div className="protocol-insight-grid" style={FORECAST_REPORT_STYLES.twoColumn}>
-          <article style={FORECAST_REPORT_STYLES.soberCard}>
-            <strong>90-day checks</strong>
-            <ForecastBulletList items={report.watch.ninetyDayChecks} />
+      {report.watch ? (
+        <ForecastReportSection number={nextSectionNumber()} title="What to Watch">
+          <article style={FORECAST_REPORT_STYLES.watchBlock}>
+            <strong>30-day observation prompt</strong>
+            <p>{report.watch.decisiveSignal}</p>
           </article>
-          <article style={FORECAST_REPORT_STYLES.soberCard}>
-            <strong>180-day checks</strong>
-            <ForecastBulletList items={report.watch.oneEightyDayChecks} />
-          </article>
-        </div>
-      </ForecastReportSection>
+          <div className="protocol-insight-grid" style={FORECAST_REPORT_STYLES.twoColumn}>
+            <article style={FORECAST_REPORT_STYLES.soberCard}>
+              <strong>90-day checks</strong>
+              <ForecastBulletList items={report.watch.ninetyDayChecks} />
+            </article>
+            <article style={FORECAST_REPORT_STYLES.soberCard}>
+              <strong>180-day checks</strong>
+              <ForecastBulletList items={report.watch.oneEightyDayChecks} />
+            </article>
+          </div>
+        </ForecastReportSection>
+      ) : null}
 
-      <ForecastReportSection number={10} title="Deal Economics" variant="economics">
+      <ForecastReportSection number={nextSectionNumber()} title="Deal Economics" variant="economics">
         {report.economics.lines.map((line) => (
           <p key={line}>{line}</p>
         ))}
       </ForecastReportSection>
 
-      <ForecastReportSection number={11} title="Recommended Actions">
+      <ForecastReportSection number={nextSectionNumber()} title="Recommended Actions">
         <div className="protocol-insight-grid" style={FORECAST_REPORT_STYLES.twoColumn}>
           <article style={FORECAST_REPORT_STYLES.soberCard}>
             <strong>Before close</strong>
@@ -5613,11 +5705,11 @@ function ForecastLedPublicReport({ report }) {
         </div>
       </ForecastReportSection>
 
-      <ForecastReportSection number={12} title="What the Full Engagement Adds" variant="premium">
+      <ForecastReportSection number={nextSectionNumber()} title="What the Full Engagement Adds" variant="premium">
         <ForecastFieldRows rows={report.fullEngagement} />
       </ForecastReportSection>
 
-      <ForecastReportSection number={13} title="Limitations">
+      <ForecastReportSection number={nextSectionNumber()} title="Limitations">
         <p>{report.limitations}</p>
       </ForecastReportSection>
     </div>
@@ -6287,6 +6379,81 @@ function addCaseStudyPdfParagraph(items, text, options = {}) {
   });
 }
 
+const EXECUTIVE_SUMMARY_PDF_BREAK_PATTERN = /\s+:\s+(?=[A-Z])|\s+(?=SEALED PREDICTION\b)|\s+(?=(?:Within 30 days|Months 2(?:-|\u2013)6|Months 6(?:-|\u2013)18):)/g;
+
+function splitExecutiveSummaryPdfParagraphs(text) {
+  let source = String(text ?? "").trim();
+  if (!source) return [];
+
+  let nextMarker = null;
+  if (/^:\s+(?=[A-Z])/.test(source)) {
+    source = source.replace(/^:\s+/, "");
+    nextMarker = "colon";
+  }
+
+  const paragraphs = [];
+  let cursor = 0;
+  EXECUTIVE_SUMMARY_PDF_BREAK_PATTERN.lastIndex = 0;
+
+  for (let match = EXECUTIVE_SUMMARY_PDF_BREAK_PATTERN.exec(source); match; match = EXECUTIVE_SUMMARY_PDF_BREAK_PATTERN.exec(source)) {
+    const paragraph = source.slice(cursor, match.index).trim();
+    if (paragraph) paragraphs.push({ text: paragraph, marker: nextMarker });
+    nextMarker = match[0].includes(":") ? "colon" : null;
+    cursor = EXECUTIVE_SUMMARY_PDF_BREAK_PATTERN.lastIndex;
+  }
+
+  const finalParagraph = source.slice(cursor).trim();
+  if (finalParagraph) paragraphs.push({ text: finalParagraph, marker: nextMarker });
+  return paragraphs;
+}
+
+function addFullAssessmentSpecificationPdfParagraphs(items, text, options = {}) {
+  const parts = splitFullAssessmentSpecificationText(text);
+
+  parts.forEach((part, index) => {
+    const isLast = index === parts.length - 1;
+    const before = index === 0 ? options.before : undefined;
+    const after = isLast ? options.after ?? 7 : 4;
+
+    if (part.type === "assessmentSpecification") {
+      addCaseStudyPdfParagraph(items, FULL_ASSESSMENT_SPECIFICATION_LABEL, {
+        ...options,
+        before,
+        after: part.detail ? 2 : after,
+        bold: true,
+      });
+      if (part.detail) {
+        addCaseStudyPdfParagraph(items, part.detail, {
+          ...options,
+          before: undefined,
+          after,
+          bold: false,
+        });
+      }
+      return;
+    }
+
+    addCaseStudyPdfParagraph(items, part.text, {
+      ...options,
+      before,
+      after,
+    });
+  });
+}
+
+function addExecutiveSummaryPdfParagraphs(items, text, options = {}) {
+  const { markerIndent = 12, ...paragraphOptions } = options;
+  const paragraphs = splitExecutiveSummaryPdfParagraphs(text);
+  paragraphs.forEach((paragraph, index) => {
+    addFullAssessmentSpecificationPdfParagraphs(items, paragraph.text, {
+      ...paragraphOptions,
+      before: index === 0 ? paragraphOptions.before : undefined,
+      after: index === paragraphs.length - 1 ? paragraphOptions.after ?? 7 : 4,
+      indent: paragraph.marker === "colon" ? markerIndent : paragraphOptions.indent,
+    });
+  });
+}
+
 function addCaseStudyPdfBulletList(items, bullets) {
   for (const bullet of bullets.filter(Boolean)) {
     addCaseStudyPdfParagraph(items, `- ${bullet}`, { after: 4, indent: 10 });
@@ -6343,7 +6510,7 @@ function pdfLayerAText(value) {
 function isPlaceholderPartyName(value) {
   const text = String(value ?? "").trim();
   if (!text) return true;
-  return /^(?:aa|bb|test|testing|demo|sample|placeholder|review acquirer|review target|acquirer pending|target pending)$/i.test(text)
+  return /^(?:aa|bb|test|testing|demo|sample|placeholder|acquirer|target|review acquirer|review target|acquirer pending|target pending)$/i.test(text)
     || /^(?:your organisation|your organization|your target)$/i.test(text)
     || /^review\s+(?:acquirer|target)$/i.test(text)
     || /^test[\s_-]*/i.test(text);
@@ -6502,6 +6669,11 @@ function buildFinalDeliverablesReportLines(deliverable, session) {
 
   const report = buildForecastLedPublicReport(deliverable, session);
   const bandColor = pdfBandColor(report.compatibility.riskBand);
+  let sectionNumber = 0;
+  const nextSectionNumber = () => {
+    sectionNumber += 1;
+    return sectionNumber;
+  };
 
   const items = [
     { text: "ACADEMY OF STRUCTURAL TYPOLOGY", size: 9, bold: true, align: "center", color: PDF_BRAND.accent, after: 18, maxCharacters: 90 },
@@ -6598,32 +6770,32 @@ function buildFinalDeliverablesReportLines(deliverable, session) {
     { type: "pageBreak" },
   ];
 
-  addCaseStudyPdfSection(items, 1, "Executive Decision Summary");
+  addCaseStudyPdfSection(items, nextSectionNumber(), "Executive Decision Summary");
   addCaseStudyPdfParagraph(
     items,
     report.executive.headline,
     { size: 11, bold: true, color: PDF_BRAND.body, after: 10 },
   );
-  addCaseStudyPdfParagraph(items, report.executive.situation);
-  addCaseStudyPdfParagraph(items, report.executive.implication);
+  addExecutiveSummaryPdfParagraphs(items, report.executive.situation);
+  addExecutiveSummaryPdfParagraphs(items, report.executive.implication);
 
-  addCaseStudyPdfSection(items, 2, "Deal Scenario");
+  addCaseStudyPdfSection(items, nextSectionNumber(), "Deal Scenario");
   items.push({
     type: "table",
-    columns: [156, 312],
+    columns: [132, 138, 198],
     rows: [
-      ["Deal field", "Public report value"],
-      ...report.dealScenario.rows,
+      ["Deal field", "Company name", "Public report value"],
+      ...report.dealScenario.rows.map((row) => [row.field, row.companyName, row.value]),
     ],
   });
 
-  addCaseStudyPdfSection(items, 3, "The Two Environments");
+  addCaseStudyPdfSection(items, nextSectionNumber(), "The Two Environments");
   addCaseStudyPdfSubsection(items, "3.1 Acquirer environment");
   addCaseStudyPdfParagraph(items, `${report.environments.acquirer.title}: ${report.environments.acquirer.body}`);
   addCaseStudyPdfSubsection(items, "3.2 Target environment");
   addCaseStudyPdfParagraph(items, `${report.environments.target.title}: ${report.environments.target.body}`);
 
-  addCaseStudyPdfSection(items, 4, "Collision Thesis");
+  addCaseStudyPdfSection(items, nextSectionNumber(), "Collision Thesis");
   items.push({
     type: "table",
     columns: [156, 312],
@@ -6631,11 +6803,14 @@ function buildFinalDeliverablesReportLines(deliverable, session) {
     rows: [["Collision point", "Interpretation"], ...report.collisionRows.map((row) => [row.point, row.interpretation])],
   });
 
-  addCaseStudyPdfSection(items, 5, "Role-Level Forecast Snapshot");
-  addCaseStudyPdfParagraph(items, report.roleLevelForecast.text);
-  addCaseStudyPdfBulletList(items, report.roleLevelForecast.missingFields);
+  if (report.roleLevelForecast) {
+    addCaseStudyPdfSection(items, nextSectionNumber(), "Role-Level Forecast Snapshot");
+    addCaseStudyPdfParagraph(items, report.roleLevelForecast.text);
+    addCaseStudyPdfBulletList(items, report.roleLevelForecast.missingFields);
+  }
 
-  addCaseStudyPdfSection(items, 6, report.sealedPredictionPreview.title);
+  items.push({ type: "pageBreak" });
+  addCaseStudyPdfSection(items, nextSectionNumber(), report.sealedPredictionPreview.title);
   items.push({
     type: "table",
     columns: [150, 318],
@@ -6643,7 +6818,7 @@ function buildFinalDeliverablesReportLines(deliverable, session) {
   });
   addCaseStudyPdfParagraph(items, report.sealedPredictionPreview.caveat, { size: 10, color: PDF_BRAND.muted });
 
-  addCaseStudyPdfSection(items, 7, "Compatibility Score");
+  addCaseStudyPdfSection(items, nextSectionNumber(), "Compatibility Score");
   addCaseStudyPdfParagraph(
     items,
     String(report.compatibility.score),
@@ -6659,7 +6834,7 @@ function buildFinalDeliverablesReportLines(deliverable, session) {
   });
   addCaseStudyPdfParagraph(items, report.compatibility.note);
 
-  addCaseStudyPdfSection(items, 8, "Timeline of Expected Friction");
+  addCaseStudyPdfSection(items, nextSectionNumber(), "Timeline of Expected Friction");
   for (const row of report.timelineRows) {
     addCaseStudyPdfSubsection(items, `${row.phase} / ${row.window}`);
     addCaseStudyPdfParagraph(items, `What surfaces: ${row.whatSurfaces}`);
@@ -6668,31 +6843,33 @@ function buildFinalDeliverablesReportLines(deliverable, session) {
     }
   }
 
-  addCaseStudyPdfSection(items, 9, "What to Watch");
-  addCaseStudyPdfParagraph(items, `30-day observation prompt: ${report.watch.decisiveSignal}`, {
-    fill: PDF_BRAND.warningFill,
-    stroke: PDF_BRAND.warningStroke,
-    strokeWidth: 1.2,
-    paddingY: 10,
-    after: 10,
-  });
-  addCaseStudyPdfSubsection(items, "90-day checks");
-  addCaseStudyPdfBulletList(items, report.watch.ninetyDayChecks);
-  addCaseStudyPdfSubsection(items, "180-day checks");
-  addCaseStudyPdfBulletList(items, report.watch.oneEightyDayChecks);
+  if (report.watch) {
+    addCaseStudyPdfSection(items, nextSectionNumber(), "What to Watch");
+    addCaseStudyPdfParagraph(items, `30-day observation prompt: ${report.watch.decisiveSignal}`, {
+      fill: PDF_BRAND.warningFill,
+      stroke: PDF_BRAND.warningStroke,
+      strokeWidth: 1.2,
+      paddingY: 10,
+      after: 10,
+    });
+    addCaseStudyPdfSubsection(items, "90-day checks");
+    addCaseStudyPdfBulletList(items, report.watch.ninetyDayChecks);
+    addCaseStudyPdfSubsection(items, "180-day checks");
+    addCaseStudyPdfBulletList(items, report.watch.oneEightyDayChecks);
+  }
 
-  addCaseStudyPdfSection(items, 10, "Deal Economics");
+  addCaseStudyPdfSection(items, nextSectionNumber(), "Deal Economics");
   for (const line of report.economics.lines) {
     addCaseStudyPdfParagraph(items, line);
   }
 
-  addCaseStudyPdfSection(items, 11, "Recommended Actions");
+  addCaseStudyPdfSection(items, nextSectionNumber(), "Recommended Actions");
   addCaseStudyPdfSubsection(items, "Before close");
   addCaseStudyPdfBulletList(items, report.actions.beforeClose);
   addCaseStudyPdfSubsection(items, "After close");
   addCaseStudyPdfBulletList(items, report.actions.afterClose);
 
-  addCaseStudyPdfSection(items, 12, "What the Full Engagement Adds");
+  addCaseStudyPdfSection(items, nextSectionNumber(), "What the Full Engagement Adds");
   items.push({
     type: "table",
     columns: [130, 338],
@@ -6702,7 +6879,7 @@ function buildFinalDeliverablesReportLines(deliverable, session) {
     ],
   });
   addCaseStudyPdfParagraph(items, "The logical next step is to confirm the forecast against named leadership roles before final sequencing.", { after: 10 });
-  addCaseStudyPdfSection(items, 13, "Limitations");
+  addCaseStudyPdfSection(items, nextSectionNumber(), "Limitations");
   items.push({
     text: report.limitations,
     size: 9,
