@@ -5,7 +5,10 @@ import {
   ACQUISITION_MOTIVE_OPTIONS,
   CANONICAL_DEAL_CONTEXT_FIELD_IDS,
   COMPETITOR_PRESERVATION_OPTIONS,
+  DEAL_CONTEXT_FIELD_IDS,
   DEAL_ECONOMICS_CURRENCY_OPTIONS,
+  DEAL_ECONOMICS_SINGLE_CURRENCY_ERROR,
+  DEAL_ECONOMICS_SINGLE_CURRENCY_MISSING_FIELD,
   DEAL_ECONOMICS_STATUS_OPTIONS,
   DEAL_TYPE_OPTIONS,
   RESPONDENT_ACCESS_LEVEL_OPTIONS,
@@ -68,6 +71,11 @@ assert.deepEqual(CANONICAL_DEAL_CONTEXT_FIELD_IDS, [
   "respondentAccessLevel",
 ]);
 assert.equal(DEAL_TYPE_OPTIONS.length, 5);
+assert.ok(DEAL_CONTEXT_FIELD_IDS.includes("keyPersonnelAtRisk"));
+assert.equal(
+  DEAL_ECONOMICS_SINGLE_CURRENCY_ERROR,
+  "Deal Economics must use one currency for enterprise value and compensation. No FX conversion is applied.",
+);
 assert.equal(acquisitionMotiveForDealType("team_acquisition"), "management_buyout");
 assert.equal(acquisitionMotiveForDealType("market_entry"), "cross_border_integration");
 assert.equal(acquisitionMotiveForDealType("kpi_driven_ma"), "operational_roll_up");
@@ -90,6 +98,11 @@ const appSource = readFileSync(new URL("../src/App.jsx", import.meta.url), "utf8
 assert.match(appSource, /Go to final report page/);
 assert.match(appSource, /finalDeliverable\.ready/);
 assert.match(appSource, /navigate\(finalDeliverable\.route\)/);
+assert.match(appSource, /Number of key personnel at risk/);
+assert.match(appSource, /Self-estimate of senior people whose departure would materially affect integration value\./);
+assert.match(appSource, /Average annual compensation per key person/);
+assert.match(appSource, /Used as per-person annual compensation for key personnel at risk, not as a total compensation pool\./);
+assert.match(appSource, /sectionId === "dealEconomicsCurrency"[\s\S]*next\.enterpriseValueCurrency = value;[\s\S]*next\.compensationCurrency = value;/);
 
 const expectedOrder = [
   "/",
@@ -170,6 +183,7 @@ assert.deepEqual(emptyEconomicsValidation.normalized, {
   enterpriseValue: null,
   enterpriseValueCurrency: "",
   enterpriseValueStatus: "not_available",
+  keyPersonnelAtRisk: null,
   compensationAssumptions: null,
   compensationCurrency: "",
   compensationStatus: "not_available",
@@ -179,15 +193,53 @@ const incompleteEconomicsValidation = validateDealEconomics({
 });
 assert.equal(incompleteEconomicsValidation.valid, false);
 assert.deepEqual(incompleteEconomicsValidation.missing, ["enterpriseValue", "enterpriseValueCurrency"]);
+const zeroKeyPersonnelValidation = validateDealEconomics({
+  keyPersonnelAtRisk: "0",
+});
+assert.equal(zeroKeyPersonnelValidation.valid, true);
+assert.equal(zeroKeyPersonnelValidation.normalized.keyPersonnelAtRisk, 0);
+const positiveKeyPersonnelValidation = validateDealEconomics({
+  keyPersonnelAtRisk: "4",
+});
+assert.equal(positiveKeyPersonnelValidation.valid, true);
+assert.equal(positiveKeyPersonnelValidation.normalized.keyPersonnelAtRisk, 4);
+const negativeKeyPersonnelValidation = validateDealEconomics({
+  keyPersonnelAtRisk: "-1",
+});
+assert.equal(negativeKeyPersonnelValidation.valid, false);
+assert.deepEqual(negativeKeyPersonnelValidation.missing, ["keyPersonnelAtRisk"]);
+const decimalKeyPersonnelValidation = validateDealEconomics({
+  keyPersonnelAtRisk: "1.5",
+});
+assert.equal(decimalKeyPersonnelValidation.valid, false);
+assert.deepEqual(decimalKeyPersonnelValidation.missing, ["keyPersonnelAtRisk"]);
 const providedEconomicsValidation = validateDealEconomics({
   enterpriseValue: "125000000",
   enterpriseValueCurrency: "USD",
   enterpriseValueStatus: "estimated",
+  keyPersonnelAtRisk: "4",
   compensationAssumptions: "4500000",
   compensationCurrency: "USD",
   compensationStatus: "confirmed",
 });
 assert.equal(providedEconomicsValidation.valid, true);
+assert.equal(providedEconomicsValidation.normalized.keyPersonnelAtRisk, 4);
+const mixedCurrencyValidation = validateDealEconomics({
+  enterpriseValue: "125000000",
+  enterpriseValueCurrency: "USD",
+  enterpriseValueStatus: "estimated",
+  compensationAssumptions: "4500000",
+  compensationCurrency: "EUR",
+  compensationStatus: "confirmed",
+});
+assert.equal(mixedCurrencyValidation.valid, false);
+assert.ok(mixedCurrencyValidation.missing.includes(DEAL_ECONOMICS_SINGLE_CURRENCY_MISSING_FIELD));
+const inactiveMixedCurrencyValidation = validateDealEconomics({
+  enterpriseValueCurrency: "USD",
+  compensationCurrency: "EUR",
+});
+assert.equal(inactiveMixedCurrencyValidation.valid, false);
+assert.ok(inactiveMixedCurrencyValidation.missing.includes(DEAL_ECONOMICS_SINGLE_CURRENCY_MISSING_FIELD));
 
 const dealContext = {
   ...dealIdentity,
@@ -201,6 +253,7 @@ const normalizedDealContext = {
   enterpriseValue: null,
   enterpriseValueCurrency: "",
   enterpriseValueStatus: "not_available",
+  keyPersonnelAtRisk: null,
   compensationAssumptions: null,
   compensationCurrency: "",
   compensationStatus: "not_available",
@@ -249,6 +302,7 @@ const withEconomics = attachDealContext(initialSession, {
   enterpriseValue: "125000000",
   enterpriseValueCurrency: "USD",
   enterpriseValueStatus: "estimated",
+  keyPersonnelAtRisk: "4",
   compensationAssumptions: "4500000",
   compensationCurrency: "USD",
   compensationStatus: "confirmed",
@@ -256,7 +310,9 @@ const withEconomics = attachDealContext(initialSession, {
 assert.equal(withEconomics.dealContext.data.enterpriseValue, 125000000);
 assert.equal(withEconomics.dealContext.data.enterpriseValueCurrency, "USD");
 assert.equal(withEconomics.dealContext.data.enterpriseValueStatus, "estimated");
+assert.equal(withEconomics.dealContext.data.keyPersonnelAtRisk, 4);
 assert.equal(withEconomics.dealContext.data.compensationAssumptions, 4500000);
+assert.equal(withEconomics.dealContext.data.compensationCurrency, "USD");
 assert.equal(withEconomics.dealContext.data.compensationStatus, "confirmed");
 
 const allAAnswers = Object.fromEntries(

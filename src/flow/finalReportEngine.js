@@ -3,12 +3,25 @@ import { buildContradictionReport } from "./contradictionEngine.js";
 import { buildEvidenceCoverage, evidenceItemsFromSession } from "./evidenceCapture.js";
 import { buildRiskOutputReport } from "./riskOutputEngine.js";
 import { buildTriageReport } from "./triageEngine.js";
+import { DEAL_ECONOMICS_DISCLAIMER } from "../data/dealEconomicsFormulaSpec.js";
+import {
+  calculateDealEconomicsRiskEnvelope,
+  describeOpenEndedHigh,
+  formatMillions,
+  getEcsValuationBand,
+  normalizeMoneyToMillions,
+} from "./dealEconomicsRiskEnvelope.js";
 
 export const FINAL_REPORT_ENGINE_VERSION = "newlogic-final-report-v1";
 
 export const DEAL_ECONOMICS_UNAVAILABLE_TEXT = "Financial exposure is not calculated in this preliminary sample because deal value and compensation inputs are not confirmed.";
 export const DEAL_ECONOMICS_INPUT_PROMPT_TEXT = "Provide EV and confirmed compensation inputs to calculate a structure-based risk envelope.";
 export const DEAL_ECONOMICS_MISSING_INPUT_TEXT = "Missing input: EV / deal value and confirmed compensation assumptions.";
+export const DEAL_ECONOMICS_DEAL_VALUE_PROMPT_TEXT = "Provide deal value to activate the risk envelope.";
+export const DEAL_ECONOMICS_SINGLE_CURRENCY_TEXT = "Deal Economics must use one currency for enterprise value and compensation. No FX conversion is applied.";
+export const DEAL_ECONOMICS_VALID_ECS_REQUIRED_TEXT = "Risk-envelope calculation requires a valid ECS score.";
+export const DEAL_ECONOMICS_SUPPORTED_CURRENCY_TEXT = "Deal Economics risk-envelope calculation requires USD or EUR currency.";
+export const DEAL_ECONOMICS_PERSONNEL_REQUIRED_TEXT = "requires personnel-at-risk and per-person compensation";
 
 export const FINAL_REPORT_SECTION_ORDER = Object.freeze([
   "executive_summary",
@@ -68,6 +81,12 @@ function formatDealEconomicsAmount(currency, amount) {
   return `${currency} ${formatted}`;
 }
 
+function parseDealEconomicsInteger(value) {
+  if (value === undefined || value === null || value === "") return null;
+  const number = Number(value);
+  return Number.isSafeInteger(number) && number >= 0 ? number : null;
+}
+
 function dealEconomicsInput(session, config) {
   const status = String(dealEconomicsValue(session, config.statusKey) ?? "not_available");
   const amount = parseDealEconomicsNumber(dealEconomicsValue(session, config.valueKey));
@@ -84,7 +103,42 @@ function dealEconomicsInput(session, config) {
   });
 }
 
-export function buildDealEconomicsReport(session = {}) {
+function dealEconomicsRawCurrency(session, key) {
+  return String(dealEconomicsValue(session, key) ?? "").trim();
+}
+
+function supportedDealEconomicsCurrency(currency) {
+  return currency === "USD" || currency === "EUR";
+}
+
+function lineWithOpenEndedHigh(label, lowValue, highValue, currency, highOpenEnded) {
+  const highText = describeOpenEndedHigh(formatMillions(highValue, currency), highOpenEnded);
+  return `${label}: Low ${formatMillions(lowValue, currency)} / High ${highText}.`;
+}
+
+function riskEnvelopeBaseScore(options = {}) {
+  return typeof options.baseEcsScore === "number" && Number.isFinite(options.baseEcsScore)
+    ? options.baseEcsScore
+    : null;
+}
+
+function riskEnvelopeUnavailable(lines, extra = {}) {
+  return Object.freeze({
+    available: Boolean(extra.available),
+    inputsAvailable: Boolean(extra.inputsAvailable),
+    calculated: false,
+    enterpriseValue: extra.enterpriseValue,
+    compensation: extra.compensation,
+    keyPersonnelAtRisk: extra.keyPersonnelAtRisk ?? null,
+    bandName: extra.bandName ?? null,
+    lines: Object.freeze(lines),
+    text: lines[0] ?? "",
+    missingInput: lines[1] ?? "",
+    prompt: lines[2] ?? "",
+  });
+}
+
+export function buildDealEconomicsReport(session = {}, options = {}) {
   const enterpriseValue = dealEconomicsInput(session, {
     valueKey: "enterpriseValue",
     currencyKey: "enterpriseValueCurrency",
@@ -95,42 +149,123 @@ export function buildDealEconomicsReport(session = {}) {
     valueKey: "compensationAssumptions",
     currencyKey: "compensationCurrency",
     statusKey: "compensationStatus",
-    label: "Compensation assumptions provided",
+    label: "Average annual compensation per key person provided",
   });
-
-  const lines = (() => {
-    if (!enterpriseValue.provided && !compensation.provided) {
-      return [
-        DEAL_ECONOMICS_UNAVAILABLE_TEXT,
-        DEAL_ECONOMICS_MISSING_INPUT_TEXT,
-        DEAL_ECONOMICS_INPUT_PROMPT_TEXT,
-      ];
-    }
-    if (enterpriseValue.provided && !compensation.provided) {
-      return [
-        enterpriseValue.line,
-        "Compensation assumptions are not confirmed, so the structure-based risk envelope is not calculated.",
-      ];
-    }
-    if (!enterpriseValue.provided && compensation.provided) {
-      return [
-        compensation.line,
-        "EV / deal value is not confirmed, so the structure-based risk envelope is not calculated.",
-      ];
-    }
-    return [
-      enterpriseValue.line,
-      compensation.line,
-      "Both EV and compensation assumptions are available. Risk-envelope calculation requires a defined formula.",
-    ];
-  })();
-
-  return Object.freeze({
-    available: enterpriseValue.provided || compensation.provided,
-    inputsAvailable: enterpriseValue.provided && compensation.provided,
-    calculated: false,
+  const keyPersonnelAtRisk = parseDealEconomicsInteger(dealEconomicsValue(session, "keyPersonnelAtRisk"));
+  const baseEcsScore = riskEnvelopeBaseScore(options);
+  const band = getEcsValuationBand(baseEcsScore);
+  const enterpriseRawCurrency = dealEconomicsRawCurrency(session, "enterpriseValueCurrency");
+  const compensationRawCurrency = dealEconomicsRawCurrency(session, "compensationCurrency");
+  const hasCurrencyMismatch = Boolean(
+    enterpriseRawCurrency
+    && compensationRawCurrency
+    && enterpriseRawCurrency !== compensationRawCurrency,
+  );
+  const calculationCurrency = enterpriseValue.currency || compensation.currency;
+  const canUseEvForEnvelope = enterpriseValue.provided && normalizeMoneyToMillions(enterpriseValue.amount) !== null;
+  const commonReportState = {
     enterpriseValue,
     compensation,
+    keyPersonnelAtRisk,
+    available: enterpriseValue.provided || compensation.provided || keyPersonnelAtRisk !== null,
+    inputsAvailable: false,
+  };
+
+  if (!enterpriseValue.provided) {
+    return riskEnvelopeUnavailable([
+      ...(compensation.provided ? [compensation.line] : []),
+      DEAL_ECONOMICS_DEAL_VALUE_PROMPT_TEXT,
+    ], commonReportState);
+  }
+
+  if (hasCurrencyMismatch) {
+    return riskEnvelopeUnavailable([
+      enterpriseValue.line,
+      ...(compensation.provided ? [compensation.line] : []),
+      DEAL_ECONOMICS_SINGLE_CURRENCY_TEXT,
+    ], commonReportState);
+  }
+
+  if (!supportedDealEconomicsCurrency(calculationCurrency)) {
+    return riskEnvelopeUnavailable([
+      enterpriseValue.line,
+      DEAL_ECONOMICS_SUPPORTED_CURRENCY_TEXT,
+    ], commonReportState);
+  }
+
+  if (!band || baseEcsScore === null) {
+    return riskEnvelopeUnavailable([
+      enterpriseValue.line,
+      DEAL_ECONOMICS_VALID_ECS_REQUIRED_TEXT,
+    ], commonReportState);
+  }
+
+  if (!canUseEvForEnvelope) {
+    return riskEnvelopeUnavailable([
+      enterpriseValue.line,
+      DEAL_ECONOMICS_DEAL_VALUE_PROMPT_TEXT,
+    ], commonReportState);
+  }
+
+  if (!compensation.provided || keyPersonnelAtRisk === null) {
+    const enterpriseValueMillions = normalizeMoneyToMillions(enterpriseValue.amount);
+    const evDiscountLow = enterpriseValueMillions * band.evDiscountLowRate;
+    const evDiscountHigh = enterpriseValueMillions * band.evDiscountHighRate;
+    const earnOutExposureLow = enterpriseValueMillions * band.earnOutExposureLowRate;
+    const earnOutExposureHigh = enterpriseValueMillions * band.earnOutExposureHighRate;
+    return riskEnvelopeUnavailable([
+      enterpriseValue.line,
+      `ECS valuation band: ${band.name} (${baseEcsScore}).`,
+      lineWithOpenEndedHigh("EV Discount", evDiscountLow, evDiscountHigh, calculationCurrency, Boolean(band.evDiscountHighOpenEnded)),
+      lineWithOpenEndedHigh("Earn-Out Exposure", earnOutExposureLow, earnOutExposureHigh, calculationCurrency, Boolean(band.earnOutExposureHighOpenEnded)),
+      `Talent Cost: ${DEAL_ECONOMICS_PERSONNEL_REQUIRED_TEXT}.`,
+      `Total Risk Envelope: ${DEAL_ECONOMICS_PERSONNEL_REQUIRED_TEXT}.`,
+      DEAL_ECONOMICS_DISCLAIMER,
+    ], { ...commonReportState, bandName: band.name });
+  }
+
+  const calculation = calculateDealEconomicsRiskEnvelope({
+    enterpriseValue: enterpriseValue.amount,
+    keyPersonnelAtRisk,
+    averageAnnualCompensationPerKeyPerson: compensation.amount,
+    baseEcsScore,
+  });
+
+  if (!calculation.calculated) {
+    return riskEnvelopeUnavailable([
+      enterpriseValue.line,
+      compensation.line,
+      calculation.missing.includes("baseEcsScore")
+        ? DEAL_ECONOMICS_VALID_ECS_REQUIRED_TEXT
+        : DEAL_ECONOMICS_DEAL_VALUE_PROMPT_TEXT,
+    ], commonReportState);
+  }
+
+  const totalHighOpenEnded = calculation.evDiscountHighOpenEnded
+    || calculation.earnOutExposureHighOpenEnded
+    || calculation.costPerDepartureHighOpenEnded
+    || calculation.estimatedTalentLossHighOpenEnded;
+  const lines = [
+    enterpriseValue.line,
+    compensation.line,
+    `Key personnel at risk: ${keyPersonnelAtRisk}.`,
+    `ECS valuation band: ${calculation.bandName} (${calculation.baseEcsScore}).`,
+    lineWithOpenEndedHigh("EV Discount", calculation.evDiscountLow, calculation.evDiscountHigh, calculationCurrency, calculation.evDiscountHighOpenEnded),
+    lineWithOpenEndedHigh("Earn-Out Exposure", calculation.earnOutExposureLow, calculation.earnOutExposureHigh, calculationCurrency, calculation.earnOutExposureHighOpenEnded),
+    lineWithOpenEndedHigh("Talent Cost", calculation.talentCostLow, calculation.talentCostHigh, calculationCurrency, calculation.costPerDepartureHighOpenEnded),
+    lineWithOpenEndedHigh("Total Risk Envelope", calculation.riskEnvelopeLow, calculation.riskEnvelopeHigh, calculationCurrency, totalHighOpenEnded),
+    DEAL_ECONOMICS_DISCLAIMER,
+  ];
+
+  return Object.freeze({
+    available: true,
+    inputsAvailable: true,
+    calculated: true,
+    enterpriseValue,
+    compensation,
+    keyPersonnelAtRisk,
+    bandName: calculation.bandName,
+    calculation,
     lines: Object.freeze(lines),
     text: lines[0] ?? "",
     missingInput: lines[1] ?? "",

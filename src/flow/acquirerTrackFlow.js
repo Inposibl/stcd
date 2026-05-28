@@ -205,6 +205,8 @@ export const TRANSACTION_DETAIL_SECTIONS = Object.freeze([
 ]);
 
 export const DEAL_ECONOMICS_CURRENCY_OPTIONS = Object.freeze(["USD", "EUR", "GBP", "Other"]);
+export const DEAL_ECONOMICS_SINGLE_CURRENCY_ERROR = "Deal Economics must use one currency for enterprise value and compensation. No FX conversion is applied.";
+export const DEAL_ECONOMICS_SINGLE_CURRENCY_MISSING_FIELD = "dealEconomicsCurrencyMismatch";
 
 export const DEAL_ECONOMICS_STATUS_OPTIONS = Object.freeze([
   Object.freeze({ title: "Confirmed", value: "confirmed" }),
@@ -231,6 +233,7 @@ export const DEAL_CONTEXT_FIELD_IDS = Object.freeze([
   "enterpriseValue",
   "enterpriseValueCurrency",
   "enterpriseValueStatus",
+  "keyPersonnelAtRisk",
   "compensationAssumptions",
   "compensationCurrency",
   "compensationStatus",
@@ -340,6 +343,19 @@ function parseNonNegativeNumber(value) {
   };
 }
 
+function parseNonNegativeInteger(value) {
+  const text = value == null ? "" : String(value).trim();
+  if (!text) return { provided: false, valid: true, value: null };
+  if (!/^\d+$/.test(text)) return { provided: true, valid: false, value: null };
+  const number = Number(text);
+  const valid = Number.isSafeInteger(number) && number >= 0;
+  return {
+    provided: true,
+    valid,
+    value: valid ? number : null,
+  };
+}
+
 function normalizeDealEconomicsInput(input, config, missing) {
   const status = normalizeDealEconomicsStatus(input[config.statusKey]);
   const currency = normalizeDealEconomicsCurrency(input[config.currencyKey]);
@@ -368,8 +384,18 @@ function normalizeDealEconomicsInput(input, config, missing) {
   return normalized;
 }
 
+function normalizeKeyPersonnelAtRisk(input, missing) {
+  const parsedValue = parseNonNegativeInteger(input.keyPersonnelAtRisk);
+  if (parsedValue.provided && !parsedValue.valid) {
+    missing.push("keyPersonnelAtRisk");
+  }
+  return { keyPersonnelAtRisk: parsedValue.provided && parsedValue.valid ? parsedValue.value : null };
+}
+
 export function validateDealEconomics(input = {}) {
   const missing = [];
+  const inputEnterpriseCurrency = normalizeDealEconomicsCurrency(input.enterpriseValueCurrency);
+  const inputCompensationCurrency = normalizeDealEconomicsCurrency(input.compensationCurrency);
   const enterpriseValue = normalizeDealEconomicsInput(input, {
     valueKey: "enterpriseValue",
     currencyKey: "enterpriseValueCurrency",
@@ -380,12 +406,21 @@ export function validateDealEconomics(input = {}) {
     currencyKey: "compensationCurrency",
     statusKey: "compensationStatus",
   }, missing);
+  const keyPersonnel = normalizeKeyPersonnelAtRisk(input, missing);
+  if (
+    inputEnterpriseCurrency
+    && inputCompensationCurrency
+    && inputEnterpriseCurrency !== inputCompensationCurrency
+  ) {
+    missing.push(DEAL_ECONOMICS_SINGLE_CURRENCY_MISSING_FIELD);
+  }
 
   return Object.freeze({
     valid: missing.length === 0,
     missing: Object.freeze(missing),
     normalized: Object.freeze({
       ...enterpriseValue,
+      ...keyPersonnel,
       ...compensation,
     }),
   });

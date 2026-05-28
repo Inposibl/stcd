@@ -8,6 +8,9 @@ import { TARGET_OBSERVATION_DIAGNOSTIC } from "./data/targetObservedEnvironmentD
 import { TARGET_SELF_ASSESSMENT_DATA } from "./data/targetSelfAssessmentData.js";
 import {
   ACQUISITION_MOTIVE_OPTIONS,
+  DEAL_ECONOMICS_CURRENCY_OPTIONS,
+  DEAL_ECONOMICS_SINGLE_CURRENCY_ERROR,
+  DEAL_ECONOMICS_SINGLE_CURRENCY_MISSING_FIELD,
   DEAL_ECONOMICS_STATUS_OPTIONS,
   DEAL_TYPE_OPTIONS,
   RESPONDENT_ACCESS_LEVEL_OPTIONS,
@@ -922,13 +925,39 @@ const DEAL_CONTEXT_MISSING_LABELS = Object.freeze({
   enterpriseValue: "Estimated deal value / enterprise value",
   enterpriseValueCurrency: "Enterprise value currency",
   enterpriseValueStatus: "Enterprise value status",
-  compensationAssumptions: "Management compensation / retention assumptions",
+  keyPersonnelAtRisk: "Number of key personnel at risk",
+  compensationAssumptions: "Average annual compensation per key person",
   compensationCurrency: "Compensation currency",
   compensationStatus: "Compensation status",
+  [DEAL_ECONOMICS_SINGLE_CURRENCY_MISSING_FIELD]: DEAL_ECONOMICS_SINGLE_CURRENCY_ERROR,
 });
 
 function dealContextFieldLabel(fieldId) {
   return DEAL_CONTEXT_MISSING_LABELS[fieldId] ?? fieldId;
+}
+
+function dealEconomicsStatusRequiresCurrency(status) {
+  return status === "confirmed" || status === "estimated";
+}
+
+function validDealEconomicsCurrency(value) {
+  return DEAL_ECONOMICS_CURRENCY_OPTIONS.includes(value) ? value : "";
+}
+
+function initialDealEconomicsCurrency(existingContext) {
+  const enterpriseStatus = existingContext.enterpriseValueStatus ?? "not_available";
+  const compensationStatus = existingContext.compensationStatus ?? "not_available";
+  const enterpriseCurrency = validDealEconomicsCurrency(existingContext.enterpriseValueCurrency);
+  const compensationCurrency = validDealEconomicsCurrency(existingContext.compensationCurrency);
+  const enterpriseActive = dealEconomicsStatusRequiresCurrency(enterpriseStatus);
+  const compensationActive = dealEconomicsStatusRequiresCurrency(compensationStatus);
+
+  if (enterpriseCurrency && compensationCurrency && enterpriseCurrency !== compensationCurrency) {
+    return "";
+  }
+  if (enterpriseActive && enterpriseCurrency) return enterpriseCurrency;
+  if (compensationActive && compensationCurrency) return compensationCurrency;
+  return enterpriseCurrency || compensationCurrency || "USD";
 }
 
 function initialDealIdentity(existingContext) {
@@ -1200,14 +1229,17 @@ function AcquisitionMotiveScreen({ session, setSession }) {
 
 function TransactionDetailsScreen({ session, setSession }) {
   const existingContext = session.dealContext?.data ?? {};
+  const initialCurrency = initialDealEconomicsCurrency(existingContext);
   const [form, setForm] = useState(() => ({
     ...Object.fromEntries(TRANSACTION_DETAIL_SECTIONS.map((section) => [section.id, existingContext[section.id] ?? ""])),
     enterpriseValue: existingContext.enterpriseValue ?? "",
-    enterpriseValueCurrency: existingContext.enterpriseValueCurrency || "USD",
+    enterpriseValueCurrency: initialCurrency || existingContext.enterpriseValueCurrency || "",
     enterpriseValueStatus: existingContext.enterpriseValueStatus ?? "not_available",
+    keyPersonnelAtRisk: existingContext.keyPersonnelAtRisk ?? "",
     compensationAssumptions: existingContext.compensationAssumptions ?? "",
-    compensationCurrency: existingContext.compensationCurrency || "USD",
+    compensationCurrency: initialCurrency || existingContext.compensationCurrency || "",
     compensationStatus: existingContext.compensationStatus ?? "not_available",
+    dealEconomicsCurrency: initialCurrency,
   }));
   const [error, setError] = useState("");
   const hasDealStartContext = Boolean(existingContext.dealType && existingContext.respondentSide);
@@ -1219,47 +1251,58 @@ function TransactionDetailsScreen({ session, setSession }) {
     ["Respondent side", optionTitle(RESPONDENT_SIDE_OPTIONS, existingContext.respondentSide)],
     ["Respondent role", optionTitle(RESPONDENT_ROLE_OPTIONS, existingContext.respondentRole)],
   ];
-  const DEAL_ECONOMICS_CURRENCIES = [
-    { value: "USD", label: "USD" },
-    { value: "EUR", label: "EUR" },
-  ];
-
   function updateDetail(sectionId, value) {
     setForm((current) => {
       const next = { ...current, [sectionId]: value };
+      if (sectionId === "dealEconomicsCurrency") {
+        next.enterpriseValueCurrency = value;
+        next.compensationCurrency = value;
+      }
       if (sectionId === "enterpriseValue" && value !== "" && current.enterpriseValueStatus === "not_available") {
         next.enterpriseValueStatus = "estimated";
-        next.enterpriseValueCurrency = current.enterpriseValueCurrency || "USD";
+        if (next.dealEconomicsCurrency) {
+          next.enterpriseValueCurrency = next.dealEconomicsCurrency;
+          next.compensationCurrency = next.dealEconomicsCurrency;
+        }
       }
       if (sectionId === "compensationAssumptions" && value !== "" && current.compensationStatus === "not_available") {
         next.compensationStatus = "estimated";
-        next.compensationCurrency = current.compensationCurrency || "USD";
+        if (next.dealEconomicsCurrency) {
+          next.enterpriseValueCurrency = next.dealEconomicsCurrency;
+          next.compensationCurrency = next.dealEconomicsCurrency;
+        }
       }
       if (sectionId === "enterpriseValueStatus" && value === "not_available") {
         next.enterpriseValue = "";
+      } else if (sectionId === "enterpriseValueStatus" && next.dealEconomicsCurrency) {
+        next.enterpriseValueCurrency = next.dealEconomicsCurrency;
+        next.compensationCurrency = next.dealEconomicsCurrency;
       }
       if (sectionId === "compensationStatus" && value === "not_available") {
         next.compensationAssumptions = "";
+      } else if (sectionId === "compensationStatus" && next.dealEconomicsCurrency) {
+        next.enterpriseValueCurrency = next.dealEconomicsCurrency;
+        next.compensationCurrency = next.dealEconomicsCurrency;
       }
       return next;
     });
     setError("");
   }
 
-  function renderDealCurrencyButtons(fieldName) {
+  function renderDealCurrencyButtons() {
     return (
       <div className="deal-economics-currency-buttons" role="group" aria-label="Currency">
-        {DEAL_ECONOMICS_CURRENCIES.map((currency) => {
-          const selected = form[fieldName] === currency.value;
+        {DEAL_ECONOMICS_CURRENCY_OPTIONS.map((currency) => {
+          const selected = form.dealEconomicsCurrency === currency;
           return (
             <button
               aria-pressed={selected}
               className={selected ? "deal-economics-currency-button active" : "deal-economics-currency-button"}
-              key={`${fieldName}-${currency.value}`}
-              onClick={() => updateDetail(fieldName, currency.value)}
+              key={`dealEconomicsCurrency-${currency}`}
+              onClick={() => updateDetail("dealEconomicsCurrency", currency)}
               type="button"
             >
-              {currency.label}
+              {currency}
             </button>
           );
         })}
@@ -1274,6 +1317,10 @@ function TransactionDetailsScreen({ session, setSession }) {
       ...form,
     });
     if (!result.validation.valid) {
+      if (result.validation.missing.includes(DEAL_ECONOMICS_SINGLE_CURRENCY_MISSING_FIELD)) {
+        setError(DEAL_ECONOMICS_SINGLE_CURRENCY_ERROR);
+        return;
+      }
       setError(`Required: ${result.validation.missing.map(dealContextFieldLabel).join(", ")}`);
       return;
     }
@@ -1334,6 +1381,12 @@ function TransactionDetailsScreen({ session, setSession }) {
           <div className="deal-economics-blocks">
             <div className="deal-economics-card">
               <label className="field-block">
+                <span>Calculation currency <small>One currency is used for enterprise value and compensation. No FX conversion is applied.</small></span>
+                {renderDealCurrencyButtons()}
+              </label>
+            </div>
+            <div className="deal-economics-card">
+              <label className="field-block">
                 <span>Estimated deal value / enterprise value <small>Used only to estimate the structure-based risk envelope in the preliminary forecast.</small></span>
                 <input
                   min="0"
@@ -1342,10 +1395,6 @@ function TransactionDetailsScreen({ session, setSession }) {
                   type="number"
                   value={form.enterpriseValue}
                 />
-              </label>
-              <label className="field-block">
-                <span>Currency</span>
-                {renderDealCurrencyButtons("enterpriseValueCurrency")}
               </label>
               <label className="field-block">
                 <span>Status</span>
@@ -1358,7 +1407,19 @@ function TransactionDetailsScreen({ session, setSession }) {
             </div>
             <div className="deal-economics-card">
               <label className="field-block">
-                <span>Management compensation / retention assumptions <small>Used to estimate exposure linked to leadership retention, resistance, or post-close underperformance.</small></span>
+                <span>Number of key personnel at risk <small>Self-estimate of senior people whose departure would materially affect integration value.</small></span>
+                <input
+                  min="0"
+                  onChange={(event) => updateDetail("keyPersonnelAtRisk", event.target.value)}
+                  step="1"
+                  type="number"
+                  value={form.keyPersonnelAtRisk}
+                />
+              </label>
+            </div>
+            <div className="deal-economics-card">
+              <label className="field-block">
+                <span>Average annual compensation per key person <small>Used as per-person annual compensation for key personnel at risk, not as a total compensation pool.</small></span>
                 <input
                   min="0"
                   onChange={(event) => updateDetail("compensationAssumptions", event.target.value)}
@@ -1366,10 +1427,6 @@ function TransactionDetailsScreen({ session, setSession }) {
                   type="number"
                   value={form.compensationAssumptions}
                 />
-              </label>
-              <label className="field-block">
-                <span>Currency</span>
-                {renderDealCurrencyButtons("compensationCurrency")}
               </label>
               <label className="field-block">
                 <span>Status</span>
@@ -5340,7 +5397,7 @@ function buildForecastLedPublicReport(deliverable, session) {
     }),
     timelineRows: Object.freeze(timelineRows.map((row) => Object.freeze(row))),
     watch: null,
-    economics: buildDealEconomicsReport(session),
+    economics: buildDealEconomicsReport(session, { baseEcsScore: score }),
     actions: Object.freeze({
       beforeClose: Object.freeze(forecastList(actions.beforeClose, [], 3).map(buyerFacingActionText)),
       afterClose: Object.freeze(forecastList(actions.afterClose, [], 3).map(buyerFacingActionText)),
