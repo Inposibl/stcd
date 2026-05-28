@@ -5285,13 +5285,25 @@ function forecastPartyName(session, deliverable, side) {
 
 const DEAL_SCENARIO_COMPANY_NAME_FALLBACK = "\u2014";
 
+function dealScenarioCompanyNameCandidates(session, key) {
+  return [
+    session?.dealContext?.data?.[key],
+    session?.preliminaryAssessment?.dealContext?.[key],
+    session?.targetInvite?.reportBinding?.dealContext?.[key],
+    session?.targetInvite?.reportBinding?.[key],
+  ];
+}
+
 function forecastDealScenarioCompanyName(session, key) {
-  const companyName = session?.dealContext?.data?.[key];
-  if (isPlaceholderPartyName(companyName)) return DEAL_SCENARIO_COMPANY_NAME_FALLBACK;
-  return forecastReportText(
-    pdfPartyName(companyName, DEAL_SCENARIO_COMPANY_NAME_FALLBACK),
-    DEAL_SCENARIO_COMPANY_NAME_FALLBACK,
-  );
+  for (const companyName of dealScenarioCompanyNameCandidates(session, key)) {
+    if (isPlaceholderPartyName(companyName)) continue;
+    const text = forecastReportText(
+      pdfPartyName(companyName, DEAL_SCENARIO_COMPANY_NAME_FALLBACK),
+      DEAL_SCENARIO_COMPANY_NAME_FALLBACK,
+    );
+    if (text && text !== DEAL_SCENARIO_COMPANY_NAME_FALLBACK) return text;
+  }
+  return DEAL_SCENARIO_COMPANY_NAME_FALLBACK;
 }
 
 function buildForecastLedPublicReport(deliverable, session) {

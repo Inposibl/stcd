@@ -521,9 +521,75 @@ assert.ok(highRiskEconomicsReport.lines.includes("EV Discount: Low USD 175M / Hi
 assert.ok(highRiskEconomicsReport.lines.includes("Earn-Out Exposure: Low USD 100M / High >= USD 400M."));
 assert.ok(highRiskEconomicsReport.lines.includes("Total Risk Envelope: Low USD 283M / High >= USD 716M."));
 
+function extractFunctionSource(source, functionName) {
+  const start = source.indexOf(`function ${functionName}`);
+  assert.notEqual(start, -1, `${functionName} must exist in App.jsx`);
+  const braceStart = source.indexOf("{", start);
+  assert.notEqual(braceStart, -1, `${functionName} must have a function body`);
+
+  let depth = 0;
+  for (let index = braceStart; index < source.length; index += 1) {
+    const character = source[index];
+    if (character === "{") depth += 1;
+    if (character === "}") depth -= 1;
+    if (depth === 0) return source.slice(start, index + 1);
+  }
+
+  throw new Error(`${functionName} function body could not be parsed`);
+}
+
+function buildDealScenarioCompanyNameResolver(appSource) {
+  const placeholderResolver = new Function(
+    `${extractFunctionSource(appSource, "isPlaceholderPartyName")}; return isPlaceholderPartyName;`,
+  )();
+  const pdfPartyName = (value, fallback) => (placeholderResolver(value) ? fallback : String(value).trim());
+  const forecastReportText = (value, fallback) => String(value ?? fallback).replace(/\s+/g, " ").trim() || fallback;
+
+  return new Function(
+    "DEAL_SCENARIO_COMPANY_NAME_FALLBACK",
+    "isPlaceholderPartyName",
+    "pdfPartyName",
+    "forecastReportText",
+    `${extractFunctionSource(appSource, "dealScenarioCompanyNameCandidates")}
+${extractFunctionSource(appSource, "forecastDealScenarioCompanyName")}
+return forecastDealScenarioCompanyName;`,
+  )("\u2014", placeholderResolver, pdfPartyName, forecastReportText);
+}
+
 const appSource = readFileSync(new URL("../src/App.jsx", import.meta.url), "utf8");
 assert.ok(appSource.includes("report.economics.lines.map"), "HTML Deal Economics must render report.economics.lines");
 assert.ok(appSource.includes("for (const line of report.economics.lines)"), "PDF Deal Economics must render report.economics.lines");
 assert.ok(appSource.includes("economics: buildDealEconomicsReport(session, { baseEcsScore: score })"), "Public report must pass its displayed ECS score into Deal Economics.");
+assert.ok(appSource.includes("session?.dealContext?.data?.[key]"), "Deal Scenario company-name resolver must check Deal Context data.");
+assert.ok(appSource.includes("session?.preliminaryAssessment?.dealContext?.[key]"), "Deal Scenario company-name resolver must check Preliminary Assessment deal context.");
+assert.ok(appSource.includes("session?.targetInvite?.reportBinding?.dealContext?.[key]"), "Deal Scenario company-name resolver must check target invite report binding deal context.");
+assert.ok(appSource.includes("session?.targetInvite?.reportBinding?.[key]"), "Deal Scenario company-name resolver must check direct target invite report binding names.");
+
+const resolveDealScenarioCompanyName = buildDealScenarioCompanyNameResolver(appSource);
+function resolveDealScenarioCompanyNames(session) {
+  return Object.freeze({
+    acquirer: resolveDealScenarioCompanyName(session, "acquirerName"),
+    target: resolveDealScenarioCompanyName(session, "targetName"),
+  });
+}
+
+assert.deepEqual(resolveDealScenarioCompanyNames({
+  dealContext: { data: { acquirerName: "BuyerCo", targetName: "TargetCo" } },
+}), { acquirer: "BuyerCo", target: "TargetCo" });
+assert.deepEqual(resolveDealScenarioCompanyNames({
+  preliminaryAssessment: { dealContext: { acquirerName: "BuyerCo", targetName: "TargetCo" } },
+}), { acquirer: "BuyerCo", target: "TargetCo" });
+assert.deepEqual(resolveDealScenarioCompanyNames({
+  targetInvite: { reportBinding: { dealContext: { acquirerName: "BuyerCo", targetName: "TargetCo" } } },
+}), { acquirer: "BuyerCo", target: "TargetCo" });
+assert.deepEqual(resolveDealScenarioCompanyNames({
+  targetInvite: { reportBinding: { acquirerName: "BuyerCo", targetName: "TargetCo" } },
+}), { acquirer: "BuyerCo", target: "TargetCo" });
+assert.deepEqual(resolveDealScenarioCompanyNames({
+  dealContext: { data: { acquirerName: "Acquirer", targetName: "Target" } },
+}), { acquirer: "\u2014", target: "\u2014" });
+assert.deepEqual(resolveDealScenarioCompanyNames({
+  dealContext: { data: { acquirerName: "Acquirer Holdings", targetName: "Target Global Ltd" } },
+}), { acquirer: "Acquirer Holdings", target: "Target Global Ltd" });
 
 console.log("Final report structure smoke test passed");
