@@ -31,6 +31,14 @@ function createResponseAdapter(): NodeApiResponse {
 }
 
 async function parseNodeBody(req: NodeApiRequest) {
+  if (req instanceof Request) {
+    try {
+      return await req.json();
+    } catch {
+      return null;
+    }
+  }
+
   if (typeof req.body === "string") {
     try {
       return JSON.parse(req.body);
@@ -40,14 +48,6 @@ async function parseNodeBody(req: NodeApiRequest) {
   }
 
   if (typeof req.body === "object" && req.body) return req.body;
-
-  if (req instanceof Request) {
-    try {
-      return await req.json();
-    } catch {
-      return null;
-    }
-  }
 
   return null;
 }
