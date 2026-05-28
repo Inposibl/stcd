@@ -610,8 +610,13 @@ export function buildPairDeliverable(input = {}) {
   });
 }
 
+function hasCompletedTargetSelfAssessment(session) {
+  if (session?.targetSelfAssessment?.completed !== true) return false;
+  return session?.targetInvite?.completed === true || session?.targetSelfDirect?.completed === true;
+}
+
 export function buildFinalDeliverable(session) {
-  if (!session?.targetInvite?.completed || !session?.targetSelfAssessment?.completed) {
+  if (!hasCompletedTargetSelfAssessment(session)) {
     return Object.freeze({
       ready: false,
       status: "target-self-assessment-required",

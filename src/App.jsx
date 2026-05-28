@@ -3546,7 +3546,9 @@ function targetSelfPositioningOptionText(option) {
   return publicText(option.text);
 }
 
-function TargetReceiptScreen({ invited = false }) {
+function TargetReceiptScreen({ invited = false, session = null }) {
+  const finalDeliverable = buildFinalDeliverable(session);
+
   return (
     <main className="target-only-screen">
       <section className="receipt-panel">
@@ -3555,6 +3557,11 @@ function TargetReceiptScreen({ invited = false }) {
         <p>{TARGET_SELF_ASSESSMENT_DATA.receipt.body}</p>
         {invited ? <p className="source-note">When the original assessment tab is still open in this browser, it is notified automatically. If that tab does not update, return to it and open the forecast report.</p> : null}
         <strong>{TARGET_SELF_ASSESSMENT_DATA.receipt.close}</strong>
+        {finalDeliverable.ready ? (
+          <div className="button-row">
+            <button type="button" onClick={() => navigate(finalDeliverable.route)}>Go to final report page</button>
+          </div>
+        ) : null}
       </section>
     </main>
   );
@@ -3574,7 +3581,7 @@ function TargetSelfAssessmentSurvey({ session, setSession, invite = null }) {
   const currentAnswerValidation = validateEvidenceClassifiedAnswer(sanitizeQuestionnaireAnswer(question, answers[question.id]));
   const canSubmitQuestion = currentAnswerValidation.valid;
 
-  if (receipt || invite?.completed || (!invite && session.targetSelfAssessment?.completed)) return <TargetReceiptScreen invited={Boolean(invite)} />;
+  if (receipt || invite?.completed || (!invite && session.targetSelfAssessment?.completed)) return <TargetReceiptScreen invited={Boolean(invite)} session={session} />;
 
   function updatePositioning(field, value) {
     const specifyFieldId = targetSelfOtherSpecifyFieldId(field.id);
@@ -3804,7 +3811,7 @@ function TargetCodeEntryScreen({ session, setSession, targetSessionId }) {
     );
   }
 
-  if (invite.completed) return <TargetReceiptScreen invited />;
+  if (invite.completed) return <TargetReceiptScreen invited session={session} />;
   if (verified) return <TargetSelfAssessmentSurvey invite={invite} session={session} setSession={setSession} />;
 
   function submit(event) {

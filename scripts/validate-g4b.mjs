@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { TARGET_SELF_ASSESSMENT_DATA } from "../src/data/targetSelfAssessmentData.js";
+import { buildFinalDeliverable } from "../src/flow/finalDeliverableFlow.js";
 import {
   buildTargetSelfAssessmentRecord,
   isTargetSelfAssessmentSourceLoaded,
@@ -115,6 +117,53 @@ assert.equal(targetSelfAssessment.classificationValidation.valid, true);
 const completedInvite = completeTargetInvite(inviteResult.invite, targetSelfAssessment, "2026-05-01T01:31:00.000Z").invite;
 assert.equal(completedInvite.completed, true);
 assert.equal(verifyTargetInvite(completedInvite, "123456", "2026-05-01T01:32:00.000Z").status, "completed");
+
+const directFinalDeliverable = buildFinalDeliverable(Object.freeze({
+  ...sessionWithPreliminary,
+  targetSelfAssessment,
+  targetSelfDirect: Object.freeze({
+    completed: true,
+    route: "step-2c-direct",
+    completedAt: targetSelfAssessment.submittedAt,
+  }),
+}));
+assert.equal(directFinalDeliverable.ready, true);
+
+const invitedFinalDeliverable = buildFinalDeliverable(Object.freeze({
+  ...inviteResult.session,
+  targetInvite: completedInvite,
+  targetSelfAssessment,
+}));
+assert.equal(invitedFinalDeliverable.ready, true);
+
+const missingTargetSelfFinalDeliverable = buildFinalDeliverable(sessionWithPreliminary);
+assert.equal(missingTargetSelfFinalDeliverable.ready, false);
+assert.equal(missingTargetSelfFinalDeliverable.status, "target-self-assessment-required");
+
+const incompleteTargetSelfFinalDeliverable = buildFinalDeliverable(Object.freeze({
+  ...sessionWithPreliminary,
+  targetInvite: Object.freeze({ completed: true }),
+  targetSelfAssessment: Object.freeze({ completed: false }),
+}));
+assert.equal(incompleteTargetSelfFinalDeliverable.ready, false);
+assert.equal(incompleteTargetSelfFinalDeliverable.status, "target-self-assessment-required");
+
+const directMarkerOnlyFinalDeliverable = buildFinalDeliverable(Object.freeze({
+  ...sessionWithPreliminary,
+  targetSelfDirect: Object.freeze({ completed: true }),
+}));
+assert.equal(directMarkerOnlyFinalDeliverable.ready, false);
+assert.equal(directMarkerOnlyFinalDeliverable.status, "target-self-assessment-required");
+
+const inviteMarkerOnlyFinalDeliverable = buildFinalDeliverable(Object.freeze({
+  ...sessionWithPreliminary,
+  targetInvite: Object.freeze({ completed: true }),
+}));
+assert.equal(inviteMarkerOnlyFinalDeliverable.ready, false);
+assert.equal(inviteMarkerOnlyFinalDeliverable.status, "target-self-assessment-required");
+
+const appSource = readFileSync(new URL("../src/App.jsx", import.meta.url), "utf8");
+assert.match(appSource, /function TargetReceiptScreen\(\{ invited = false, session = null \}\)[\s\S]*const finalDeliverable = buildFinalDeliverable\(session\);[\s\S]*Go to final report page[\s\S]*navigate\(finalDeliverable\.route\)/);
 
 const otherPositioningMissingText = validateTargetSelfPositioning({ p1: "D", p2: "C" });
 assert.equal(otherPositioningMissingText.valid, false);
