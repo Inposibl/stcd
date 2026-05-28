@@ -58,7 +58,7 @@ assert.deepEqual(TRANSACTION_DETAIL_SECTIONS.map((section) => section.id), [
   "firmTenure",
   "integrationTimeline",
 ]);
-assert.deepEqual(DEAL_ECONOMICS_CURRENCY_OPTIONS, ["USD", "EUR", "GBP", "Other"]);
+assert.deepEqual(DEAL_ECONOMICS_CURRENCY_OPTIONS, ["USD", "EUR"]);
 assert.deepEqual(DEAL_ECONOMICS_STATUS_OPTIONS.map((option) => option.value), ["confirmed", "estimated", "not_available"]);
 assert.deepEqual(CANONICAL_DEAL_CONTEXT_FIELD_IDS, [
   "acquirerName",
@@ -103,6 +103,8 @@ assert.match(appSource, /Self-estimate of senior people whose departure would ma
 assert.match(appSource, /Average annual compensation per key person/);
 assert.match(appSource, /Used as per-person annual compensation for key personnel at risk, not as a total compensation pool\./);
 assert.match(appSource, /sectionId === "dealEconomicsCurrency"[\s\S]*next\.enterpriseValueCurrency = value;[\s\S]*next\.compensationCurrency = value;/);
+assert.match(appSource, /if \(enterpriseActive && !enterpriseCurrency\) return "";/);
+assert.match(appSource, /if \(compensationActive && !compensationCurrency\) return "";/);
 
 const expectedOrder = [
   "/",
@@ -224,6 +226,38 @@ const providedEconomicsValidation = validateDealEconomics({
 });
 assert.equal(providedEconomicsValidation.valid, true);
 assert.equal(providedEconomicsValidation.normalized.keyPersonnelAtRisk, 4);
+const eurEconomicsValidation = validateDealEconomics({
+  enterpriseValue: "125000000",
+  enterpriseValueCurrency: "EUR",
+  enterpriseValueStatus: "estimated",
+  keyPersonnelAtRisk: "4",
+  compensationAssumptions: "4500000",
+  compensationCurrency: "EUR",
+  compensationStatus: "confirmed",
+});
+assert.equal(eurEconomicsValidation.valid, true);
+assert.equal(eurEconomicsValidation.normalized.enterpriseValueCurrency, "EUR");
+assert.equal(eurEconomicsValidation.normalized.compensationCurrency, "EUR");
+const gbpEconomicsValidation = validateDealEconomics({
+  enterpriseValue: "125000000",
+  enterpriseValueCurrency: "GBP",
+  enterpriseValueStatus: "estimated",
+  compensationAssumptions: "4500000",
+  compensationCurrency: "GBP",
+  compensationStatus: "confirmed",
+});
+assert.equal(gbpEconomicsValidation.valid, false);
+assert.deepEqual(gbpEconomicsValidation.missing, ["enterpriseValueCurrency", "compensationCurrency"]);
+const otherCurrencyEconomicsValidation = validateDealEconomics({
+  enterpriseValue: "125000000",
+  enterpriseValueCurrency: "Other",
+  enterpriseValueStatus: "estimated",
+  compensationAssumptions: "4500000",
+  compensationCurrency: "Other",
+  compensationStatus: "confirmed",
+});
+assert.equal(otherCurrencyEconomicsValidation.valid, false);
+assert.deepEqual(otherCurrencyEconomicsValidation.missing, ["enterpriseValueCurrency", "compensationCurrency"]);
 const mixedCurrencyValidation = validateDealEconomics({
   enterpriseValue: "125000000",
   enterpriseValueCurrency: "USD",
@@ -240,6 +274,7 @@ const inactiveMixedCurrencyValidation = validateDealEconomics({
 });
 assert.equal(inactiveMixedCurrencyValidation.valid, false);
 assert.ok(inactiveMixedCurrencyValidation.missing.includes(DEAL_ECONOMICS_SINGLE_CURRENCY_MISSING_FIELD));
+assert.match(DEAL_ECONOMICS_SINGLE_CURRENCY_ERROR, /No FX conversion is applied/);
 
 const dealContext = {
   ...dealIdentity,

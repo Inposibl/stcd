@@ -204,7 +204,7 @@ export const TRANSACTION_DETAIL_SECTIONS = Object.freeze([
   }),
 ]);
 
-export const DEAL_ECONOMICS_CURRENCY_OPTIONS = Object.freeze(["USD", "EUR", "GBP", "Other"]);
+export const DEAL_ECONOMICS_CURRENCY_OPTIONS = Object.freeze(["USD", "EUR"]);
 export const DEAL_ECONOMICS_SINGLE_CURRENCY_ERROR = "Deal Economics must use one currency for enterprise value and compensation. No FX conversion is applied.";
 export const DEAL_ECONOMICS_SINGLE_CURRENCY_MISSING_FIELD = "dealEconomicsCurrencyMismatch";
 

@@ -952,6 +952,8 @@ function initialDealEconomicsCurrency(existingContext) {
   const enterpriseActive = dealEconomicsStatusRequiresCurrency(enterpriseStatus);
   const compensationActive = dealEconomicsStatusRequiresCurrency(compensationStatus);
 
+  if (enterpriseActive && !enterpriseCurrency) return "";
+  if (compensationActive && !compensationCurrency) return "";
   if (enterpriseCurrency && compensationCurrency && enterpriseCurrency !== compensationCurrency) {
     return "";
   }
