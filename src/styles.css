@@ -3053,6 +3053,10 @@ textarea {
   color: #121826;
 }
 
+.forecast-report-section--premium .range-row strong {
+  color: #ffffff;
+}
+
 .range-row em {
   color: #516075;
   font-style: normal;

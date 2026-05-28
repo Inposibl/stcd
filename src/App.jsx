@@ -5532,6 +5532,7 @@ const FORECAST_REPORT_STYLES = Object.freeze({
 });
 
 function ForecastReportSection({ number, title, children, variant = "standard" }) {
+  const sectionClassName = `reveal-block forecast-report-section${variant === "premium" ? " forecast-report-section--premium" : ""}`;
   const sectionStyle = {
     ...FORECAST_REPORT_STYLES.section,
     ...(variant === "dashed" ? FORECAST_REPORT_STYLES.dashedCard : null),
@@ -5548,7 +5549,7 @@ function ForecastReportSection({ number, title, children, variant = "standard" }
   };
 
   return (
-    <section className="reveal-block forecast-report-section" style={sectionStyle}>
+    <section className={sectionClassName} style={sectionStyle}>
       <p className="eyebrow" style={eyebrowStyle}>{String(number).padStart(2, "0")}</p>
       <h2 style={titleStyle}>{title}</h2>
       {children}
